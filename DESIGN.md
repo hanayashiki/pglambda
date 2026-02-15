@@ -26,6 +26,32 @@ class Client {
 
 ---
 
+# Syntax
+
+## Simple Query Builder
+
+```pgl
+query get_user_by_id($id: text) {
+    select * from users where id = $id
+}
+```
+
+## Nested Query Builder
+
+You can call one builder inside another using `!` syntax. This inlines the callee's body at compile time, distinguishing it from SQL function calls.
+
+```pgl
+query user_by_id(user: Row<users>, $id: text) {
+    user.id = $id
+}
+
+query select_user_by_id($id: text) {
+    select * from users where user_by_id!(users, $id)
+}
+```
+
+---
+
 # Type System
 
 pglambda uses a constraint-based type inference system to provide type safety without requiring extensive type annotations. The type checker performs pure type inference, deriving types from usage patterns and database schema information.
@@ -405,58 +431,137 @@ select * from evens
 
 ## Implementation Phases
 
-### Phase 1: Foundation
-- [ ] Define type representation:
-  - Primitive types (int, text, bool, numeric, etc.)
-  - Type variables (α, β, ...)
-  - Composite types (arrays, records, nullable)
-- [ ] Implement AST visitor to extract typed items
-- [ ] Build referential dependency graph
+**Philosophy:** Implement the novel/unclear parts first (constraint algorithm), then add standard algorithms (SCC) later.
 
-### Phase 2: SCC Algorithm
-- [ ] Implement Tarjan's algorithm for SCC decomposition
-- [ ] Topological sort for processing order
-- [ ] Test with mutually recursive CTEs
+### Phase 1: Constraint-Based Type Inference (Core Algorithm)
+**Goal:** Understand and implement the constraint generation and solving algorithm on simple cases first.
 
-### Phase 3: Constraint System
+- [x] Define type representation (TypeStore with structural sharing)
 - [ ] Define constraint types:
   - Equality constraints: `T1 = T2`
-  - Overload checks: `op(args) -> result`
-- [ ] Implement constraint generation for each AST node type:
-  - Literals → equality to concrete type
-  - Operators → equality + overload check
-  - Functions → overload check
-  - Columns → equality to schema type
-- [ ] Tag constraints with SCC membership
-
-### Phase 4: Unification & Overload Resolution
+  - Overload constraints: `op(T1, T2, ...) -> T_result`
 - [ ] Implement unification algorithm:
+  - Core unification: `unify(T1, T2) -> Substitution`
   - Handle type variable = type variable
   - Handle type variable = concrete type
-  - Occurs check
-  - Substitution management
-- [ ] Implement overload resolution:
-  - Define operator/function signatures (hardcoded or from catalog)
-  - Lookup matching overload by concrete argument types
-  - Extract result type from overload signature
+  - Handle concrete type = concrete type (structural equality)
+  - Occurs check (prevent infinite types: `α = α[]`)
+  - Substitution composition and application
+- [ ] Test unification in isolation:
+  ```typescript
+  // Test cases:
+  unify(int, int) → success
+  unify(α, int) → {α: int}
+  unify(α[], β[]) → {α: β} or vice versa
+  unify(int, text) → error
+  unify(α, α[]) → error (occurs check)
+  ```
 
-### Phase 5: Schema Integration
-- [ ] Extract schema from database (or schema file)
+### Phase 2: Simple Constraint Generation (No Recursion)
+**Goal:** Generate and solve constraints for simple, non-recursive queries (no SCC needed yet).
+
+- [ ] Implement constraint generation for basic AST nodes:
+  - **Literals**: `42 → T = int`, `'hello' → T = text`, `null → T = α | null`
+  - **Binary operators**: `e1 + e2 → [T_e1 = T_e2, overload(+, [T_e1, T_e2], T_result)]`
+  - **Column references**: `select x from t → T_x = schema(t).x` (hardcoded schema for now)
+  - **WHERE clauses**: `where cond → T_cond = bool`
+  - **SELECT clauses**: `select e1, e2 → T_result = {col1: T_e1, col2: T_e2}`
+- [ ] Implement constraint solver (two-phase):
+  - **Phase 1 (Equality)**: Solve all equality constraints via unification
+  - **Phase 2 (Overload)**: Validate overload constraints after types are inferred
+- [ ] Implement simple overload resolution:
+  - Hardcoded operator signatures: `+: [(int, int) -> int, (text, text) -> text, ...]`
+  - Lookup: Given concrete argument types, find matching signature
+  - Result type extraction from signature
+- [ ] Test on simple queries:
+  ```pgl
+  select 1 + 2
+  select x + 1 where x : int  -- infer T_x = int from literal 1
+  select 'hello' || 'world'
+  ```
+
+### Phase 3: Schema Integration & Type Mapping
+**Goal:** Connect to real database schema instead of hardcoded types.
+
+- [ ] Define schema representation:
+  - Tables: `Map<tableName, TableSchema>`
+  - Columns: `Map<columnName, PostgresType>`
+  - Nullability: Track `nullable` flag
 - [ ] Map PostgreSQL types to pglambda types:
-  - int4 → int
-  - text, varchar → text
-  - bool → bool
-  - Handle nullable columns (T | null)
-- [ ] Resolve column types from schema during constraint generation
+  - `int4, int8, int2 → int`
+  - `text, varchar, char → text`
+  - `bool → bool`
+  - `numeric, decimal → numeric`
+  - Nullable columns: `T | null`
+- [ ] Schema-driven constraint generation:
+  - `select name from users → T_name = schema(users).name`
+  - `select * from users → T_result = schema(users)`
+- [ ] Test with real schema (mock or minimal test database)
 
-### Phase 6: Error Reporting
-- [ ] Collect and report type errors:
-  - Unification failures (type mismatch)
-  - Missing overloads (no matching function signature)
-  - Under-constrained types (ambiguous type variables)
-  - Missing schema information
-- [ ] Source location tracking for error messages
-- [ ] Clear error messages with type mismatch explanations
+### Phase 4: Error Reporting & Diagnostics
+**Goal:** Provide clear, actionable error messages.
+
+- [ ] Source location tracking:
+  - Attach source locations to AST nodes during parsing
+  - Propagate locations through constraints
+  - Include location in error messages
+- [ ] Error types:
+  - **Unification failure**: `Cannot unify int with text at line X`
+  - **Missing overload**: `No overload for +(text, int) at line X`
+  - **Ambiguous type**: `Cannot infer type for $x (under-constrained)`
+  - **Schema error**: `Column 'foo' does not exist in table 'users'`
+- [ ] Error formatting:
+  ```
+  Error: Type mismatch at example.pgl:5:12
+
+  5 |   select x + 'hello'
+                 ^
+  Cannot add int and text
+
+  Expected: int
+  Found:    text
+  ```
+
+### Phase 5: Dependency Analysis & SCC (Standard Algorithms)
+**Goal:** Handle mutually recursive queries (CTEs, subqueries).
+
+- [ ] Build referential dependency graph:
+  - Nodes: Typed items (variables, expressions, CTEs)
+  - Edges: A depends on B if A references B
+- [ ] Implement Tarjan's algorithm for SCC decomposition
+- [ ] Topological sort for processing order
+- [ ] Tag constraints with SCC membership
+- [ ] Process constraints per SCC in topological order:
+  - Solve constraints within each SCC simultaneously
+  - Freeze solved types before moving to next SCC
+- [ ] Test with mutually recursive CTEs:
+  ```pgl
+  with recursive
+    evens as (select 0 as n union all select n+2 from odds where n < 10),
+    odds  as (select 1 as n union all select n+2 from evens where n < 10)
+  select * from evens
+  ```
+
+### Phase 6: Advanced Features & Optimization
+**Goal:** Production-ready type checker with full PostgreSQL compatibility.
+
+- [ ] Query PostgreSQL catalog for overloads:
+  - Load operator signatures from `pg_operator`
+  - Load function signatures from `pg_proc`
+  - Support user-defined functions
+- [ ] Performance optimization:
+  - Constraint deduplication
+  - Incremental solving (cache results)
+  - Parallel SCC processing (independent SCCs)
+- [ ] Advanced type features:
+  - Array types: `T[]` with proper variance
+  - Subqueries: Type nested SELECT expressions
+  - Aggregations: `COUNT(*) → int`, `SUM(x) → typeof(x)`
+  - CASE expressions: Unify all branch types
+- [ ] Integration testing:
+  - Full queries from real codebases
+  - Performance benchmarks
+  - Edge case coverage
 
 ---
 
