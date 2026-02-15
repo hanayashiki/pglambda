@@ -1,0 +1,29 @@
+{
+  "name": "parser",
+  "type": "module",
+  "version": "2.2.8",
+  "description": "parser package",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "imports": {
+    "#*": "./src/*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc",
+    "test": "vitest run",
+    "lint": "eslint"
+  },
+  "license": "MIT",
+  "public": true,
+  "dependencies": {
+    "antlr": "workspace:*"
+  },
+  "devDependencies": {
+    "pgsql-parser": "^17.9.11",
+    "tsx": "^4.21.0",
+    "vitest": "^4.0.18"
+  }
+}

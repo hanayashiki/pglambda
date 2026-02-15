@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // Generated ANTLR code requires looser module resolution
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    // Allow unused variables in ANTLR-generated code
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src", "playground"]
+}

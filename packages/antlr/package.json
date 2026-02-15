@@ -1,0 +1,33 @@
+{
+  "name": "antlr",
+  "type": "module",
+  "version": "2.2.8",
+  "description": "the generated antlr syntax",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "check": "tsc",
+    "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript src/PGLParser.g4",
+    "build": "tsup",
+    "prepublishOnly": "pnpm run gen && pnpm run build",
+    "lint": "eslint"
+  },
+  "license": "MIT",
+  "public": true,
+  "devDependencies": {
+    "antlr4": "^4.13.2",
+    "pgsql-parser": "^17.9.11",
+    "tsx": "^4.21.0",
+    "vitest": "^4.0.18",
+    "tsup": "^8.0.0"
+  }
+}
