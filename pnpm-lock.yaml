@@ -25,11 +25,10 @@ importers:
         version: 5.9.3
 
   packages/antlr:
-    dependencies:
+    devDependencies:
       antlr4:
         specifier: ^4.13.2
         version: 4.13.2
-    devDependencies:
       pgsql-parser:
         specifier: ^17.9.11
         version: 17.9.11
@@ -49,15 +48,18 @@ importers:
         specifier: workspace:*
         version: link:../antlr
     devDependencies:
-      antlr4:
-        specifier: ^4.13.2
-        version: 4.13.2
       pgsql-parser:
         specifier: ^17.9.11
         version: 17.9.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@25.2.3)(jiti@2.6.1)(tsx@4.21.0)
+
+  packages/types:
+    devDependencies:
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.2.3)(jiti@2.6.1)(tsx@4.21.0)
