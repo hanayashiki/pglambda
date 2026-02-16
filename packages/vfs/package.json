@@ -1,5 +1,5 @@
 {
-  "name": "@pglambda/vfs",
+  "name": "vfs",
   "type": "module",
   "version": "0.0.1",
   "description": "Virtual File System abstraction for pglambda",

@@ -16,5 +16,10 @@
   "public": true,
   "devDependencies": {
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "zod": "catalog:",
+    "tequila": "workspace:*",
+    "vfs": "workspace:*"
   }
 }

@@ -12,6 +12,9 @@ catalogs:
     minimatch:
       specifier: ^10.0.1
       version: 10.2.0
+    zod:
+      specifier: 4.3.6
+      version: 4.3.6
 
 importers:
 
@@ -52,6 +55,16 @@ importers:
         version: 4.0.18(@types/node@25.2.3)(jiti@2.6.1)(tsx@4.21.0)
 
   packages/compiler:
+    dependencies:
+      tequila:
+        specifier: workspace:*
+        version: link:../tequila
+      vfs:
+        specifier: workspace:*
+        version: link:../vfs
+      zod:
+        specifier: 'catalog:'
+        version: 4.3.6
     devDependencies:
       vitest:
         specifier: ^4.0.18
@@ -1125,6 +1138,9 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@clack/core@0.5.0':
@@ -1890,3 +1906,5 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
+
+  zod@4.3.6: {}
