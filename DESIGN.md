@@ -22,7 +22,11 @@ class Client {
 
 ## Programming Language Conventions
 
-1. Filename: ends with `.pgl`
+1. **Filename**: ends with `.pgl`
+2. **Module system**: Each file is a module. Module name is derived from filename (`users.pgl` → `users`)
+3. **Compilation unit**: Files define the boundary of compilation. Type inference happens within file boundaries.
+4. **Imports**: Go-like import syntax: `import "./path/to/file.pgl"`
+5. **Exports**: Mark queries with `export` to make them visible to other modules
 
 ---
 
@@ -49,6 +53,46 @@ query select_user_by_id($id: text) {
     select * from users where user_by_id!(users, $id)
 }
 ```
+
+## Modules & Imports
+
+Each `.pgl` file is a module. Use `export` to make queries available to other modules, and `import` to use queries from other files.
+
+**Example:**
+
+```pgl
+// users.pgl
+export query get_user_by_id($id: text) {
+    select * from users where id = $id
+}
+
+export query get_user_by_email($email: text) {
+    select * from users where email = $email
+}
+```
+
+```pgl
+// admin.pgl
+import "./users.pgl"
+
+query check_admin($id: text) {
+    select * from admins
+    where user_id in users.get_user_by_id!($id).id
+}
+
+query admin_by_email($email: text) {
+    select a.*
+    from admins a
+    join users.get_user_by_email!($email) u on a.user_id = u.id
+}
+```
+
+**Key points:**
+- Import paths are relative: `"./users.pgl"`, `"../shared/auth.pgl"`
+- Module name is the filename without `.pgl`: `users.pgl` → `users`
+- Access exported items with dot notation: `users.get_user_by_id`
+- Only `export` marked queries are visible to other modules
+- Files are compilation units — type inference stays within file boundaries
 
 ---
 
@@ -431,7 +475,9 @@ select * from evens
 
 ## Implementation Phases
 
-**Philosophy:** Implement the novel/unclear parts first (constraint algorithm), then add standard algorithms (SCC) later.
+**Philosophy:** Implement the novel/unclear parts first (constraint algorithm), then add standard algorithms (module system, SCC) later.
+
+**Architecture:** PGL files are modules and define the boundary of compilation. Each file is type-checked independently (after its dependencies), with SCCs confined to within-file recursion. This simplifies analysis and provides a predictable compilation model.
 
 ### Phase 1: Constraint-Based Type Inference (Core Algorithm) with Internal Row Polymorphism
 
@@ -440,11 +486,11 @@ select * from evens
 **Key insight:** Field access on type variables generates equality constraints with open record types (e.g., `α.field` → `α = {field: β | ρ}`). Unification solves all constraints in one pass. After inference, close all unbound row variables to produce closed record types.
 
 - [x] Define type representation (TypeStore with structural sharing)
-- [ ] Extend type representation for row polymorphism:
-  - [ ] Add `rest: Type | null` field to RecordType (`null` = closed record, TypeVariable = open record)
-  - [ ] Update TypeStore.record() to support optional `rest` parameter
-  - [ ] Hash-consing for open records (canonicalize by fields + rest)
-  - [ ] Test: create and cache open/closed records
+- [x] Extend type representation for row polymorphism:
+  - [x] Add `rest: Type | null` field to RecordType (`null` = closed record, TypeVariable = open record)
+  - [x] Update TypeStore.record() to support optional `rest` parameter
+  - [x] Hash-consing for open records (canonicalize by fields + rest)
+  - [x] Test: create and cache open/closed records
 - [x] Implement unification algorithm (equality constraints only):
   - [x] Core unification: `unify(T1, T2)` mutates shared substitution
   - [x] Handle type variable = type variable
@@ -453,11 +499,11 @@ select * from evens
   - [x] Occurs check (prevent infinite types: `α = α[]`)
   - [x] Substitution with provenance tracking (BindingSource)
   - [x] Test basic unification (primitives, arrays, nullables, closed records)
-  - [ ] Extend unification for row polymorphism:
-    - [ ] Unify closed with open record: `{a: int, b: text} = {a: β | ρ}` → `β = int, ρ = {b: text}`
-    - [ ] Unify two open records: `{a: int | ρ1} = {b: text | ρ2}` → merge non-common fields into row variables
-    - [ ] Row variable occurs check: prevent `ρ = {a: int, b: ρ}`
-    - [ ] Test row unification
+  - [x] Extend unification for row polymorphism:
+    - [x] Unify closed with open record: `{a: int, b: text} = {a: β | ρ}` → `β = int, ρ = {b: text}`
+    - [x] Unify two open records: `{a: int | ρ1} = {b: text | ρ2}` → merge non-common fields into row variables
+    - [x] Row variable occurs check: prevent `ρ = {a: int, b: ρ}`
+    - [x] Test row unification
 - [ ] Define constraint types:
   - [x] Equality constraints: `T1 = T2` (handled by Unification)
   - [ ] Field access: Generate equality with open record (`e.field` → `T_e = {field: T_field | ρ_fresh}`)
@@ -570,18 +616,117 @@ select * from evens
   Found:    text
   ```
 
-### Phase 5: Dependency Analysis & SCC (Standard Algorithms)
-**Goal:** Handle mutually recursive queries (CTEs, subqueries).
+### Phase 5: Module System & File Boundaries
+**Goal:** Implement Go-like module system where each file is a compilation unit with explicit imports/exports.
 
-- [ ] Build referential dependency graph:
-  - Nodes: Typed items (variables, expressions, CTEs)
+**Design principle:** Files are modules and define the boundary of compilation. SCCs must fit within files. Type inference happens within file boundaries, simplifying analysis and reducing user surprise.
+
+#### Module Syntax
+
+**Import syntax (Go-like):**
+```pgl
+// users.pgl
+export query get_user_by_id($id: text) {
+    select * from users where id = $id
+}
+
+export query get_user_by_email($email: text) {
+    select * from users where email = $email
+}
+```
+
+```pgl
+// admin.pgl
+import "./users.pgl"
+
+query admin_users($id: text) {
+    select * from admins
+    where user_id in users.get_user_by_id!($id).id
+}
+```
+
+**Key rules:**
+- Module name is derived from filename: `users.pgl` → module `users`
+- Import path is relative to current file: `"./users.pgl"`, `"../shared/auth.pgl"`
+- Module names must be valid identifiers (enforced by requiring valid filenames)
+- Access exported items via dot notation: `users.get_user_by_id`
+- Only `export` marked items are visible to other modules
+
+#### Implementation Tasks
+
+- [ ] **Parsing:**
+  - [ ] Add `import` statement to grammar: `import <string-literal>`
+  - [ ] Add `export` keyword for query definitions
+  - [ ] Validate import paths (must be relative, end in `.pgl`)
+  - [ ] Extract module name from filename (remove `.pgl` extension)
+  - [ ] Validate module names are valid identifiers
+
+- [ ] **Module resolution:**
+  - [ ] Resolve import paths relative to current file
+  - [ ] Build module dependency graph (file → dependencies)
+  - [ ] Detect circular imports (error if cycle exists)
+  - [ ] Topological sort of modules for type-checking order
+  - [ ] Cache parsed modules (avoid re-parsing)
+
+- [ ] **Scope & name resolution:**
+  - [ ] Track exported queries per module
+  - [ ] Implement qualified name lookup: `module.query_name`
+  - [ ] Validate referenced queries exist and are exported
+  - [ ] Prevent name conflicts (within file, queries must have unique names)
+
+- [ ] **Type checking with modules:**
+  - [ ] Type-check modules in dependency order (dependencies first)
+  - [ ] Require explicit type signatures for exported queries (no cross-file inference)
+  - [ ] Validate imported query signatures match usage
+  - [ ] Store inferred types for exported queries (for dependent modules)
+
+- [ ] **Error handling:**
+  - [ ] Error: Import not found: `Cannot find module "./users.pgl"`
+  - [ ] Error: Circular imports: `Circular import detected: a.pgl → b.pgl → a.pgl`
+  - [ ] Error: Undefined export: `Module "users" does not export "get_user"`
+  - [ ] Error: Missing export annotation: `Query "foo" is used in other modules but not marked "export"`
+
+- [ ] **Testing:**
+  ```pgl
+  // Test: basic import/export
+  // users.pgl
+  export query get_user($id: text) { select * from users where id = $id }
+
+  // app.pgl
+  import "./users.pgl"
+  query app_query($id: text) { select * from users.get_user!($id) }
+
+  // Test: multi-level imports (a → b → c)
+  // Test: circular import detection
+  // Test: missing export error
+  // Test: module name validation
+  ```
+
+#### Benefits of This Design
+
+1. **Clear compilation boundaries** - Each file is independently type-checked (after dependencies)
+2. **No cross-file SCCs** - Simplifies SCC analysis (only within-file recursion)
+3. **Explicit interfaces** - Export signatures serve as documentation
+4. **Predictable compilation** - File changes only affect dependents, not arbitrary files
+5. **Parallel compilation** - Independent modules can be type-checked in parallel
+6. **Incremental compilation** - Only recheck changed files and dependents
+
+### Phase 6: Dependency Analysis & SCC (Within-File Only)
+**Goal:** Handle mutually recursive queries within a single file (CTEs, subqueries).
+
+**Scope:** Dependency analysis is now scoped to a single file. Cross-file dependencies are handled by module resolution (Phase 5).
+
+- [ ] Build referential dependency graph (within file):
+  - Nodes: Typed items (variables, expressions, CTEs, queries)
   - Edges: A depends on B if A references B
+  - Exclude cross-module references (already resolved)
 - [ ] Implement Tarjan's algorithm for SCC decomposition
 - [ ] Topological sort for processing order
 - [ ] Tag constraints with SCC membership
 - [ ] Process constraints per SCC in topological order:
   - Solve constraints within each SCC simultaneously
   - Freeze solved types before moving to next SCC
+- [ ] Validate: SCCs only contain items from the same file (enforced by module system)
 - [ ] Test with mutually recursive CTEs:
   ```pgl
   with recursive
@@ -590,7 +735,7 @@ select * from evens
   select * from evens
   ```
 
-### Phase 6: Advanced Features & Optimization
+### Phase 7: Advanced Features & Optimization
 **Goal:** Production-ready type checker with full PostgreSQL compatibility.
 
 - [ ] Query PostgreSQL catalog for overloads:
