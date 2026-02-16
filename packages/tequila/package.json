@@ -1,8 +1,8 @@
 {
-  "name": "compiler",
+  "name": "tequila",
   "type": "module",
   "version": "0.0.1",
-  "description": "Main compiler for pglambda",
+  "description": "Cache layer for pglambda",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
