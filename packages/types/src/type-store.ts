@@ -108,7 +108,9 @@ export class TypeStore {
         const fieldEntries = Object.entries(type.fields).sort(
           ([a], [b]) => a.localeCompare(b),
         );
-        return `record:${fieldEntries.map(([k, v]) => `${k}:${v.id}`).join(",")}` as CacheKey;
+        const fieldsKey = fieldEntries.map(([k, v]) => `${k}:${v.id}`).join(",");
+        const restKey = type.rest ? `:rest:${type.rest.id}` : "";
+        return `record:${fieldsKey}${restKey}` as CacheKey;
       }
 
       case "nullable":
@@ -177,6 +179,7 @@ export class TypeStore {
    * Field order is NOT significant: {a: int, b: text} === {b: text, a: int}
    *
    * @param fields Object mapping field names to types
+   * @param rest Optional rest type for row polymorphism (null = closed record)
    *
    * @example
    * const int = store.primitive('int');
@@ -184,12 +187,16 @@ export class TypeStore {
    * const rec1 = store.record({ id: int, name: text });
    * const rec2 = store.record({ name: text, id: int });
    * console.assert(rec1 === rec2); // true - order doesn't matter
+   *
+   * // Open record with row variable
+   * const rho = store.typevar('rho');
+   * const open = store.record({ id: int }, rho);
    */
-  record(fields: Record<string, Type>): RecordType {
+  record(fields: Record<string, Type>, rest: Type | null = null): RecordType {
     return this.ensure<RecordType>({
       kind: "record",
       fields: { ...fields }, // Copy to prevent external mutation
-      closed: true,
+      rest,
     });
   }
 

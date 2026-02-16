@@ -46,12 +46,16 @@ export interface ArrayType {
 /**
  * Record type {field1: T1, field2: T2}
  * Field order is not significant (order-insensitive)
+ *
+ * Supports row polymorphism (internal only):
+ * - rest: null → closed record: {a: int, b: text}
+ * - rest: TypeVariable → open record: {a: int | ρ}
  */
 export interface RecordType {
   readonly kind: 'record';
   readonly id: TypeId;
   readonly fields: Readonly<Record<string, Type>>;
-  readonly closed: true; // No row polymorphism initially
+  readonly rest: Type | null; // null = closed, TypeVariable = open record
 }
 
 /**

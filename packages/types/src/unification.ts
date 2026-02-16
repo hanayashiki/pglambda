@@ -41,8 +41,7 @@ export class Unification {
   private bindings = new Map<TypeId, Binding>();
   private errors: UnificationError[] = [];
 
-  // @ts-ignore 6138
-  constructor(private readonly _typeStore: TypeStore) {}
+  constructor(private readonly typeStore: TypeStore) {}
 
   /**
    * Follow substitution chains to the root type.
@@ -59,7 +58,7 @@ export class Unification {
 
   /**
    * Check if a type variable occurs anywhere inside a type.
-   * Prevents infinite types like α = α[].
+   * Prevents infinite types like α = α[] or ρ = {a: int | ρ}.
    */
   private occursIn(typeVarId: TypeId, type: Type): boolean {
     type = this.resolve(type);
@@ -70,10 +69,15 @@ export class Unification {
         return this.occursIn(typeVarId, type.elementType);
       case "nullable":
         return this.occursIn(typeVarId, type.innerType);
-      case "record":
-        return Object.values(type.fields).some((f) =>
+      case "record": {
+        const fieldOccurs = Object.values(type.fields).some((f) =>
           this.occursIn(typeVarId, f),
         );
+        const restOccurs = type.rest
+          ? this.occursIn(typeVarId, type.rest)
+          : false;
+        return fieldOccurs || restOccurs;
+      }
       case "primitive":
       case "error":
         return false;
@@ -165,23 +169,55 @@ export class Unification {
 
       case "record": {
         const t2r = t2 as RecordType;
-        const fields1 = Object.keys(t1.fields).sort();
-        const fields2 = Object.keys(t2r.fields).sort();
 
-        if (
-          fields1.length !== fields2.length ||
-          !fields1.every((f, i) => f === fields2[i])
-        ) {
-          this.errors.push({
-            errorKind: "field_mismatch",
-            message: `Record field mismatch: {${fields1.join(", ")}} vs {${fields2.join(", ")}}`,
-          });
-          return;
+        // Collect all fields from both records
+        const fields1 = new Set(Object.keys(t1.fields));
+        const fields2 = new Set(Object.keys(t2r.fields));
+        const allFields = new Set([...fields1, ...fields2]);
+
+        // CASE 1: Both closed → exact match required
+        if (t1.rest === null && t2r.rest === null) {
+          if (fields1.size !== fields2.size) {
+            this.errors.push({
+              errorKind: "field_mismatch",
+              message: `Record field mismatch: {${[...fields1].sort().join(", ")}} vs {${[...fields2].sort().join(", ")}}`,
+            });
+            return;
+          }
         }
 
-        for (const field of fields1) {
-          this.unify(t1.fields[field], t2r.fields[field]);
+        // CASE 4: Both open → unify rest variables
+        if (t1.rest !== null && t2r.rest !== null) {
+          this.unify(t1.rest, t2r.rest);
         }
+
+        // Unify all fields
+        for (const field of allFields) {
+          const ft1 = t1.fields[field];
+          const ft2 = t2r.fields[field];
+
+          if (ft1 && ft2) {
+            // Common field - unify types
+            this.unify(ft1, ft2);
+          } else if (ft1 && t2r.rest !== null) {
+            // Field only in t1, but t2 is open
+            // Create a record with this field and unify with t2.rest
+            const singleField = this.typeStore.record({ [field]: ft1 });
+            this.unify(t2r.rest, singleField);
+          } else if (ft2 && t1.rest !== null) {
+            // Field only in t2, but t1 is open
+            const singleField = this.typeStore.record({ [field]: ft2 });
+            this.unify(t1.rest, singleField);
+          } else {
+            // Field exists in only one record, and the other is closed
+            this.errors.push({
+              errorKind: "field_mismatch",
+              message: `Field '${field}' missing in one of the records`,
+            });
+            return;
+          }
+        }
+
         return;
       }
     }
@@ -199,7 +235,7 @@ export class Unification {
 
     return {
       bindings: resultBindings,
-      errors: this.errors,
+      errors: this.errors.slice(0),
     };
   }
 }

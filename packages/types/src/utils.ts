@@ -25,7 +25,17 @@ export function typeToString(type: Type): string {
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([name, fieldType]) => `${name}: ${typeToString(fieldType)}`)
         .join(', ');
-      return `{${fields}}`;
+
+      if (type.rest === null) {
+        // Closed record
+        return `{${fields}}`;
+      } else {
+        // Open record with rest type
+        const restStr = typeToString(type.rest);
+        return fields.length > 0
+          ? `{${fields} | ${restStr}}`
+          : `{${restStr}}`;
+      }
     }
 
     case 'nullable':

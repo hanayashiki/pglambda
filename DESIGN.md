@@ -433,28 +433,76 @@ select * from evens
 
 **Philosophy:** Implement the novel/unclear parts first (constraint algorithm), then add standard algorithms (SCC) later.
 
-### Phase 1: Constraint-Based Type Inference (Core Algorithm)
-**Goal:** Understand and implement the constraint generation and solving algorithm on simple cases first.
+### Phase 1: Constraint-Based Type Inference (Core Algorithm) with Internal Row Polymorphism
+
+**Goal:** Implement constraint-based type inference using row polymorphism internally to eliminate fixed-point loops. Row types are not exposed to users — they're used only during inference and closed to produce user-facing closed record types.
+
+**Key insight:** Field access on type variables generates equality constraints with open record types (e.g., `α.field` → `α = {field: β | ρ}`). Unification solves all constraints in one pass. After inference, close all unbound row variables to produce closed record types.
 
 - [x] Define type representation (TypeStore with structural sharing)
+- [ ] Extend type representation for row polymorphism:
+  - [ ] Add `rest: Type | null` field to RecordType (`null` = closed record, TypeVariable = open record)
+  - [ ] Update TypeStore.record() to support optional `rest` parameter
+  - [ ] Hash-consing for open records (canonicalize by fields + rest)
+  - [ ] Test: create and cache open/closed records
+- [x] Implement unification algorithm (equality constraints only):
+  - [x] Core unification: `unify(T1, T2)` mutates shared substitution
+  - [x] Handle type variable = type variable
+  - [x] Handle type variable = concrete type
+  - [x] Handle concrete type = concrete type (structural equality)
+  - [x] Occurs check (prevent infinite types: `α = α[]`)
+  - [x] Substitution with provenance tracking (BindingSource)
+  - [x] Test basic unification (primitives, arrays, nullables, closed records)
+  - [ ] Extend unification for row polymorphism:
+    - [ ] Unify closed with open record: `{a: int, b: text} = {a: β | ρ}` → `β = int, ρ = {b: text}`
+    - [ ] Unify two open records: `{a: int | ρ1} = {b: text | ρ2}` → merge non-common fields into row variables
+    - [ ] Row variable occurs check: prevent `ρ = {a: int, b: ρ}`
+    - [ ] Test row unification
 - [ ] Define constraint types:
-  - Equality constraints: `T1 = T2`
-  - Overload constraints: `op(T1, T2, ...) -> T_result`
-- [ ] Implement unification algorithm:
-  - Core unification: `unify(T1, T2) -> Substitution`
-  - Handle type variable = type variable
-  - Handle type variable = concrete type
-  - Handle concrete type = concrete type (structural equality)
-  - Occurs check (prevent infinite types: `α = α[]`)
-  - Substitution composition and application
-- [ ] Test unification in isolation:
+  - [x] Equality constraints: `T1 = T2` (handled by Unification)
+  - [ ] Field access: Generate equality with open record (`e.field` → `T_e = {field: T_field | ρ_fresh}`)
+  - [ ] Assignable constraints: `T1 <: T2` (for nullable assignability: `int <: int | null`)
+  - [ ] Overload constraints: `op(T1, T2, ...) -> T_result` (for operator/function resolution)
+- [ ] Implement Solver (orchestrates constraint solving):
+  - [ ] Accept constraints: `addEquality()`, `addAssignable()`, `addOverload()`
+  - [ ] Solve all equality constraints via Unification (one pass — no fixed-point loop needed!)
+  - [ ] Check assignable constraints (after unification)
+  - [ ] Validate overload constraints (after unification)
+  - [ ] Close row variables: default all unbound row variables to empty row (produces closed records)
+  - [ ] Return final substitution + errors
+- [ ] Test Solver with row polymorphism:
   ```typescript
-  // Test cases:
-  unify(int, int) → success
-  unify(α, int) → {α: int}
-  unify(α[], β[]) → {α: β} or vice versa
-  unify(int, text) → error
-  unify(α, α[]) → error (occurs check)
+  // Test: field access with row types (one unification pass)
+  const alpha = store.typevar("alpha");
+  const beta = store.typevar("beta");
+  const rho = store.typevar("rho");
+
+  solver.addEquality(alpha, store.record({id: store.primitive("int"), name: store.primitive("text")}));
+  solver.addEquality(alpha, store.openRecord({id: beta}, rho));  // From α.id access
+  solver.solve();
+  // → α = {id: int, name: text}, β = int, ρ binds to {name: text}
+  // After closing: α = {id: int, name: text} (closed record)
+
+  // Test: mutual recursion — unifies in ONE PASS (no fixed-point!)
+  const f1 = store.typevar("f1");
+  const f2 = store.typevar("f2");
+  const id1 = store.typevar("id1");
+  const id2 = store.typevar("id2");
+  const rho1 = store.typevar("rho1");
+  const rho2 = store.typevar("rho2");
+
+  solver.addEquality(f2, store.openRecord({id: id1}, rho1));  // f2().id
+  solver.addEquality(f1, store.openRecord({id: id2}, rho2));  // f1().id
+  solver.addEquality(f1, f2);                                 // mutual recursion
+  solver.solve();
+  // Unification trace:
+  //   1. f1 = f2 (bind f1 ↦ f2)
+  //   2. f2 = {id: id1 | rho1} (bind f2 ↦ {id: id1 | rho1})
+  //   3. f1 = {id: id2 | rho2}
+  //      Resolve: f1 → f2 → {id: id1 | rho1}
+  //      Unify: {id: id1 | rho1} = {id: id2 | rho2}
+  //      Result: id1 = id2, rho1 = rho2
+  // After closing: f1 = f2 = {id: T_id} (closed record)
   ```
 
 ### Phase 2: Simple Constraint Generation (No Recursion)
