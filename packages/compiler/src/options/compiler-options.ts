@@ -9,6 +9,12 @@ export const CompilerOptions = z.object({
     .array(z.string())
     .describe("Glob patterns (minimatch) for files to include in compilation")
     .default(["**/*"]),
+  exclude: z
+    .array(z.string())
+    .describe(
+      "Glob patterns (minimatch) for files to exclude in compilation. Only included files that do not match any of the exclude patterns will be compiled.",
+    )
+    .default(["**/node_modules/**", "**/.git/**", "**/.hg/**", "dist/**"]),
 
   outputOptions: OutputOptions.describe(
     "Options for controlling compiler output",

@@ -1,7 +1,11 @@
-import type { AnyKeySchema, KeyType, ValueType } from "./key.js";
+import type { AnyKeySchema, KeyType, QueryFunction, ValueType } from "./key.js";
 import type { TequilaNode } from "./node.js";
-import type { QueryFunction, TequilaDB } from "./tequila-db.js";
-import type { CachedValue, DependencyRecord, ExecutionContext } from "./types.js";
+import type { TequilaDB } from "./tequila-db.js";
+import type {
+  CachedValue,
+  DependencyRecord,
+  ExecutionContext,
+} from "./types.js";
 
 /**
  * Context-aware DB wrapper that carries execution context for async-safe dependency tracking
@@ -50,7 +54,10 @@ export class TequilaDBImpl implements TequilaDB {
   private cache: Map<AnyKeySchema, Map<any, CachedValue<any>>> = new Map();
 
   // Reverse dependencies: For each (schema, key), track which other (schema, key) pairs depend on it
-  private reverseDeps: Map<AnyKeySchema, Map<any, Set<{ schema: AnyKeySchema; key: any }>>> = new Map();
+  private reverseDeps: Map<
+    AnyKeySchema,
+    Map<any, Set<{ schema: AnyKeySchema; key: any }>>
+  > = new Map();
 
   // In-flight computations: Deduplicate concurrent gets for the same key
   private inFlight: Map<AnyKeySchema, Map<any, Promise<any>>> = new Map();
@@ -90,7 +97,11 @@ export class TequilaDBImpl implements TequilaDB {
         let allUnchanged = true;
         for (const dep of cached.dependencies) {
           // Don't pass parentContext when verifying - just check the value
-          const currentValue = await this.getWithContext(dep.schema, dep.key, undefined);
+          const currentValue = await this.getWithContext(
+            dep.schema,
+            dep.key,
+            undefined,
+          );
           if (currentValue !== dep.value) {
             allUnchanged = false;
             break;
@@ -103,7 +114,11 @@ export class TequilaDBImpl implements TequilaDB {
 
           // Record in parent's dependencies if in tracking context
           if (parentContext) {
-            parentContext.dependencies.push({ schema, key, value: cached.value });
+            parentContext.dependencies.push({
+              schema,
+              key,
+              value: cached.value,
+            });
           }
 
           return cached.value;
@@ -222,7 +237,9 @@ export class TequilaDBImpl implements TequilaDB {
   ): QueryFunction<S> {
     // Check for duplicate schema names in this DB instance
     if (this.schemaNames.has(keySchema.name)) {
-      throw new Error(`Schema with name '${keySchema.name}' has already been defined in this DB`);
+      throw new Error(
+        `Schema with name '${keySchema.name}' has already been defined in this DB`,
+      );
     }
     this.schemaNames.add(keySchema.name);
 
@@ -243,7 +260,9 @@ export class TequilaDBImpl implements TequilaDB {
   ): QueryFunction<S> {
     // Check for duplicate schema names in this DB instance
     if (this.schemaNames.has(keySchema.name)) {
-      throw new Error(`Schema with name '${keySchema.name}' has already been defined in this DB`);
+      throw new Error(
+        `Schema with name '${keySchema.name}' has already been defined in this DB`,
+      );
     }
     this.schemaNames.add(keySchema.name);
 

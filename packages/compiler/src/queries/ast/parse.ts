@@ -16,7 +16,7 @@ export const parseASTSchema = defineKeySchema<FileUri, ParseResult>("parseAST");
  * This query depends on `loadTextContent` to get file contents,
  * then delegates to the parser package for the actual parsing.
  */
-export const parseAST = hostedQuery(async (db, uri, _) => {
+export const parseAST = hostedQuery(parseASTSchema, async (db, uri, _) => {
   // Load file content (dependency tracked automatically via db.get)
   const textContent = await db.get(textContentSchema, uri);
 

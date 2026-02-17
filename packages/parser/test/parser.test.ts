@@ -5,52 +5,14 @@ import { fileURLToPath } from "node:url";
 import {
   PGLLexer,
   PGLParser,
-  PGLParserListener,
-  ParserRuleContext,
-  ParseTreeWalker,
   CharStream,
   CommonTokenStream,
-  TerminalNode,
 } from "@pglambda/antlr";
+import { formatParseTree } from "../src/index.js";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Custom listener to format parse tree with proper indentation
-class TreeFormatterListener extends PGLParserListener {
-  private lines: string[] = [];
-  private indent = 0;
-
-  enterEveryRule(ctx: ParserRuleContext): void {
-    // ruleIndex exists but isn't in the type definitions
-    const ruleIndex = (ctx as any).ruleIndex;
-    const ruleName = PGLParser.ruleNames[ruleIndex];
-    this.lines.push("  ".repeat(this.indent) + ruleName);
-    this.indent++;
-  }
-
-  exitEveryRule(_ctx: ParserRuleContext): void {
-    this.indent--;
-  }
-
-  visitTerminal(node: TerminalNode): void {
-    const text = node.getText();
-    if (text !== "<EOF>") {
-      this.lines.push("  ".repeat(this.indent) + JSON.stringify(text));
-    }
-  }
-
-  getFormattedTree(): string {
-    return this.lines.join("\n");
-  }
-}
-
-function formatParseTree(tree: ParserRuleContext): string {
-  const listener = new TreeFormatterListener();
-  ParseTreeWalker.DEFAULT.walk(listener, tree);
-  return listener.getFormattedTree();
-}
 
 describe("ANTLR Parser Snapshot Tests", () => {
   const inputDir = join(__dirname, "input");

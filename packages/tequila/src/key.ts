@@ -1,3 +1,5 @@
+import type { TequilaDB } from "./tequila-db";
+
 /**
  * A key schema defines the type of keys and values for inputs and tracked computations.
  * Each schema is a unique object that carries type information via TypeScript generics.
@@ -51,3 +53,11 @@ export type ValueType<S extends AnyKeySchema> =
 export function defineKeySchema<K, V>(name: string): KeySchema<K, V> {
   return new KeySchema<K, V>(name);
 }
+
+/**
+ * Query function type for inputs and tracked computations
+ */
+export type QueryFunction<S extends AnyKeySchema> = (
+  db: TequilaDB,
+  key: KeyType<S>,
+) => Promise<ValueType<S>>;

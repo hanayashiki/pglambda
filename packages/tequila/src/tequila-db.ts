@@ -1,12 +1,4 @@
-import type { AnyKeySchema, KeyType, ValueType } from "./key";
-
-/**
- * Query function type for inputs and tracked computations
- */
-export type QueryFunction<S extends AnyKeySchema> = (
-  db: TequilaDB,
-  key: KeyType<S>,
-) => Promise<ValueType<S>>;
+import type { AnyKeySchema, KeyType, QueryFunction, ValueType } from "./key";
 
 export interface TequilaDB {
   get<S extends AnyKeySchema>(
