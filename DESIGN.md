@@ -14,8 +14,8 @@ Compiled code (draft):
 
 ```ts
 class Client {
-    getUserById(id: string): User[] {
-        return this.pg.execute("select * from users where id = $1", [id]);
+    async getUserById(id: string): Promise<User[]> {
+        return await this.pg.execute("select * from users where id = $1", [id]);
     }
 }
 ```
