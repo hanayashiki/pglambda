@@ -10,11 +10,11 @@ query get_user_by_id($id: text) {
 }
 ```
 
-Compiled code:
+Compiled code (draft):
 
 ```ts
 class Client {
-    function getUserById(id: string): User[] {
+    getUserById(id: string): User[] {
         return this.pg.execute("select * from users where id = $1", [id]);
     }
 }
