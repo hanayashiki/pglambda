@@ -1,4 +1,7 @@
 {
   "include": ["src", "test", "playground"],
-  "extends": "../../tsconfig.json"
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["@pglambda/antlr/antlr4", "@types/node"]
+  }
 }

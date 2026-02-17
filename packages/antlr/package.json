@@ -9,6 +9,9 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./antlr4": {
+      "types": "./src/antlr4.d.ts"
     }
   },
   "files": [

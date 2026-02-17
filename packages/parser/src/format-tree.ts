@@ -11,9 +11,7 @@ class TreeFormatterListener extends PGLParserListener {
   private indent = 0;
 
   enterEveryRule(ctx: ParserRuleContext): void {
-    // ruleIndex exists but isn't in the type definitions
-    const ruleIndex = (ctx as any).ruleIndex;
-    const ruleName = PGLParser.ruleNames[ruleIndex];
+    const ruleName = PGLParser.ruleNames[ctx.ruleIndex];
     this.lines.push("  ".repeat(this.indent) + ruleName);
     this.indent++;
   }

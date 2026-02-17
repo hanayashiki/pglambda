@@ -8,7 +8,8 @@ import {
   CharStream,
   CommonTokenStream,
 } from "@pglambda/antlr";
-import { formatParseTree } from "../src/index.js";
+import type { FileUri } from "@pglambda/utils";
+import { formatParseTree, parseContent } from "../src/index.js";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -43,5 +44,42 @@ describe("ANTLR Parser Snapshot Tests", () => {
   // Ensure we have at least one test
   test("has fixture files", () => {
     expect(fixtures.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Content Hash", () => {
+  const queryA = `
+    query get_user_by_id($id: text) {
+      select * from users where id = $id
+    }
+  `;
+
+  const queryB = `
+    query get_all_users() {
+      select * from users
+    }
+  `;
+
+  test("same query produces same hash across modules", () => {
+    const moduleAB = parseContent({
+      content: `${queryA}\n${queryB}`,
+      uri: "file:///ab.pgl" as FileUri,
+      success: true,
+    });
+
+    const moduleA = parseContent({
+      content: queryA,
+      uri: "file:///a.pgl" as FileUri,
+      success: true,
+    });
+
+    const abDefs = moduleAB.parseTree!.def_list();
+    const aDefs = moduleA.parseTree!.def_list();
+
+    const hashAinAB = abDefs[0].query_def().contentHash;
+    const hashAinA = aDefs[0].query_def().contentHash;
+
+    expect(hashAinAB).toBeTypeOf("string");
+    expect(hashAinAB).toBe(hashAinA);
   });
 });
