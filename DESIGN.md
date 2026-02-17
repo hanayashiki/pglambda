@@ -161,7 +161,7 @@ These are different functions with different type signatures, not automatic type
 
 ### Composite Types
 - **Array types**: `T[]` for arrays
-- **Record types**: `{field1: T1, field2: T2}` for row types (always closed - no row polymorphism initially)
+- **Record types**: `{field1: T1, field2: T2}` for row types
 
 ### Polymorphism
 - **Ad-hoc polymorphism**: Operators like `+`, `||` work on multiple types via overloading
@@ -320,17 +320,48 @@ concat(e1, e2) ⇒
   Equality: T_result = text
 ```
 
-#### Column References
-```
-select * from users  ⇒
-  Equality: T_result = schema(users)
+#### Row Type Model
 
-select name from t   ⇒
-  Equality: T_name = schema(t).name
-  Equality: T_result = {name: T_name}
+SQL rows are modeled as **record types with unique field names** — intentionally stricter than SQL (which allows duplicate names and positional access), analogous to how TypeScript models JS objects with interfaces.
+
+**Scope is two-level.** A FROM clause produces a record of records, keyed by table alias:
+```
+FROM users u JOIN orders o ON u.id = o.user_id  ⇒
+  Scope = {u: {id: int, name: text}, o: {id: int, product: text}}
 ```
 
-**Schema lookups generate equality constraints** with concrete types from the database schema.
+Single-table queries use the table name as key:
+```
+FROM users  ⇒
+  Scope = {users: {id: int, name: text}}
+```
+
+**Column access rules:**
+- **Table-qualified** (required for table columns): `u.id` → `Scope.u.id`
+- **Unqualified** (only for aliased computed expressions): `u.id + 1 AS next_id`
+- **Bare column names from tables are not allowed** — makes row type structure determinable from syntax alone, without schema knowledge
+
+The schema is only needed to *verify* that a column exists and has a given type, not to determine the row type structure.
+
+#### Column Reference Constraints
+```
+-- Qualified column access
+select u.name from users u  ⇒
+  Equality: T_name = schema(users).name
+  Equality: T_result = {u: {name: T_name}}
+
+-- Computed expression with alias
+select u.id + 1 as next_id from users u  ⇒
+  Equality: T_next_id = T_(u.id + 1)
+  Equality: T_result = {next_id: T_next_id}
+
+-- SELECT * expands per table
+select * from users u join orders o  ⇒
+  Equality: T_result = {u: schema(users), o: schema(orders)}
+  (ERROR if expansion would produce duplicate top-level keys)
+```
+
+**Uniqueness:** Duplicate column names across tables are valid in the scope (both `u.id` and `o.id` coexist). Ambiguity is only an error at unqualified access, which is already disallowed for table columns.
 
 #### WHERE Clauses
 ```
