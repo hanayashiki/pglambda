@@ -56,10 +56,22 @@ importers:
 
   packages/compiler:
     dependencies:
-      tequila:
+      '@pglambda/antlr':
+        specifier: workspace:*
+        version: link:../antlr
+      '@pglambda/parser':
+        specifier: workspace:*
+        version: link:../parser
+      '@pglambda/tequila':
         specifier: workspace:*
         version: link:../tequila
-      vfs:
+      '@pglambda/types':
+        specifier: workspace:*
+        version: link:../types
+      '@pglambda/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@pglambda/vfs':
         specifier: workspace:*
         version: link:../vfs
       zod:
@@ -72,9 +84,12 @@ importers:
 
   packages/parser:
     dependencies:
-      antlr:
+      '@pglambda/antlr':
         specifier: workspace:*
         version: link:../antlr
+      '@pglambda/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       pgsql-parser:
         specifier: ^17.9.11
@@ -93,6 +108,10 @@ importers:
         version: 4.0.18(@types/node@25.2.3)(jiti@2.6.1)(tsx@4.21.0)
 
   packages/types:
+    dependencies:
+      '@pglambda/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       vitest:
         specifier: ^4.0.18

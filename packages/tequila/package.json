@@ -1,5 +1,5 @@
 {
-  "name": "tequila",
+  "name": "@pglambda/tequila",
   "type": "module",
   "version": "0.0.1",
   "description": "Cache layer for pglambda",

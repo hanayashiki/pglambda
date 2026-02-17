@@ -1,15 +1,7 @@
-import { defineKeySchema } from "tequila";
+import { defineKeySchema } from "@pglambda/tequila";
 import { hostedQuery } from "../../host/index.js";
 import { type FileUri, uriToPath } from "../../utils/uri.js";
-
-export type TextContent = {
-  uri: FileUri;
-  content: string;
-  /**
-   * Whether we successfully read the file content.
-   */
-  success: boolean;
-};
+import type { TextContent } from "@pglambda/utils";
 
 export const textContentSchema = defineKeySchema<FileUri, TextContent>(
   "textContent",

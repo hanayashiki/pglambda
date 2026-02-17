@@ -1,19 +1,13 @@
 import type { PrimitiveName } from './primitives.ts';
+import type { SourceLocation } from '@pglambda/utils';
+
+export type { SourceLocation };
 
 /**
  * Type ID for reference equality and cycle detection
  * Using branded type to prevent accidental mixing with regular numbers
  */
 export type TypeId = number & { readonly __brand: 'TypeId' };
-
-/**
- * Source location for error tracking
- */
-export interface SourceLocation {
-  readonly file: string;
-  readonly line: number;
-  readonly column: number;
-}
 
 /**
  * Primitive type (int, text, bool, etc.)

@@ -1,5 +1,5 @@
 {
-  "name": "antlr",
+  "name": "@pglambda/antlr",
   "type": "module",
   "version": "2.2.8",
   "description": "the generated antlr syntax",

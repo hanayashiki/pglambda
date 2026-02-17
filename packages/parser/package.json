@@ -1,5 +1,5 @@
 {
-  "name": "parser",
+  "name": "@pglambda/parser",
   "type": "module",
   "version": "2.2.8",
   "description": "parser package",
@@ -19,7 +19,8 @@
   "license": "MIT",
   "public": true,
   "dependencies": {
-    "antlr": "workspace:*"
+    "@pglambda/antlr": "workspace:*",
+    "@pglambda/utils": "workspace:*"
   },
   "devDependencies": {
     "pgsql-parser": "^17.9.11",

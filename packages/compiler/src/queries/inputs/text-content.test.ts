@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { TequilaDBImpl } from "tequila";
-import { MemoryVFS } from "vfs";
+import { TequilaDBImpl } from "@pglambda/tequila";
+import { MemoryVFS } from "@pglambda/vfs";
 import { loadTextContent } from "./text-content.js";
 import { pathToUri } from "../../utils/uri.js";
 import { defaultCompilerOptions as options } from "../../options/index.js";

@@ -1,5 +1,5 @@
 {
-  "name": "types",
+  "name": "@pglambda/types",
   "type": "module",
   "version": "0.0.1",
   "description": "Shared TypeScript types and inference algorithm for pglambda",
@@ -14,6 +14,9 @@
   },
   "license": "MIT",
   "public": true,
+  "dependencies": {
+    "@pglambda/utils": "workspace:*"
+  },
   "devDependencies": {
     "vitest": "^4.0.18"
   }

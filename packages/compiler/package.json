@@ -1,5 +1,5 @@
 {
-  "name": "compiler",
+  "name": "@pglambda/compiler",
   "type": "module",
   "version": "0.0.1",
   "description": "Main compiler for pglambda",
@@ -19,7 +19,11 @@
   },
   "dependencies": {
     "zod": "catalog:",
-    "tequila": "workspace:*",
-    "vfs": "workspace:*"
+    "@pglambda/tequila": "workspace:*",
+    "@pglambda/vfs": "workspace:*",
+    "@pglambda/antlr": "workspace:*",
+    "@pglambda/types": "workspace:*",
+    "@pglambda/utils": "workspace:*",
+    "@pglambda/parser": "workspace:*"
   }
 }

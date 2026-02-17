@@ -11,7 +11,7 @@ import {
   CharStream,
   CommonTokenStream,
   TerminalNode,
-} from "antlr";
+} from "@pglambda/antlr";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);

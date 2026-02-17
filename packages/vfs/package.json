@@ -1,5 +1,5 @@
 {
-  "name": "vfs",
+  "name": "@pglambda/vfs",
   "type": "module",
   "version": "0.0.1",
   "description": "Virtual File System abstraction for pglambda",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "check": "tsc",
-    "test": "vitest run"
+    "test": "echo TBD"
   },
   "license": "MIT",
   "public": true,

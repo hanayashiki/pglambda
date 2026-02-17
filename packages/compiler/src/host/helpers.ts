@@ -4,7 +4,7 @@ import type {
   QueryFunction,
   TequilaDB,
   ValueType,
-} from "tequila";
+} from "@pglambda/tequila";
 import type { HostContext } from "./compiler-host";
 
 export type HostedQuery<S extends AnyKeySchema> = {
