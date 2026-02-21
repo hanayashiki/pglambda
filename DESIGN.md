@@ -547,268 +547,33 @@ select * from evens
     - [x] Unify two open records: `{a: int | ρ1} = {b: text | ρ2}` → merge non-common fields into row variables
     - [x] Row variable occurs check: prevent `ρ = {a: int, b: ρ}`
     - [x] Test row unification
-- [ ] Define constraint types:
-  - [x] Equality constraints: `T1 = T2` (handled by Unification)
-  - [ ] Field access: Generate equality with open record (`e.field` → `T_e = {field: T_field | ρ_fresh}`)
-  - [ ] Assignable constraints: `T1 <: T2` (for nullable assignability: `int <: int | null`)
-  - [ ] Overload constraints: `op(T1, T2, ...) -> T_result` (for operator/function resolution)
-- [ ] Implement Solver (orchestrates constraint solving):
-  - [ ] Accept constraints: `addEquality()`, `addAssignable()`, `addOverload()`
-  - [ ] Solve all equality constraints via Unification (one pass — no fixed-point loop needed!)
-  - [ ] Check assignable constraints (after unification)
-  - [ ] Validate overload constraints (after unification)
-  - [ ] Close row variables: default all unbound row variables to empty row (produces closed records)
-  - [ ] Return final substitution + errors
-- [ ] Test Solver with row polymorphism:
-  ```typescript
-  // Test: field access with row types (one unification pass)
-  const alpha = store.typevar("alpha");
-  const beta = store.typevar("beta");
-  const rho = store.typevar("rho");
+- [x] Define equality constraint type: `T1 = T2` (handled by Unification)
 
-  solver.addEquality(alpha, store.record({id: store.primitive("int"), name: store.primitive("text")}));
-  solver.addEquality(alpha, store.openRecord({id: beta}, rho));  // From α.id access
-  solver.solve();
-  // → α = {id: int, name: text}, β = int, ρ binds to {name: text}
-  // After closing: α = {id: int, name: text} (closed record)
+### Phase 2: Minimal Checker PoC
+**Goal:** Type-check `select 1 as col` → row type `{col: int}`. The checker operates on `simple_select` (not `query_def` — that requires function types).
 
-  // Test: mutual recursion — unifies in ONE PASS (no fixed-point!)
-  const f1 = store.typevar("f1");
-  const f2 = store.typevar("f2");
-  const id1 = store.typevar("id1");
-  const id2 = store.typevar("id2");
-  const rho1 = store.typevar("rho1");
-  const rho2 = store.typevar("rho2");
+**Core concepts:**
+- **SCC** as the unit of type checking, with imports (external types depended on) and exports (types produced) keyed by AST ContentHash
+- **Constraint generation** from `simple_select`: literals → primitive types, target aliases → record fields
+- **Solver** wrapping Unification to resolve constraints
 
-  solver.addEquality(f2, store.openRecord({id: id1}, rho1));  // f2().id
-  solver.addEquality(f1, store.openRecord({id: id2}, rho2));  // f1().id
-  solver.addEquality(f1, f2);                                 // mutual recursion
-  solver.solve();
-  // Unification trace:
-  //   1. f1 = f2 (bind f1 ↦ f2)
-  //   2. f2 = {id: id1 | rho1} (bind f2 ↦ {id: id1 | rho1})
-  //   3. f1 = {id: id2 | rho2}
-  //      Resolve: f1 → f2 → {id: id1 | rho1}
-  //      Unify: {id: id1 | rho1} = {id: id2 | rho2}
-  //      Result: id1 = id2, rho1 = rho2
-  // After closing: f1 = f2 = {id: T_id} (closed record)
-  ```
+- [ ] Define SCC type (imports/exports by ContentHash)
+- [ ] Define equality constraint type
+- [ ] Implement constraint generator for `simple_select`:
+  - Literals: `42 → int`, `'hello' → text`, `true/false → bool`, `null → nullable`
+  - Target list with aliases → record fields
+  - `simple_select` → row type (RecordType) from target list
+- [ ] Implement Solver (thin wrapper around Unification)
+- [ ] Test: `select 1 as col` → `{col: int}`
+- [ ] Test: `select 1 as a, 'x' as b` → `{a: int, b: text}`
 
-### Phase 2: Simple Constraint Generation (No Recursion)
-**Goal:** Generate and solve constraints for simple, non-recursive queries (no SCC needed yet).
+### Roadmap
 
-- [ ] Implement constraint generation for basic AST nodes:
-  - **Literals**: `42 → T = int`, `'hello' → T = text`, `null → T = α | null`
-  - **Binary operators**: `e1 + e2 → [T_e1 = T_e2, overload(+, [T_e1, T_e2], T_result)]`
-  - **Column references**: `select x from t → T_x = schema(t).x` (hardcoded schema for now)
-  - **WHERE clauses**: `where cond → T_cond = bool`
-  - **SELECT clauses**: `select e1, e2 → T_result = {col1: T_e1, col2: T_e2}`
-- [ ] Implement constraint solver (two-phase):
-  - **Phase 1 (Equality)**: Solve all equality constraints via unification
-  - **Phase 2 (Overload)**: Validate overload constraints after types are inferred
-- [ ] Implement simple overload resolution:
-  - Hardcoded operator signatures: `+: [(int, int) -> int, (text, text) -> text, ...]`
-  - Lookup: Given concrete argument types, find matching signature
-  - Result type extraction from signature
-- [ ] Test on simple queries:
-  ```pgl
-  select 1 + 2
-  select x + 1 where x : int  -- infer T_x = int from literal 1
-  select 'hello' || 'world'
-  ```
-
-### Phase 3: Schema Integration & Type Mapping
-**Goal:** Connect to real database schema instead of hardcoded types.
-
-- [ ] Define schema representation:
-  - Tables: `Map<tableName, TableSchema>`
-  - Columns: `Map<columnName, PostgresType>`
-  - Nullability: Track `nullable` flag
-- [ ] Map PostgreSQL types to pglambda types:
-  - `int4, int8, int2 → int`
-  - `text, varchar, char → text`
-  - `bool → bool`
-  - `numeric, decimal → numeric`
-  - Nullable columns: `T | null`
-- [ ] Schema-driven constraint generation:
-  - `select name from users → T_name = schema(users).name`
-  - `select * from users → T_result = schema(users)`
-- [ ] Test with real schema (mock or minimal test database)
-
-### Phase 4: Error Reporting & Diagnostics
-**Goal:** Provide clear, actionable error messages.
-
-- [ ] Source location tracking:
-  - Attach source locations to AST nodes during parsing
-  - Propagate locations through constraints
-  - Include location in error messages
-- [ ] Error types:
-  - **Unification failure**: `Cannot unify int with text at line X`
-  - **Missing overload**: `No overload for +(text, int) at line X`
-  - **Ambiguous type**: `Cannot infer type for $x (under-constrained)`
-  - **Schema error**: `Column 'foo' does not exist in table 'users'`
-- [ ] Error formatting:
-  ```
-  Error: Type mismatch at example.pgl:5:12
-
-  5 |   select x + 'hello'
-                 ^
-  Cannot add int and text
-
-  Expected: int
-  Found:    text
-  ```
-
-### Phase 5: Module System & File Boundaries
-**Goal:** Implement Go-like module system where each file is a compilation unit with explicit imports/exports.
-
-**Design principle:** Files are modules and define the boundary of compilation. SCCs must fit within files. Type inference happens within file boundaries, simplifying analysis and reducing user surprise.
-
-#### Module Syntax
-
-**Import syntax (Go-like):**
-```pgl
-// users.pgl
-export query get_user_by_id($id: text) {
-    select * from users where id = $id
-}
-
-export query get_user_by_email($email: text) {
-    select * from users where email = $email
-}
-```
-
-```pgl
-// admin.pgl
-import "./users.pgl"
-
-query admin_users($id: text) {
-    select * from admins
-    where user_id in users.get_user_by_id!($id).id
-}
-```
-
-**Key rules:**
-- Module name is derived from filename: `users.pgl` → module `users`
-- Import path is relative to current file: `"./users.pgl"`, `"../shared/auth.pgl"`
-- Module names must be valid identifiers (enforced by requiring valid filenames)
-- Access exported items via dot notation: `users.get_user_by_id`
-- Only `export` marked items are visible to other modules
-
-#### Implementation Tasks
-
-- [ ] **Parsing:**
-  - [ ] Add `import` statement to grammar: `import <string-literal>`
-  - [ ] Add `export` keyword for query definitions
-  - [ ] Validate import paths (must be relative, end in `.pgl`)
-  - [ ] Extract module name from filename (remove `.pgl` extension)
-  - [ ] Validate module names are valid identifiers
-
-- [ ] **Module resolution:**
-  - [ ] Resolve import paths relative to current file
-  - [ ] Build module dependency graph (file → dependencies)
-  - [ ] Detect circular imports (error if cycle exists)
-  - [ ] Topological sort of modules for type-checking order
-  - [ ] Cache parsed modules (avoid re-parsing)
-
-- [ ] **Scope & name resolution:**
-  - [ ] Track exported queries per module
-  - [ ] Implement qualified name lookup: `module.query_name`
-  - [ ] Validate referenced queries exist and are exported
-  - [ ] Prevent name conflicts (within file, queries must have unique names)
-
-- [ ] **Type checking with modules:**
-  - [ ] Type-check modules in dependency order (dependencies first)
-  - [ ] Require explicit type signatures for exported queries (no cross-file inference)
-  - [ ] Validate imported query signatures match usage
-  - [ ] Store inferred types for exported queries (for dependent modules)
-
-- [ ] **Error handling:**
-  - [ ] Error: Import not found: `Cannot find module "./users.pgl"`
-  - [ ] Error: Circular imports: `Circular import detected: a.pgl → b.pgl → a.pgl`
-  - [ ] Error: Undefined export: `Module "users" does not export "get_user"`
-  - [ ] Error: Missing export annotation: `Query "foo" is used in other modules but not marked "export"`
-
-- [ ] **Testing:**
-  ```pgl
-  // Test: basic import/export
-  // users.pgl
-  export query get_user($id: text) { select * from users where id = $id }
-
-  // app.pgl
-  import "./users.pgl"
-  query app_query($id: text) { select * from users.get_user!($id) }
-
-  // Test: multi-level imports (a → b → c)
-  // Test: circular import detection
-  // Test: missing export error
-  // Test: module name validation
-  ```
-
-#### Benefits of This Design
-
-1. **Clear compilation boundaries** - Each file is independently type-checked (after dependencies)
-2. **No cross-file SCCs** - Simplifies SCC analysis (only within-file recursion)
-3. **Explicit interfaces** - Export signatures serve as documentation
-4. **Predictable compilation** - File changes only affect dependents, not arbitrary files
-5. **Parallel compilation** - Independent modules can be type-checked in parallel
-6. **Incremental compilation** - Only recheck changed files and dependents
-
-### Phase 6: Dependency Analysis & SCC (Within-File Only)
-**Goal:** Handle mutually recursive queries within a single file (CTEs, subqueries).
-
-**Scope:** Dependency analysis is now scoped to a single file. Cross-file dependencies are handled by module resolution (Phase 5).
-
-- [ ] Build referential dependency graph (within file):
-  - Nodes: Typed items (variables, expressions, CTEs, queries)
-  - Edges: A depends on B if A references B
-  - Exclude cross-module references (already resolved)
-- [ ] Implement Tarjan's algorithm for SCC decomposition
-- [ ] Topological sort for processing order
-- [ ] Tag constraints with SCC membership
-- [ ] Process constraints per SCC in topological order:
-  - Solve constraints within each SCC simultaneously
-  - Freeze solved types before moving to next SCC
-- [ ] Validate: SCCs only contain items from the same file (enforced by module system)
-- [ ] Test with mutually recursive CTEs:
-  ```pgl
-  with recursive
-    evens as (select 0 as n union all select n+2 from odds where n < 10),
-    odds  as (select 1 as n union all select n+2 from evens where n < 10)
-  select * from evens
-  ```
-
-### Phase 7: Advanced Features & Optimization
-**Goal:** Production-ready type checker with full PostgreSQL compatibility.
-
-- [ ] Query PostgreSQL catalog for overloads:
-  - Load operator signatures from `pg_operator`
-  - Load function signatures from `pg_proc`
-  - Support user-defined functions
-- [ ] Performance optimization:
-  - Constraint deduplication
-  - Incremental solving (cache results)
-  - Parallel SCC processing (independent SCCs)
-- [ ] Advanced type features:
-  - Array types: `T[]` with proper variance
-  - Subqueries: Type nested SELECT expressions
-  - Aggregations: `COUNT(*) → int`, `SUM(x) → typeof(x)`
-  - CASE expressions: Unify all branch types
-- [ ] Integration testing:
-  - Full queries from real codebases
-  - Performance benchmarks
-  - Edge case coverage
-
----
-
-## Future Enhancements
-
-- **Implicit coercion (opt-in)**: Add a "loose mode" that inserts implicit casts like PostgreSQL
-- **Bidirectional type checking**: Allow optional type annotations for better error messages
-- **Row polymorphism**: Type `select * from t` without knowing all columns ahead of time
-- **Subtyping**: Model PostgreSQL type hierarchies (e.g., `int2 <: int4 <: int8 <: numeric`)
-- **Generic/polymorphic type variables**: For user-defined functions and query builders
-- **Higher-kinded types**: For advanced generic query combinators
-- **Effect system**: Track query side effects (read-only vs read-write)
-- **Query from PostgreSQL catalog**: Load operator/function overloads from `pg_operator`, `pg_proc` instead of hardcoding
+- Expressions & operators (binary ops, overload resolution)
+- Schema & FROM clause (table references, column resolution)
+- Query parameters & function types (`query_def`)
+- Module system (imports, exports, file boundaries)
+- SCC decomposition (Tarjan's, mutual recursion)
+- Error reporting & diagnostics
+- Advanced features (aggregations, subqueries, CASE, catalog integration)
 

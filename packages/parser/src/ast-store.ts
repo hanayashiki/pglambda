@@ -16,4 +16,13 @@ export class AstStore {
     this.astCache.set(hash, ctx);
     return ctx;
   }
+
+  getAs<T extends ParserRuleContext>(hash: ContentHash): T {
+    const cached = this.astCache.get(hash);
+    if (!cached) {
+      throw new Error("hash for ast does not exist");
+    }
+
+    return cached as any;
+  }
 }

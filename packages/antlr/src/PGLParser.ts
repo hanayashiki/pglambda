@@ -12,6 +12,8 @@ import {
 	Interval, IntervalSet
 } from 'antlr4';
 import PGLParserListener from "./PGLParserListener.js";
+import PGLParserVisitor from "./PGLParserVisitor.js";
+
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
 type int = number;
@@ -1797,6 +1799,14 @@ export class IdentifierContext extends ParserRuleContext {
 	 		listener.exitIdentifier(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitIdentifier) {
+			return visitor.visitIdentifier(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1830,6 +1840,14 @@ export class Qualified_nameContext extends ParserRuleContext {
 	 		listener.exitQualified_name(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitQualified_name) {
+			return visitor.visitQualified_name(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1860,6 +1878,14 @@ export class ProgContext extends ParserRuleContext {
 	 		listener.exitProg(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitProg) {
+			return visitor.visitProg(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1885,6 +1911,14 @@ export class DefContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitDef) {
 	 		listener.exitDef(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitDef) {
+			return visitor.visitDef(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -1926,6 +1960,14 @@ export class Query_defContext extends ParserRuleContext {
 	 		listener.exitQuery_def(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitQuery_def) {
+			return visitor.visitQuery_def(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1965,6 +2007,14 @@ export class Query_parameter_listContext extends ParserRuleContext {
 	 		listener.exitQuery_parameter_list(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitQuery_parameter_list) {
+			return visitor.visitQuery_parameter_list(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -1995,6 +2045,14 @@ export class Query_parameterContext extends ParserRuleContext {
 	 		listener.exitQuery_parameter(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitQuery_parameter) {
+			return visitor.visitQuery_parameter(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2017,6 +2075,14 @@ export class Query_bodyContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitQuery_body) {
 	 		listener.exitQuery_body(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitQuery_body) {
+			return visitor.visitQuery_body(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2052,6 +2118,14 @@ export class Simple_selectContext extends ParserRuleContext {
 	 		listener.exitSimple_select(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitSimple_select) {
+			return visitor.visitSimple_select(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2083,6 +2157,14 @@ export class Target_listContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitTarget_list) {
 	 		listener.exitTarget_list(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitTarget_list) {
+			return visitor.visitTarget_list(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2124,6 +2206,14 @@ export class Target_labelContext extends Target_elContext {
 	 		listener.exitTarget_label(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitTarget_label) {
+			return visitor.visitTarget_label(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 export class Target_starContext extends Target_elContext {
 	constructor(parser: PGLParser, ctx: Target_elContext) {
@@ -2141,6 +2231,14 @@ export class Target_starContext extends Target_elContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitTarget_star) {
 	 		listener.exitTarget_star(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitTarget_star) {
+			return visitor.visitTarget_star(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2168,6 +2266,14 @@ export class From_clauseContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitFrom_clause) {
 	 		listener.exitFrom_clause(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitFrom_clause) {
+			return visitor.visitFrom_clause(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2203,6 +2309,14 @@ export class From_listContext extends ParserRuleContext {
 	 		listener.exitFrom_list(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitFrom_list) {
+			return visitor.visitFrom_list(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2233,6 +2347,14 @@ export class Table_refContext extends ParserRuleContext {
 	 		listener.exitTable_ref(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitTable_ref) {
+			return visitor.visitTable_ref(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2255,6 +2377,14 @@ export class Relation_exprContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitRelation_expr) {
 	 		listener.exitRelation_expr(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitRelation_expr) {
+			return visitor.visitRelation_expr(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2284,6 +2414,14 @@ export class Where_clauseContext extends ParserRuleContext {
 	 		listener.exitWhere_clause(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitWhere_clause) {
+			return visitor.visitWhere_clause(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2306,6 +2444,14 @@ export class A_exprContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr) {
 	 		listener.exitA_expr(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr) {
+			return visitor.visitA_expr(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2341,6 +2487,14 @@ export class A_expr_orContext extends ParserRuleContext {
 	 		listener.exitA_expr_or(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_or) {
+			return visitor.visitA_expr_or(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2372,6 +2526,14 @@ export class A_expr_andContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_and) {
 	 		listener.exitA_expr_and(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_and) {
+			return visitor.visitA_expr_and(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2408,6 +2570,14 @@ export class A_expr_betweenContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_between) {
 	 		listener.exitA_expr_between(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_between) {
+			return visitor.visitA_expr_between(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2458,6 +2628,14 @@ export class A_expr_inContext extends ParserRuleContext {
 	 		listener.exitA_expr_in(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_in) {
+			return visitor.visitA_expr_in(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2486,6 +2664,14 @@ export class A_expr_unary_notContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_unary_not) {
 	 		listener.exitA_expr_unary_not(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_unary_not) {
+			return visitor.visitA_expr_unary_not(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2519,6 +2705,14 @@ export class A_expr_isnullContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_isnull) {
 	 		listener.exitA_expr_isnull(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_isnull) {
+			return visitor.visitA_expr_isnull(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2558,6 +2752,14 @@ export class A_expr_is_notContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_is_not) {
 	 		listener.exitA_expr_is_not(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_is_not) {
+			return visitor.visitA_expr_is_not(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2605,6 +2807,14 @@ export class A_expr_compareContext extends ParserRuleContext {
 	 		listener.exitA_expr_compare(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_compare) {
+			return visitor.visitA_expr_compare(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2636,6 +2846,14 @@ export class A_expr_likeContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_like) {
 	 		listener.exitA_expr_like(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_like) {
+			return visitor.visitA_expr_like(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2675,6 +2893,14 @@ export class A_expr_addContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_add) {
 	 		listener.exitA_expr_add(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_add) {
+			return visitor.visitA_expr_add(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2722,6 +2948,14 @@ export class A_expr_mulContext extends ParserRuleContext {
 	 		listener.exitA_expr_mul(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_mul) {
+			return visitor.visitA_expr_mul(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2750,6 +2984,14 @@ export class A_expr_unaryContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitA_expr_unary) {
 	 		listener.exitA_expr_unary(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitA_expr_unary) {
+			return visitor.visitA_expr_unary(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2791,6 +3033,14 @@ export class C_exprContext extends ParserRuleContext {
 	 		listener.exitC_expr(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitC_expr) {
+			return visitor.visitC_expr(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2828,6 +3078,14 @@ export class ColumnrefContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitColumnref) {
 	 		listener.exitColumnref(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitColumnref) {
+			return visitor.visitColumnref(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -2869,6 +3127,14 @@ export class AexprconstContext extends ParserRuleContext {
 	 		listener.exitAexprconst(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitAexprconst) {
+			return visitor.visitAexprconst(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2893,6 +3159,14 @@ export class Type_defContext extends ParserRuleContext {
 	 		listener.exitType_def(this);
 		}
 	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitType_def) {
+			return visitor.visitType_def(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
 }
 
 
@@ -2915,6 +3189,14 @@ export class Type_expressionContext extends ParserRuleContext {
 	public exitRule(listener: PGLParserListener): void {
 	    if(listener.exitType_expression) {
 	 		listener.exitType_expression(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitType_expression) {
+			return visitor.visitType_expression(this);
+		} else {
+			return visitor.visitChildren(this);
 		}
 	}
 }

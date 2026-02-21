@@ -7,4 +7,7 @@ export { default as PGLParser } from "./PGLParser";
 export * from "./PGLParserListener";
 export { default as PGLParserListener } from "./PGLParserListener";
 
+export * from "./PGLParserVisitor";
+export { default as PGLParserVisitor } from "./PGLParserVisitor";
+
 export * from "antlr4";

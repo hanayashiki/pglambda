@@ -226,6 +226,8 @@ export class Unification {
   /**
    * Snapshot the current state: resolved bindings and accumulated errors.
    * Call this once after all constraints have been unified.
+   * 
+   * TODO: no need for such snapshot, maybe remove it?
    */
   getResult(): UnificationResult {
     const resultBindings = new Map<TypeId, Type>();
