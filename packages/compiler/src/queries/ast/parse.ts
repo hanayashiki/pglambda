@@ -16,26 +16,29 @@ export const parseASTSchema = defineKeySchema<FileUri, ParseResult>("parseAST");
  * This query depends on `loadTextContent` to get file contents,
  * then delegates to the parser package for the actual parsing.
  */
-export const parseAST = hostedQuery(parseASTSchema, async (db, uri, _) => {
-  // Load file content (dependency tracked automatically via db.get)
-  const textContent = await db.get(textContentSchema, uri);
+export const parseAST = hostedQuery(
+  parseASTSchema,
+  async (db, uri, { astStore }) => {
+    // Load file content (dependency tracked automatically via db.get)
+    const textContent = await db.get(textContentSchema, uri);
 
-  // If file load failed, return error result
-  if (!textContent.success) {
-    return {
-      uri,
-      parseTree: null,
-      errors: [
-        {
-          severity: "error" as const,
-          message: `Failed to load file: ${uri}`,
-          location: { file: uri, line: 1, column: 0 },
-          recovered: false,
-        },
-      ],
-      success: false,
-    };
-  }
+    // If file load failed, return error result
+    if (!textContent.success) {
+      return {
+        uri,
+        parseTree: null,
+        errors: [
+          {
+            severity: "error" as const,
+            message: `Failed to load file: ${uri}`,
+            location: { file: uri, line: 1, column: 0 },
+            recovered: false,
+          },
+        ],
+        success: false,
+      };
+    }
 
-  return parseContent(textContent);
-});
+    return parseContent(textContent, { astStore });
+  },
+);

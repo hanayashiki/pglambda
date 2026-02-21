@@ -10,25 +10,40 @@ import type { TextContent } from "@pglambda/utils";
 import md5 from "md5";
 import { CollectingErrorListener } from "./error-listener.js";
 import type { ParseResult } from "./types.js";
+import type { ContentHash } from "@pglambda/antlr/antlr4";
+import type { AstStore } from "#ast-store.js";
 
 class ContentHashListener extends PGLParserListener {
-  constructor(private content: string) {
+  constructor(
+    private content: string,
+    private ctx: ParseContentContext,
+  ) {
     super();
   }
 
   exitEveryRule(ctx: ParserRuleContext) {
     const start = ctx.start?.start ?? 0;
     const stop = (ctx.stop?.stop ?? start) + 1;
-    ctx.contentHash = md5(ctx.ruleIndex + ":" + this.content.slice(start, stop));
+    ctx.contentHash = md5(
+      ctx.ruleIndex + ":" + this.content.slice(start, stop),
+    ) as ContentHash;
+    this.ctx.astStore.ensure(ctx);
   }
 }
+
+export type ParseContentContext = {
+  astStore: AstStore;
+};
 
 /**
  * Parse .pgl source content into an ANTLR parse tree with syntax error collection.
  *
  * Pure function — no tequila, no file I/O.
  */
-export function parseContent({ content, uri }: TextContent): ParseResult {
+export function parseContent(
+  { content, uri }: TextContent,
+  context: ParseContentContext,
+): ParseResult {
   try {
     const inputStream = CharStreams.fromString(content);
 
@@ -42,7 +57,7 @@ export function parseContent({ content, uri }: TextContent): ParseResult {
     const parser = new PGLParser(tokenStream);
     parser.removeErrorListeners();
     parser.addErrorListener(errorListener);
-    parser.addParseListener(new ContentHashListener(content));
+    parser.addParseListener(new ContentHashListener(content, context));
 
     const parseTree = parser.prog();
     const errors = errorListener.getErrors();

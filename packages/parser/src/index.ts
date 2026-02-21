@@ -1,3 +1,4 @@
+export * from "./ast-store.js";
 export * from "./types.js";
 export * from "./error-listener.js";
 export * from "./parse.js";

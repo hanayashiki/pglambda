@@ -1,15 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { TequilaDBImpl } from "@pglambda/tequila";
-import { MemoryVFS } from "@pglambda/vfs";
-import { loadTextContent } from "./text-content.js";
-import { pathToUri } from "../../utils/uri.js";
-import { defaultCompilerOptions as options } from "../../options/index.js";
+import { loadTextContent } from "../src/queries/inputs/text-content.js";
+import { pathToUri } from "../src/utils/uri.js";
+import { createTestHostContext } from "./create-host-context.js";
 
 describe("loadTextContent", () => {
   const setupQuery = (files: Record<string, string>) => {
-    const vfs = new MemoryVFS(files);
+    const ctx = createTestHostContext(files);
     const db = new TequilaDBImpl();
-    const query = loadTextContent.withContext({ vfs, options });
+
+    const query = loadTextContent.withContext(ctx);
     return { db, query };
   };
 
@@ -38,7 +38,8 @@ describe("loadTextContent", () => {
   });
 
   it("handles file with UTF-8 content", async () => {
-    const utf8Content = "query 测试 { select * from users where name = '日本語' }";
+    const utf8Content =
+      "query 测试 { select * from users where name = '日本語' }";
     const { db, query } = setupQuery({
       "/unicode.pgl": utf8Content,
     });

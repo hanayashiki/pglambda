@@ -1,25 +1,24 @@
 import { describe, it, expect } from "vitest";
 import { createTequilaDB } from "@pglambda/tequila";
-import { MemoryVFS } from "@pglambda/vfs";
-import { parseAST, parseASTSchema } from "./parse.js";
-import { pathToUri } from "../../utils/uri.js";
-import { defaultCompilerOptions } from "../../options/compiler-options.js";
-import { loadTextContent } from "../inputs/text-content.js";
+import { parseAST, parseASTSchema } from "../src/queries/ast/parse.js";
+import { pathToUri } from "../src/utils/uri.js";
+import { loadTextContent } from "../src/queries/inputs/text-content.js";
 import { ProgContext } from "@pglambda/antlr";
+import { createTestHostContext } from "./create-host-context.js";
 
 describe("parseAST", () => {
   const setupQuery = (files: Record<string, string>) => {
-    const vfs = new MemoryVFS(files);
+    const ctx = createTestHostContext(files);
+
     const db = createTequilaDB();
-    const options = defaultCompilerOptions;
 
     // Register loadTextContent as an input query
-    db.defineInput(...loadTextContent({ vfs, options }));
+    db.defineInput(...loadTextContent(ctx));
 
     // Register parseAST as a tracked query
-    db.defineTracked(...parseAST({ vfs, options }));
+    db.defineTracked(...parseAST(ctx));
 
-    return { db, vfs, options };
+    return { db };
   };
 
   describe("successful parsing", () => {

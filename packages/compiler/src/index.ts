@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { mkdir } from "node:fs/promises";
 import { NodeVFS } from "@pglambda/vfs";
-import { formatParseTree } from "@pglambda/parser";
+import { AstStore, formatParseTree } from "@pglambda/parser";
 import { createTequilaDB } from "@pglambda/tequila";
 import { pathToUri } from "./utils/uri.js";
 import type { HostContext } from "./host/index.js";
@@ -23,6 +23,7 @@ export const main = async (optionsIn: CompilerOptionsIn, workspace: string) => {
       },
     },
     vfs: new NodeVFS([workspace]),
+    astStore: new AstStore(),
   };
 
   const db = createTequilaDB();

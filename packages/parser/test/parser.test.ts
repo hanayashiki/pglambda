@@ -2,18 +2,21 @@ import { describe, test, expect } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  PGLLexer,
-  PGLParser,
-  CharStream,
-  CommonTokenStream,
-} from "@pglambda/antlr";
 import type { FileUri } from "@pglambda/utils";
-import { formatParseTree, parseContent } from "../src/index.js";
+import {
+  formatParseTree,
+  parseContent,
+  type ParseContentContext,
+} from "../src/index.js";
+import { AstStore } from "#ast-store.js";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const ctx: ParseContentContext = {
+  astStore: new AstStore(),
+};
 
 describe("ANTLR Parser Snapshot Tests", () => {
   const inputDir = join(__dirname, "input");
@@ -25,17 +28,17 @@ describe("ANTLR Parser Snapshot Tests", () => {
     const filepath = join(inputDir, filename);
     const input = readFileSync(filepath, "utf-8");
 
-    // Standard ANTLR parsing pipeline
-    const chars = new CharStream(input);
-    const lexer = new PGLLexer(chars);
-    const tokens = new CommonTokenStream(lexer);
-    const parser = new PGLParser(tokens);
-
-    // Parse from root rule
-    const tree = parser.prog();
+    const result = parseContent(
+      {
+        content: input,
+        uri: `file:///${filename}` as FileUri,
+        success: true,
+      },
+      ctx,
+    );
 
     // Format parse tree with proper indentation using listener
-    const formattedTree = formatParseTree(tree);
+    const formattedTree = formatParseTree(result.parseTree!);
 
     // Snapshot the parse tree to individual file
     expect(formattedTree).toMatchFileSnapshot(`__snapshots__/${filename}.snap`);
@@ -61,17 +64,23 @@ describe("Content Hash", () => {
   `;
 
   test("same query produces same hash across modules", () => {
-    const moduleAB = parseContent({
-      content: `${queryA}\n${queryB}`,
-      uri: "file:///ab.pgl" as FileUri,
-      success: true,
-    });
+    const moduleAB = parseContent(
+      {
+        content: `${queryA}\n${queryB}`,
+        uri: "file:///ab.pgl" as FileUri,
+        success: true,
+      },
+      ctx,
+    );
 
-    const moduleA = parseContent({
-      content: queryA,
-      uri: "file:///a.pgl" as FileUri,
-      success: true,
-    });
+    const moduleA = parseContent(
+      {
+        content: queryA,
+        uri: "file:///a.pgl" as FileUri,
+        success: true,
+      },
+      ctx,
+    );
 
     const abDefs = moduleAB.parseTree!.def_list();
     const aDefs = moduleA.parseTree!.def_list();
@@ -81,5 +90,10 @@ describe("Content Hash", () => {
 
     expect(hashAinAB).toBeTypeOf("string");
     expect(hashAinAB).toBe(hashAinA);
+
+    // AstStore returns the same cached node for matching hashes
+    const cachedFromAB = ctx.astStore.ensure(abDefs[0].query_def());
+    const cachedFromA = ctx.astStore.ensure(aDefs[0].query_def());
+    expect(cachedFromAB).toBe(cachedFromA);
   });
 });
