@@ -324,44 +324,56 @@ concat(e1, e2) ⇒
 
 SQL rows are modeled as **record types with unique field names** — intentionally stricter than SQL (which allows duplicate names and positional access), analogous to how TypeScript models JS objects with interfaces.
 
-**Scope is two-level.** A FROM clause produces a record of records, keyed by table alias:
+**Scope (internal):** A FROM clause produces a two-level record of records, keyed by table name or alias. This is used for column resolution within the query — not exposed in the result type.
 ```
 FROM users u JOIN orders o ON u.id = o.user_id  ⇒
   Scope = {u: {id: int, name: text}, o: {id: int, product: text}}
 ```
 
-Single-table queries use the table name as key:
+**Result type (flat):** The SELECT list determines the output — a flat record keyed by column name or explicit alias. Table prefixes are stripped; only the column name survives.
 ```
-FROM users  ⇒
-  Scope = {users: {id: int, name: text}}
+SELECT u.name, o.product  ⇒  {name: text, product: text}
+SELECT u.id AS user_id     ⇒  {user_id: int}
+SELECT 1 AS value          ⇒  {value: int}
 ```
 
 **Column access rules:**
 - **Table-qualified** (required for table columns): `u.id` → `Scope.u.id`
 - **Unqualified** (only for aliased computed expressions): `u.id + 1 AS next_id`
-- **Bare column names from tables are not allowed** — makes row type structure determinable from syntax alone, without schema knowledge
+- **Bare column names from tables are not allowed** — makes the query self-documenting without schema knowledge
+- **Computed expressions require explicit aliases** — no auto-generated `?column?` names
+- **Duplicate output column names are an error** — `SELECT u.id, o.id` requires aliases to disambiguate
 
-The schema is only needed to *verify* that a column exists and has a given type, not to determine the row type structure.
+The schema is only needed to *verify* that a column exists and has a given type, not to determine the result type structure.
+
+**Local alias limitation.** Table aliases are local to the FROM clause and do not survive SQL subquery boundaries. For stable naming across boundaries, use views — they are persistent named entities like tables.
 
 #### Column Reference Constraints
 ```
--- Qualified column access
+-- Qualified column access (output keyed by column name)
 select u.name from users u  ⇒
   Equality: T_name = schema(users).name
-  Equality: T_result = {u: {name: T_name}}
+  Equality: T_result = {name: T_name}
+
+-- Explicit alias overrides the column name
+select u.id as user_id from users u  ⇒
+  Equality: T_user_id = schema(users).id
+  Equality: T_result = {user_id: T_user_id}
 
 -- Computed expression with alias
 select u.id + 1 as next_id from users u  ⇒
   Equality: T_next_id = T_(u.id + 1)
   Equality: T_result = {next_id: T_next_id}
 
--- SELECT * expands per table
-select * from users u join orders o  ⇒
-  Equality: T_result = {u: schema(users), o: schema(orders)}
-  (ERROR if expansion would produce duplicate top-level keys)
-```
+-- SELECT * from single table
+select * from users  ⇒
+  Equality: T_result = schema(users)
 
-**Uniqueness:** Duplicate column names across tables are valid in the scope (both `u.id` and `o.id` coexist). Ambiguity is only an error at unqualified access, which is already disallowed for table columns.
+-- SELECT * from join (ERROR if duplicate column names)
+select * from users u join orders o  ⇒
+  Equality: T_result = schema(users) ∪ schema(orders)
+  (ERROR if any column name appears in both tables)
+```
 
 #### WHERE Clauses
 ```
