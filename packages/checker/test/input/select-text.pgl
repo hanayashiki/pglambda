@@ -1,0 +1,2 @@
+query q() { select 'hi' as s }
+--          ^ q

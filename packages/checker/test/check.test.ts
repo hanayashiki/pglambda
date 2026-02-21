@@ -1,48 +1,27 @@
-// import { describe, test, expect } from "vitest";
-// import { parseContent, AstStore } from "@pglambda/parser";
-// import type { FileUri } from "@pglambda/utils";
-// import { TypeStore, typeToString } from "@pglambda/types";
-// import { checkSimpleSelect } from "../src/checkers/select.js";
+import { describe, test, expect } from "vitest";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { checkAndExtractMarkers } from "./check-helper.js";
 
-// const astStore = new AstStore();
+describe("Checker Snapshot Tests", () => {
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input");
+  const fixtures = readdirSync(inputDir)
+    .filter((f) => f.endsWith(".pgl"))
+    .sort();
 
-// /**
-//  * Parse a PGL query, type-check its simple_select, and assert the expected type.
-//  */
-// function check(source: string, expected: string) {
-//   const result = parseContent(
-//     { content: source, uri: "test.pgl" as FileUri, success: true },
-//     { astStore },
-//   );
-//   expect(result.success).toBe(true);
-//   const tree = result.parseTree!;
-//   const ctx = tree.def(0).query_def().query_body().simple_select();
-//   const store = new TypeStore();
-//   const checked = checkSimpleSelect(ctx, store);
+  test.each(fixtures)("checks %s", async (filename: string) => {
+    const filepath = join(inputDir, filename);
+    const input = readFileSync(filepath, "utf-8");
 
-//   expect(checked.errors).toEqual([]);
-//   expect(typeToString(checked.type)).toBe(expected);
-// }
+    const snapshot = checkAndExtractMarkers(input, filename);
 
-// describe("checkSimpleSelect", () => {
-//   test("select 1 as col → {col: int}", () => {
-//     check("query q() { select 1 as col }", "{col: int}");
-//   });
+    await expect(snapshot).toMatchFileSnapshot(
+      `__snapshots__/${filename}.snap`,
+    );
+  });
 
-//   test("select 'hi' as s → {s: text}", () => {
-//     check("query q() { select 'hi' as s }", "{s: text}");
-//   });
-
-//   test("select 1 as a, 'x' as b → {a: int, b: text}", () => {
-//     check("query q() { select 1 as a, 'x' as b }", "{a: int, b: text}");
-//   });
-
-//   test("select true as flag → {flag: bool}", () => {
-//     check("query q() { select true as flag }", "{flag: bool}");
-//   });
-
-//   test("select 1.5 as n → {n: numeric}", () => {
-//     check("query q() { select 1.5 as n }", "{n: numeric}");
-//   });
-// });
-// TODO: restore the test after refactoring
+  test("has fixture files", () => {
+    expect(fixtures.length).toBeGreaterThan(0);
+  });
+});

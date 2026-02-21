@@ -17,6 +17,10 @@ export class AstStore {
     return ctx;
   }
 
+  [Symbol.iterator](): IterableIterator<ContentHash> {
+    return this.astCache.keys();
+  }
+
   getAs<T extends ParserRuleContext>(hash: ContentHash): T {
     const cached = this.astCache.get(hash);
     if (!cached) {

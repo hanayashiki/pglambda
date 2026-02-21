@@ -1,0 +1,2 @@
+query q() { select 1.5 as n }
+--          ^ s

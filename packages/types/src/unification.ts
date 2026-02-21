@@ -57,6 +57,43 @@ export class Unification {
   }
 
   /**
+   * Recursively resolve all type variables within a type structure.
+   * Unlike resolve(), this walks into records, arrays, and nullables.
+   */
+  deepResolve(type: Type): Type {
+    type = this.resolve(type);
+    switch (type.kind) {
+      case "primitive":
+      case "typevar":
+      case "error":
+        return type;
+      case "array": {
+        const elem = this.deepResolve(type.elementType);
+        return elem === type.elementType ? type : this.typeStore.array(elem);
+      }
+      case "nullable": {
+        const inner = this.deepResolve(type.innerType);
+        return inner === type.innerType ? type : this.typeStore.nullable(inner);
+      }
+      case "record": {
+        let changed = false;
+        const fields: Record<string, Type> = {};
+        for (const [name, fieldType] of Object.entries(type.fields)) {
+          const resolved = this.deepResolve(fieldType);
+
+          if (resolved !== fieldType) changed = true;
+          fields[name] = resolved;
+        }
+        const rest = type.rest ? this.deepResolve(type.rest) : null;
+        if (rest !== type.rest) changed = true;
+        return changed ? this.typeStore.record(fields, rest) : type;
+      }
+      default:
+        throw new Error(`${JSON.stringify(type)} is not resolved`);
+    }
+  }
+
+  /**
    * Check if a type variable occurs anywhere inside a type.
    * Prevents infinite types like α = α[] or ρ = {a: int | ρ}.
    */
@@ -226,7 +263,7 @@ export class Unification {
   /**
    * Snapshot the current state: resolved bindings and accumulated errors.
    * Call this once after all constraints have been unified.
-   * 
+   *
    * TODO: no need for such snapshot, maybe remove it?
    */
   getResult(): UnificationResult {

@@ -11,15 +11,12 @@ import {
 import { AstStore } from "#ast-store.js";
 
 // ESM equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 const ctx: ParseContentContext = {
   astStore: new AstStore(),
 };
 
 describe("ANTLR Parser Snapshot Tests", () => {
-  const inputDir = join(__dirname, "input");
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
     .sort(); // Consistent order across platforms

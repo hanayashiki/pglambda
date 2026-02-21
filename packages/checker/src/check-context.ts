@@ -67,7 +67,7 @@ export class CheckContext {
     for (const hash of this.sccIn.exportedNodes) {
       const type = this.resolveExport(hash);
       if (type) {
-        typeExports.set(hash, this.unification.resolve(type));
+        typeExports.set(hash, this.unification.deepResolve(type));
       }
     }
 
