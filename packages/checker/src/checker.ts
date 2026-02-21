@@ -38,22 +38,40 @@ export class Checker extends PGLParserVisitor<Type> {
   // --- Expression visitors (binary-or-passthrough) ---
 
   visitA_expr_or = (ctx: A_expr_orContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_and_list(), "OR expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_and_list(),
+      "OR expressions not supported yet",
+    );
 
   visitA_expr_and = (ctx: A_expr_andContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_between_list(), "AND expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_between_list(),
+      "AND expressions not supported yet",
+    );
 
   visitA_expr_compare = (ctx: A_expr_compareContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_like_list(), "Comparison expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_like_list(),
+      "Comparison expressions not supported yet",
+    );
 
   visitA_expr_like = (ctx: A_expr_likeContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_add_list(), "LIKE expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_add_list(),
+      "LIKE expressions not supported yet",
+    );
 
   visitA_expr_add = (ctx: A_expr_addContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_mul_list(), "Arithmetic expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_mul_list(),
+      "Arithmetic expressions not supported yet",
+    );
 
   visitA_expr_mul = (ctx: A_expr_mulContext): Type =>
-    this.binaryOrPassthrough(ctx.a_expr_unary_list(), "Multiplication expressions not supported yet");
+    this.binaryOrPassthrough(
+      ctx.a_expr_unary_list(),
+      "Multiplication expressions not supported yet",
+    );
 
   // --- Special expression visitors ---
 
@@ -114,6 +132,6 @@ export class Checker extends PGLParserVisitor<Type> {
         }
       }
 
-      return this.typeStore.record(fields);
+      return this.typeStore.array(this.typeStore.record(fields)); // TODO: use set type
     });
 }

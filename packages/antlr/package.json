@@ -20,7 +20,7 @@
   "scripts": {
     "check": "tsc",
     "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript -visitor src/PGLParser.g4",
-    "build": "tsup",
+    "build": "pnpm gen && tsup",
     "prepublishOnly": "pnpm run gen && pnpm run build",
     "lint": "eslint"
   },

@@ -63,8 +63,9 @@ export default class PGLParser extends Parser {
 	public static readonly QUOTED_IDENTIFIER = 42;
 	public static readonly PARAM = 43;
 	public static readonly WS = 44;
-	public static readonly LINE_COMMENT = 45;
-	public static readonly BLOCK_COMMENT = 46;
+	public static readonly LINE_COMMENT_QUERY = 45;
+	public static readonly LINE_COMMENT = 46;
+	public static readonly BLOCK_COMMENT = 47;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_identifier = 0;
 	public static readonly RULE_qualified_name = 1;
@@ -152,6 +153,7 @@ export default class PGLParser extends Parser {
                                                              "IDENTIFIER", 
                                                              "QUOTED_IDENTIFIER", 
                                                              "PARAM", "WS", 
+                                                             "LINE_COMMENT_QUERY", 
                                                              "LINE_COMMENT", 
                                                              "BLOCK_COMMENT" ];
 	// tslint:disable:no-trailing-whitespace
@@ -1664,7 +1666,7 @@ export default class PGLParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,46,299,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,47,299,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,
 	10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,
 	7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,

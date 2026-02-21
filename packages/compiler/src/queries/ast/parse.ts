@@ -36,6 +36,7 @@ export const parseAST = hostedQuery(
           },
         ],
         success: false,
+        markers: [],
       };
     }
 

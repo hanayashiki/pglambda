@@ -9,9 +9,11 @@ import {
 import type { TextContent } from "@pglambda/utils";
 import md5 from "md5";
 import { CollectingErrorListener } from "./error-listener.js";
-import type { ParseResult } from "./types.js";
+import type { ParseResult, ResolvedMarker } from "./types.js";
 import type { ContentHash } from "@pglambda/antlr/antlr4";
 import type { AstStore } from "#ast-store.js";
+import { extractMarkersFromToken } from "./query-markers.js";
+import { resolveNodeAtPosition } from "./ast-lookup.js";
 
 class ContentHashListener extends PGLParserListener {
   constructor(
@@ -62,7 +64,21 @@ export function parseContent(
     const parseTree = parser.prog();
     const errors = errorListener.getErrors();
 
-    return { uri, parseTree, errors, success: errors.length === 0 };
+    // Collect query markers from QUERY_MARKER channel tokens
+    tokenStream.fill();
+    const markers: ResolvedMarker[] = [];
+    for (const token of tokenStream.tokens) {
+      if (token.channel === PGLLexer.QUERY_MARKER) {
+        for (const qm of extractMarkersFromToken(token)) {
+          markers.push({
+            label: qm.label,
+            node: resolveNodeAtPosition(parseTree, qm.line, qm.column),
+          });
+        }
+      }
+    }
+
+    return { uri, parseTree, errors, markers, success: errors.length === 0 };
   } catch (error) {
     return {
       uri,
@@ -75,6 +91,7 @@ export function parseContent(
           recovered: false,
         },
       ],
+      markers: [],
       success: false,
     };
   }

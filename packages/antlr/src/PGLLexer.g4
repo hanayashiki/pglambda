@@ -4,6 +4,8 @@ options {
 	caseInsensitive = true;
 }
 
+channels { QUERY_MARKER }
+
 // DSL keywords
 KW_QUERY: 'query';
 KW_TYPE: 'type';
@@ -63,5 +65,6 @@ PARAM: '$' [a-z_] [a-z_0-9]*;
 
 // Whitespace & comments
 WS: [ \t\r\n]+ -> skip;
+LINE_COMMENT_QUERY: '--' [ \t]* '^' ~[\r\n]* -> channel(QUERY_MARKER);
 LINE_COMMENT: '--' ~[\r\n]* -> skip;
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
