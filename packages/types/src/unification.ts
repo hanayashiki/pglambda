@@ -207,51 +207,120 @@ export class Unification {
       case "record": {
         const t2r = t2 as RecordType;
 
-        // Collect all fields from both records
-        const fields1 = new Set(Object.keys(t1.fields));
-        const fields2 = new Set(Object.keys(t2r.fields));
-        const allFields = new Set([...fields1, ...fields2]);
+        // Step 1: Partition fields into common and extras
+        const fields1 = Object.keys(t1.fields);
+        const fields2 = Object.keys(t2r.fields);
+        const fieldSet1 = new Set(fields1);
+        const fieldSet2 = new Set(fields2);
 
-        // CASE 1: Both closed → exact match required
-        if (t1.rest === null && t2r.rest === null) {
-          if (fields1.size !== fields2.size) {
+        const commonFields = fields1.filter((f) => fieldSet2.has(f));
+        const onlyInT1 = fields1.filter((f) => !fieldSet2.has(f));
+        const onlyInT2 = fields2.filter((f) => !fieldSet1.has(f));
+
+        // Step 2: Unify all common fields
+        for (const field of commonFields) {
+          this.unify(t1.fields[field], t2r.fields[field]);
+        }
+
+        // Step 3: Handle extra fields based on rest status
+        const hasExtraInT1 = onlyInT1.length > 0;
+        const hasExtraInT2 = onlyInT2.length > 0;
+
+        if (!hasExtraInT1 && !hasExtraInT2) {
+          // CASE: No extra fields - same field sets
+          if (t1.rest && t2r.rest) {
+            // Both open - unify rest variables
+            this.unify(t1.rest, t2r.rest);
+          } else if (t1.rest && !t2r.rest) {
+            // t1 open, t2 closed - bind t1.rest to empty closed record
+            this.unify(t1.rest, this.typeStore.record({}));
+          } else if (!t1.rest && t2r.rest) {
+            // t2 open, t1 closed - bind t2.rest to empty closed record
+            this.unify(t2r.rest, this.typeStore.record({}));
+          }
+          // Both closed with same fields - OK, nothing to do
+        } else if (hasExtraInT1 && !hasExtraInT2) {
+          // CASE: Extra fields only in t1
+          if (!t2r.rest) {
+            // t2 is closed but t1 has extra fields → error
             this.errors.push({
               errorKind: "field_mismatch",
-              message: `Record field mismatch: {${[...fields1].sort().join(", ")}} vs {${[...fields2].sort().join(", ")}}`,
+              message: `Fields [${onlyInT1.join(", ")}] in left record but not in closed right record`,
             });
             return;
           }
-        }
-
-        // CASE 4: Both open → unify rest variables
-        if (t1.rest !== null && t2r.rest !== null) {
-          this.unify(t1.rest, t2r.rest);
-        }
-
-        // Unify all fields
-        for (const field of allFields) {
-          const ft1 = t1.fields[field];
-          const ft2 = t2r.fields[field];
-
-          if (ft1 && ft2) {
-            // Common field - unify types
-            this.unify(ft1, ft2);
-          } else if (ft1 && t2r.rest !== null) {
-            // Field only in t1, but t2 is open
-            // Create a record with this field and unify with t2.rest
-            const singleField = this.typeStore.record({ [field]: ft1 });
-            this.unify(t2r.rest, singleField);
-          } else if (ft2 && t1.rest !== null) {
-            // Field only in t2, but t1 is open
-            const singleField = this.typeStore.record({ [field]: ft2 });
-            this.unify(t1.rest, singleField);
-          } else {
-            // Field exists in only one record, and the other is closed
+          // t2 is open - bind t2.rest to record with ALL extras from t1
+          const extraFields: Record<string, Type> = {};
+          for (const field of onlyInT1) {
+            extraFields[field] = t1.fields[field];
+          }
+          this.unify(t2r.rest, this.typeStore.record(extraFields, t1.rest));
+        } else if (!hasExtraInT1 && hasExtraInT2) {
+          // CASE: Extra fields only in t2
+          if (!t1.rest) {
+            // t1 is closed but t2 has extra fields → error
             this.errors.push({
               errorKind: "field_mismatch",
-              message: `Field '${field}' missing in one of the records`,
+              message: `Fields [${onlyInT2.join(", ")}] in right record but not in closed left record`,
             });
             return;
+          }
+          // t1 is open - bind t1.rest to record with ALL extras from t2
+          const extraFields: Record<string, Type> = {};
+          for (const field of onlyInT2) {
+            extraFields[field] = t2r.fields[field];
+          }
+          this.unify(t1.rest, this.typeStore.record(extraFields, t2r.rest));
+        } else {
+          // CASE: Extra fields on BOTH sides
+          if (!t1.rest && !t2r.rest) {
+            // Both closed with different fields → error
+            this.errors.push({
+              errorKind: "field_mismatch",
+              message: `Record field mismatch - left extra: [${onlyInT1.join(", ")}], right extra: [${onlyInT2.join(", ")}]`,
+            });
+            return;
+          } else if (t1.rest && !t2r.rest) {
+            // t1 open but t2 closed with different fields → error
+            this.errors.push({
+              errorKind: "field_mismatch",
+              message: `Cannot unify open record with closed record having different fields`,
+            });
+            return;
+          } else if (!t1.rest && t2r.rest) {
+            // t2 open but t1 closed with different fields → error
+            this.errors.push({
+              errorKind: "field_mismatch",
+              message: `Cannot unify closed record with open record having different fields`,
+            });
+            return;
+          } else {
+            // Both open with different fields - use fresh rest variable
+            const freshRest = this.typeStore.typevar();
+
+            // Build record for t1.rest: contains t2's extra fields + fresh rest
+            const extraForT1: Record<string, Type> = {};
+            for (const field of onlyInT2) {
+              extraForT1[field] = t2r.fields[field];
+            }
+            const recordForT1Rest = this.typeStore.record(
+              extraForT1,
+              freshRest,
+            );
+
+            // Build record for t2.rest: contains t1's extra fields + fresh rest
+            const extraForT2: Record<string, Type> = {};
+            for (const field of onlyInT1) {
+              extraForT2[field] = t1.fields[field];
+            }
+            const recordForT2Rest = this.typeStore.record(
+              extraForT2,
+              freshRest,
+            );
+
+            // Unify both rest variables (both must be non-null in this branch)
+            this.unify(t1.rest!, recordForT1Rest);
+            this.unify(t2r.rest!, recordForT2Rest);
           }
         }
 
