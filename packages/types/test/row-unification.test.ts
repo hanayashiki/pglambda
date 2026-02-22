@@ -342,23 +342,19 @@ describe("Row Polymorphism Unification", () => {
       // f1 = {id: id2 | rho2} (from f1().id access)
       u.unify(f1, store.record({ id: id2 }, rho2));
 
-      // f1 = f2 (mutual recursion constraint)
-      u.unify(f1, f2);
+      // f1 = id1 (f1's return type is f2's id field type)
+      u.unify(f1, id1);
+
+      // f2 = id2 (f2's return type is f1's id field type)
+      u.unify(f2, id2);
 
       const result = u.getResult();
-      expect(result.errors).toHaveLength(0);
 
-      // Both f1 and f2 should resolve to records
-      const resolvedF1 = u.resolve(f1);
-      const resolvedF2 = u.resolve(f2);
-      expect(resolvedF1.kind).toBe("record");
-      expect(resolvedF2.kind).toBe("record");
-
-      // id1 and id2 should unify
-      expect(u.resolve(id1)).toBe(u.resolve(id2));
-
-      // rho1 and rho2 should unify
-      expect(u.resolve(rho1)).toBe(u.resolve(rho2));
+      // This should trigger occurs check error!
+      // id1 = {id: id2 | rho2} and id2 = {id: id1 | rho1}
+      // Substituting: id1 = {id: {id: id1 | rho1} | rho2} → infinite type
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].errorKind).toBe("occurs_check");
     });
 
     test("deeply nested row unification", () => {
