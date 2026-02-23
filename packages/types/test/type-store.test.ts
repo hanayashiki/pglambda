@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
 import type { TypeConstructorId } from "../src/type.ts";
-import { typeToString } from "../src/utils.ts";
 
 describe("TypeStore", () => {
   let store: TypeStore;
@@ -432,7 +431,7 @@ describe("TypeStore", () => {
       const rec = store.record({ id: store.primitive("int"), name: store.primitive("text") });
       const applied = store.apply(setOfCtorId, [rec]);
       expect(applied.kind).toBe("applied");
-      expect(typeToString(applied, store)).toBe("SetOf<{id: int, name: text}>");
+      expect(store.typeToString(applied)).toBe("SetOf<{id: int, name: text}>");
     });
 
     test("applied types copy arguments array to prevent mutation", () => {
@@ -445,7 +444,7 @@ describe("TypeStore", () => {
       args[0] = rec2;
 
       // Applied type should not be affected
-      expect(typeToString(applied, store)).toBe("SetOf<{id: int}>");
+      expect(store.typeToString(applied)).toBe("SetOf<{id: int}>");
     });
 
     test("getAs retrieves applied type by id", () => {

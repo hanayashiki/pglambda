@@ -9,7 +9,6 @@ import type {
   TypeId,
 } from "./type";
 import type { TypeStore } from "./type-store";
-import { typeToString } from "./utils";
 
 type Binding = {
   type: Type;
@@ -166,7 +165,7 @@ export class Unification {
       if (this.occursIn(t1.id, t2)) {
         this.errors.push({
           errorKind: "occurs_check",
-          message: `Cannot construct infinite type: ${t1.name} = ${typeToString(t2)}`,
+          message: `Cannot construct infinite type: ${t1.name} = ${this.typeStore.typeToString(t2)}`,
         });
         return;
       }
@@ -179,7 +178,7 @@ export class Unification {
       if (this.occursIn(t2.id, t1)) {
         this.errors.push({
           errorKind: "occurs_check",
-          message: `Cannot construct infinite type: ${t2.name} = ${typeToString(t1)}`,
+          message: `Cannot construct infinite type: ${t2.name} = ${this.typeStore.typeToString(t1)}`,
         });
         return;
       }
@@ -191,7 +190,7 @@ export class Unification {
     if (t1.kind !== t2.kind) {
       this.errors.push({
         errorKind: "kind_mismatch",
-        message: `Cannot unify ${typeToString(t1)} with ${typeToString(t2)}`,
+        message: `Cannot unify ${this.typeStore.typeToString(t1)} with ${this.typeStore.typeToString(t2)}`,
       });
       return;
     }
@@ -349,7 +348,7 @@ export class Unification {
         if (t1.constructorId !== t2a.constructorId) {
           this.errors.push({
             errorKind: "kind_mismatch",
-            message: `Cannot unify ${typeToString(t1)} with ${typeToString(t2)}`,
+            message: `Cannot unify ${this.typeStore.typeToString(t1)} with ${this.typeStore.typeToString(t2)}`,
           });
           return;
         }

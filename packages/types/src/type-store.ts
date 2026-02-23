@@ -255,6 +255,67 @@ export class TypeStore {
   }
 
   /**
+   * Convert a type to a human-readable string representation
+   *
+   * @example
+   * store.typeToString(int) // "int"
+   * store.typeToString(array(int)) // "int[]"
+   * store.typeToString(appliedType) // "SetOf<{col: int}>"
+   */
+  typeToString(type: Type): string {
+    switch (type.kind) {
+      case "primitive":
+        return type.name;
+
+      case "typevar":
+        return type.name;
+
+      case "array":
+        return `${this.typeToString(type.elementType)}[]`;
+
+      case "record": {
+        const fields = Object.entries(type.fields)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(
+            ([name, fieldType]) =>
+              `${name}: ${this.typeToString(fieldType)}`,
+          )
+          .join(", ");
+
+        if (type.rest === null) {
+          return `{${fields}}`;
+        } else {
+          const restStr = this.typeToString(type.rest);
+          return fields.length > 0
+            ? `{${fields} | ${restStr}}`
+            : `{${restStr}}`;
+        }
+      }
+
+      case "nullable":
+        return `${this.typeToString(type.innerType)} | null`;
+
+      case "applied": {
+        const argStrs = type.arguments
+          .map((t) => this.typeToString(t))
+          .join(", ");
+        const ctor = this.ctors.get(type.constructorId);
+        return `${ctor.name}<${argStrs}>`;
+      }
+
+      case "error":
+        return `<error: ${type.message}>`;
+
+      default: {
+        const exhaustive: never = type;
+        throw new Error(
+          `Unhandled type kind: ${JSON.stringify(exhaustive)}`,
+        );
+      }
+    }
+  }
+
+  /**
    * Apply a type constructor to type arguments
    * Validates arity and creates an AppliedType
    *

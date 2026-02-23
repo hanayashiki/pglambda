@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
 import { Unification } from "../src/unification.ts";
-import { typeToString } from "../src/utils.ts";
 
 describe("Row Polymorphism Unification", () => {
   let store: TypeStore;
@@ -239,8 +238,8 @@ describe("Row Polymorphism Unification", () => {
       expect(result.errors).toHaveLength(0);
 
       // ρ₁ should contain field c, ρ₂ should contain field b
-      expect(typeToString(u.resolve(rho1))).toBe("{c: bool | T7}");
-      expect(typeToString(u.resolve(rho2))).toBe("{b: text | T7}");
+      expect(store.typeToString(u.resolve(rho1))).toBe("{c: bool | T7}");
+      expect(store.typeToString(u.resolve(rho2))).toBe("{b: text | T7}");
     });
   });
 
@@ -413,7 +412,7 @@ describe("Row Polymorphism Unification", () => {
 
       // Deep resolve preserves row structure: {id: int | {name: text, active: bool | {created_at: int}}}
       const fullyResolved = u.deepResolve(open);
-      expect(typeToString(fullyResolved)).toBe(
+      expect(store.typeToString(fullyResolved)).toBe(
         "{id: int | {active: bool, name: text | {created_at: int}}}",
       );
 

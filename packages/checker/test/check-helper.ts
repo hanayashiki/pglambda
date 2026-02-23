@@ -1,6 +1,6 @@
 import { parseContent, AstStore } from "@pglambda/parser";
 import type { FileUri } from "@pglambda/utils";
-import { TypeStore, typeToString } from "@pglambda/types";
+import { TypeStore } from "@pglambda/types";
 import { CheckContext } from "../src/check-context.js";
 import type { SCCIn } from "../src/scc.js";
 
@@ -44,7 +44,7 @@ export function checkAndExtractMarkers(source: string, filename = "test.pgl"): s
     .filter((m) => m.node !== null)
     .map((m) => {
       const type = result.scc.exports.get(m.node!.contentHash);
-      const typeStr = type ? typeToString(type, store) : "<unresolved>";
+      const typeStr = type ? store.typeToString(type) : "<unresolved>";
       return { label: m.label, typeStr };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
