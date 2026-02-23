@@ -1,15 +1,22 @@
 import type { Type } from './type.ts';
+import type { TypeStore } from './type-store.ts';
 
 /**
  * Convert a type to a human-readable string representation
  *
+ * @param type The type to convert
+ * @param store Optional TypeStore for looking up constructor names
+ *
+ * TODO: make typeToString a method on TypeStore
+ * 
  * @example
  * typeToString(int) // "int"
  * typeToString(array(int)) // "int[]"
  * typeToString(nullable(text)) // "text | null"
  * typeToString(error("msg")) // "<error: msg>"
+ * typeToString(appliedType, store) // "SetOf<{col: int}>"
  */
-export function typeToString(type: Type): string {
+export function typeToString(type: Type, store?: TypeStore): string {
   switch (type.kind) {
     case 'primitive':
       return type.name;
@@ -18,12 +25,12 @@ export function typeToString(type: Type): string {
       return type.name;
 
     case 'array':
-      return `${typeToString(type.elementType)}[]`;
+      return `${typeToString(type.elementType, store)}[]`;
 
     case 'record': {
       const fields = Object.entries(type.fields)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([name, fieldType]) => `${name}: ${typeToString(fieldType)}`)
+        .map(([name, fieldType]) => `${name}: ${typeToString(fieldType, store)}`)
         .join(', ');
 
       if (type.rest === null) {
@@ -31,7 +38,7 @@ export function typeToString(type: Type): string {
         return `{${fields}}`;
       } else {
         // Open record with rest type
-        const restStr = typeToString(type.rest);
+        const restStr = typeToString(type.rest, store);
         return fields.length > 0
           ? `{${fields} | ${restStr}}`
           : `{${restStr}}`;
@@ -39,10 +46,24 @@ export function typeToString(type: Type): string {
     }
 
     case 'nullable':
-      return `${typeToString(type.innerType)} | null`;
+      return `${typeToString(type.innerType, store)} | null`;
+
+    case 'applied': {
+      const argStrs = type.arguments.map((t) => typeToString(t, store)).join(', ');
+      if (store) {
+        const ctor = store.ctors.get(type.constructorId);
+        return `${ctor.name}<${argStrs}>`;
+      }
+      return `<ctor#${type.constructorId}><${argStrs}>`;
+    }
 
     case 'error':
       return `<error: ${type.message}>`;
+
+    default: {
+      const exhaustive: never = type;
+      throw new Error(`Unhandled type kind: ${JSON.stringify(exhaustive)}`);
+    }
   }
 }
 
@@ -82,6 +103,7 @@ export interface TypeVisitor<R> {
   visitArray?(type: Extract<Type, { kind: 'array' }>): R;
   visitRecord?(type: Extract<Type, { kind: 'record' }>): R;
   visitNullable?(type: Extract<Type, { kind: 'nullable' }>): R;
+  visitApplied?(type: Extract<Type, { kind: 'applied' }>): R;
   visitError?(type: Extract<Type, { kind: 'error' }>): R;
 }
 
@@ -107,6 +129,8 @@ export function visitType<R>(type: Type, visitor: TypeVisitor<R>): R | undefined
       return visitor.visitRecord?.(type);
     case 'nullable':
       return visitor.visitNullable?.(type);
+    case 'applied':
+      return visitor.visitApplied?.(type);
     case 'error':
       return visitor.visitError?.(type);
   }

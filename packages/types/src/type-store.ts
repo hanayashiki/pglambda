@@ -7,10 +7,13 @@ import type {
   RecordType,
   NullableType,
   ErrorType,
+  AppliedType,
   SourceLocation,
   TypeKind,
+  TypeConstructorId,
 } from "./type.ts";
 import type { PrimitiveName } from "./primitives.ts";
+import { TypeConstructorStore } from "./type-constructor-store.js";
 
 type CacheKey = string & { __brand: "CacheKey" };
 
@@ -26,8 +29,18 @@ type CacheKey = string & { __brand: "CacheKey" };
 export class TypeStore {
   private nextId = 0; // Internal counter (regular number)
 
-  private typeCache = new Map<string, Type>();
+  private typeCache = new Map<CacheKey, Type>();
   private typeById = new Map<TypeId, Type>();
+  private typeCtorStore = new TypeConstructorStore();
+
+  constructor() {}
+
+  /**
+   * Get the type constructor store
+   */
+  get ctors(): TypeConstructorStore {
+    return this.typeCtorStore;
+  }
 
   /**
    * Generate a fresh type ID
@@ -43,10 +56,7 @@ export class TypeStore {
    * @throws Error if type not found or kind doesn't match
    * @returns The type with the specified ID and kind
    */
-  getAs<K extends TypeKind>(
-    id: TypeId,
-    kind: K,
-  ): Extract<Type, { kind: K }> {
+  getAs<K extends TypeKind>(id: TypeId, kind: K): Extract<Type, { kind: K }> {
     const type = this.typeById.get(id);
     if (!type) {
       throw new Error(`Type with ID ${id} not found`);
@@ -105,10 +115,12 @@ export class TypeStore {
         return `array:${type.elementType.id}` as CacheKey;
 
       case "record": {
-        const fieldEntries = Object.entries(type.fields).sort(
-          ([a], [b]) => a.localeCompare(b),
+        const fieldEntries = Object.entries(type.fields).sort(([a], [b]) =>
+          a.localeCompare(b),
         );
-        const fieldsKey = fieldEntries.map(([k, v]) => `${k}:${v.id}`).join(",");
+        const fieldsKey = fieldEntries
+          .map(([k, v]) => `${k}:${v.id}`)
+          .join(",");
         const restKey = type.rest ? `:rest:${type.rest.id}` : "";
         return `record:${fieldsKey}${restKey}` as CacheKey;
       }
@@ -118,6 +130,11 @@ export class TypeStore {
 
       case "error":
         return `error:${type.id}` as CacheKey;
+
+      case "applied": {
+        const argIds = type.arguments.map((arg) => arg.id).join(",");
+        return `applied:${type.constructorId}:${argIds}` as CacheKey;
+      }
     }
   }
 
@@ -234,6 +251,32 @@ export class TypeStore {
       kind: "error",
       message,
       location,
+    });
+  }
+
+  /**
+   * Apply a type constructor to type arguments
+   * Validates arity and creates an AppliedType
+   *
+   * @example
+   * const setOfCtor = store.ctors.lookup("SetOf");
+   * const recordType = store.record({ col: store.primitive("int") });
+   * const setType = store.apply(setOfCtor.id, [recordType]);
+   */
+  apply(ctorId: TypeConstructorId, args: Type[]): AppliedType {
+    const ctor = this.typeCtorStore.get(ctorId);
+
+    // Validate arity
+    if (args.length !== ctor.parameters.length) {
+      throw new Error(
+        `Type constructor '${ctor.name}' expects ${ctor.parameters.length} argument(s), got ${args.length}`,
+      );
+    }
+
+    return this.ensure<AppliedType>({
+      kind: "applied",
+      constructorId: ctorId,
+      arguments: [...args], // Copy to prevent external mutation
     });
   }
 }

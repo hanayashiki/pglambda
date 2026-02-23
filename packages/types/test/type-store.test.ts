@@ -1,5 +1,7 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
+import type { TypeConstructorId } from "../src/type.ts";
+import { typeToString } from "../src/utils.ts";
 
 describe("TypeStore", () => {
   let store: TypeStore;
@@ -372,6 +374,86 @@ describe("TypeStore", () => {
       const t2 = store.typevar();
 
       expect(t1.id).not.toBe(t2.id);
+    });
+  });
+
+  describe("applied types", () => {
+    let setOfCtorId: TypeConstructorId;
+
+    beforeEach(() => {
+      // Look up SetOf constructor by name
+      const setOfCtor = store.ctors.lookup("SetOf");
+      if (!setOfCtor) throw new Error("SetOf not registered");
+      setOfCtorId = setOfCtor.id;
+    });
+
+    test("same constructor + args returns same instance (===)", () => {
+      const recordType = store.record({ col: store.primitive("int") });
+      const applied1 = store.apply(setOfCtorId, [recordType]);
+      const applied2 = store.apply(setOfCtorId, [recordType]);
+      expect(applied1).toBe(applied2);
+      expect(applied1 === applied2).toBe(true);
+    });
+
+    test("different arguments produce different instances", () => {
+      const rec1 = store.record({ col: store.primitive("int") });
+      const rec2 = store.record({ col: store.primitive("text") });
+      const applied1 = store.apply(setOfCtorId, [rec1]);
+      const applied2 = store.apply(setOfCtorId, [rec2]);
+      expect(applied1).not.toBe(applied2);
+      expect(applied1 === applied2).toBe(false);
+    });
+
+    test("applied types with typevar arguments are unique if typevars differ", () => {
+      const t1 = store.typevar();
+      const t2 = store.typevar();
+      const rec1 = store.record({ col: t1 });
+      const rec2 = store.record({ col: t2 });
+      const applied1 = store.apply(setOfCtorId, [rec1]);
+      const applied2 = store.apply(setOfCtorId, [rec2]);
+      expect(applied1).not.toBe(applied2);
+    });
+
+    test("apply() validates arity", () => {
+      const int = store.primitive("int");
+      const text = store.primitive("text");
+      expect(() => {
+        store.apply(setOfCtorId, [int, text]); // SetOf takes 1 arg
+      }).toThrow(/expects 1 argument.*got 2/);
+    });
+
+    test("apply() throws for wrong number of arguments", () => {
+      expect(() => {
+        store.apply(setOfCtorId, []); // SetOf needs 1 arg
+      }).toThrow(/expects 1 argument.*got 0/);
+    });
+
+    test("applied types have correct properties", () => {
+      const rec = store.record({ id: store.primitive("int"), name: store.primitive("text") });
+      const applied = store.apply(setOfCtorId, [rec]);
+      expect(applied.kind).toBe("applied");
+      expect(typeToString(applied, store)).toBe("SetOf<{id: int, name: text}>");
+    });
+
+    test("applied types copy arguments array to prevent mutation", () => {
+      const rec1 = store.record({ id: store.primitive("int") });
+      const rec2 = store.record({ name: store.primitive("text") });
+      const args = [rec1];
+      const applied = store.apply(setOfCtorId, args);
+
+      // Mutate original array
+      args[0] = rec2;
+
+      // Applied type should not be affected
+      expect(typeToString(applied, store)).toBe("SetOf<{id: int}>");
+    });
+
+    test("getAs retrieves applied type by id", () => {
+      const rec = store.record({ id: store.primitive("int") });
+      const applied = store.apply(setOfCtorId, [rec]);
+      const retrieved = store.getAs(applied.id, "applied");
+      expect(retrieved).toBe(applied);
+      expect(retrieved === applied).toBe(true);
     });
   });
 });

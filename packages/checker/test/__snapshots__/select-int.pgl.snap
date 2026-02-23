@@ -1,1 +1,1 @@
-s: {col: int}[]
+s: SetOf<{col: int}>

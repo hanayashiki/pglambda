@@ -1,1 +1,1 @@
-s: {flag: bool}[]
+s: SetOf<{flag: bool}>

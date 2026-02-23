@@ -1,1 +1,1 @@
-s: {a: int, b: text}[]
+s: SetOf<{a: int, b: text}>

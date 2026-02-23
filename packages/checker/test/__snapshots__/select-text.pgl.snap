@@ -1,1 +1,1 @@
-q: {s: text}[]
+q: SetOf<{s: text}>

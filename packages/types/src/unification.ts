@@ -1,4 +1,5 @@
 import type {
+  AppliedType,
   ArrayType,
   NullableType,
   PrimitiveType,
@@ -88,6 +89,18 @@ export class Unification {
         if (rest !== type.rest) changed = true;
         return changed ? this.typeStore.record(fields, rest) : type;
       }
+      case "applied": {
+        let changed = false;
+        const resolvedArgs: Type[] = [];
+        for (const arg of type.arguments) {
+          const resolved = this.deepResolve(arg);
+          if (resolved !== arg) changed = true;
+          resolvedArgs.push(resolved);
+        }
+        return changed
+          ? this.typeStore.apply(type.constructorId, resolvedArgs)
+          : type;
+      }
       default:
         throw new Error(`${JSON.stringify(type)} is not resolved`);
     }
@@ -115,6 +128,8 @@ export class Unification {
           : false;
         return fieldOccurs || restOccurs;
       }
+      case "applied":
+        return type.arguments.some((arg) => this.occursIn(typeVarId, arg));
       case "primitive":
       case "error":
         return false;
@@ -324,6 +339,34 @@ export class Unification {
           }
         }
 
+        return;
+      }
+
+      case "applied": {
+        const t2a = t2 as AppliedType;
+
+        // Constructors must match
+        if (t1.constructorId !== t2a.constructorId) {
+          this.errors.push({
+            errorKind: "kind_mismatch",
+            message: `Cannot unify ${typeToString(t1)} with ${typeToString(t2)}`,
+          });
+          return;
+        }
+
+        // Arity check (should always pass by construction, but defensive)
+        if (t1.arguments.length !== t2a.arguments.length) {
+          this.errors.push({
+            errorKind: "kind_mismatch",
+            message: `Applied type argument count mismatch`,
+          });
+          return;
+        }
+
+        // Unify arguments pointwise
+        for (let i = 0; i < t1.arguments.length; i++) {
+          this.unify(t1.arguments[i], t2a.arguments[i]);
+        }
         return;
       }
     }

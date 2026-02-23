@@ -1,4 +1,10 @@
-import { Unification, type Type, type TypeStore } from "@pglambda/types";
+import {
+  Unification,
+  type Type,
+  type TypeStore,
+  type TypeConstructorId,
+  type AppliedType,
+} from "@pglambda/types";
 import type { EqualityConstraint } from "./constraint.js";
 import type { AstStore } from "@pglambda/parser";
 import type { ContentHash, SCC, SCCIn } from "./scc.js";
@@ -26,6 +32,7 @@ export class CheckContext {
 
   private constraints: EqualityConstraint[] = [];
   private unification: Unification;
+  private readonly setOfCtorId: TypeConstructorId;
 
   constructor(
     private sccIn: SCCIn,
@@ -34,6 +41,13 @@ export class CheckContext {
   ) {
     this.unification = new Unification(store);
     this.astToType = new Map();
+
+    // Look up SetOf constructor
+    const setOfCtor = store.ctors.lookup("SetOf");
+    if (!setOfCtor) {
+      throw new Error("SetOf type constructor not registered");
+    }
+    this.setOfCtorId = setOfCtor.id;
   }
 
   get typeStore(): TypeStore {
@@ -46,6 +60,14 @@ export class CheckContext {
 
   addError(message: string): void {
     this.errors.push({ message });
+  }
+
+  /**
+   * Helper method for creating SetOf types
+   * TODO: create a type safe version.
+   */
+  setOf(rowType: Type): AppliedType {
+    return this.store.apply(this.setOfCtorId, [rowType]);
   }
 
   /** Collect all constraints from AST and solve the types. */

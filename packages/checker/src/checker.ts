@@ -221,7 +221,7 @@ export class Checker
         }
       }
 
-      return this.typeStore.array(this.typeStore.record(fields)); // TODO: use set type
+      return this.ctx.setOf(this.typeStore.record(fields));
     });
 
   // --- Program structure visitors ---

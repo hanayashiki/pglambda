@@ -44,7 +44,7 @@ export function checkAndExtractMarkers(source: string, filename = "test.pgl"): s
     .filter((m) => m.node !== null)
     .map((m) => {
       const type = result.scc.exports.get(m.node!.contentHash);
-      const typeStr = type ? typeToString(type) : "<unresolved>";
+      const typeStr = type ? typeToString(type, store) : "<unresolved>";
       return { label: m.label, typeStr };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
