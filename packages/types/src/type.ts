@@ -17,11 +17,7 @@ export type TypeConstructorId = number & {
 };
 
 /**
- * Type constructor definition
- * Represents a type-level function that takes type arguments.
- *
- * @example
- * SetOf<{ col: int }>
+ * @see 02_GENERIC_TYPES.md#type-constructor
  */
 export interface TypeConstructor {
   readonly id: TypeConstructorId;
@@ -33,6 +29,20 @@ export type TypeConstructorCreate = Pick<
   TypeConstructor,
   "name" | "parameters"
 >;
+
+export type TypeSchemeId = number & {
+  readonly __brand: "TypeSchemeId";
+};
+
+/**
+ * @see 02_GENERIC_TYPES.md#type-scheme
+ */
+export interface TypeScheme {
+  readonly id: TypeSchemeId;
+  readonly name: string;
+  readonly parameters: string[];
+  readonly body: Type;
+}
 
 /**
  * Primitive type (int, text, bool, etc.)
@@ -113,6 +123,54 @@ export interface AppliedType {
 }
 
 /**
+ * Function type (param1: T1, param2: T2, ...) => R
+ *
+ * Parameters are ordered. Parameter names are purely descriptive
+ * (for display and codegen) and do not participate in unification.
+ * Two function types unify if their parameter types match positionally
+ * and their return types match.
+ */
+export interface FunctionType {
+  readonly kind: "function";
+  readonly id: TypeId;
+  readonly parameters: readonly string[];
+  readonly parameterTypes: readonly Type[];
+  readonly returnType: Type;
+}
+
+/**
+ * Type parameter reference, scoped to a specific TypeScheme.
+ *
+ * ParamType is a constant in unification — it only unifies with the exact
+ * same ParamType (matching both schemeId and index). Unifying a ParamType
+ * with a different ParamType or a concrete type is a type error.
+ * TypeVariables CAN be bound to ParamType through unification.
+ *
+ * During body checking of a generic definition, declared type parameters
+ * are represented directly as ParamType (not as TypeVariables). This means:
+ * - The body must be valid for ALL instantiations of the type parameters
+ * - No generalization step is needed — the scheme is constructed directly
+ *   from the body's result type, which already contains ParamType nodes
+ *
+ * At call sites, ParamType nodes in a scheme's body are replaced with
+ * fresh TypeVariables during instantiation.
+ */
+export interface ParamType {
+  readonly kind: "param";
+  readonly id: TypeId;
+  /**
+   * Which TypeScheme this parameter belongs to.
+   * Two ParamTypes with the same index but different schemeIds
+   * are different types and will not unify.
+   */
+  readonly schemeId: TypeSchemeId;
+  /**
+   * 0-based index into the TypeScheme's parameter list.
+   */
+  readonly index: number;
+}
+
+/**
  * Base type representing all types in the pglambda type system
  */
 export type Type =
@@ -122,7 +180,9 @@ export type Type =
   | RecordType
   | NullableType
   | ErrorType
-  | AppliedType;
+  | AppliedType
+  | FunctionType
+  | ParamType;
 
 export type TypeKind = Type["kind"];
 
@@ -154,4 +214,12 @@ export function isError(type: Type): type is ErrorType {
 
 export function isAppliedType(type: Type): type is AppliedType {
   return type.kind === "applied";
+}
+
+export function isFunction(type: Type): type is FunctionType {
+  return type.kind === "function";
+}
+
+export function isParam(type: Type): type is ParamType {
+  return type.kind === "param";
 }

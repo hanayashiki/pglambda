@@ -1,7 +1,11 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
 import { Unification } from "../src/unification.ts";
-import type { TypeConstructorId, AppliedType } from "../src/type.ts";
+import type {
+  TypeConstructorId,
+  TypeSchemeId,
+  AppliedType,
+} from "../src/type.ts";
 
 describe("Unification", () => {
   let store: TypeStore;
@@ -71,6 +75,127 @@ describe("Unification", () => {
     const result = u.getResult();
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0].errorKind).toBe("field_mismatch");
+  });
+
+  describe("function type unification", () => {
+    test("unifies matching function types", () => {
+      const int = store.primitive("int");
+      const text = store.primitive("text");
+      const fn1 = store.fn(["x"], [int], text);
+      const fn2 = store.fn(["y"], [int], text);
+
+      u.unify(fn1, fn2);
+      expect(u.getResult().errors).toHaveLength(0);
+    });
+
+    test("infers through function parameter types", () => {
+      const alpha = store.typevar("alpha");
+      const int = store.primitive("int");
+      const text = store.primitive("text");
+      const fn1 = store.fn(["x"], [alpha], text);
+      const fn2 = store.fn(["x"], [int], text);
+
+      u.unify(fn1, fn2);
+      expect(u.getResult().errors).toHaveLength(0);
+      expect(u.resolve(alpha)).toBe(int);
+    });
+
+    test("infers through function return type", () => {
+      const alpha = store.typevar("alpha");
+      const int = store.primitive("int");
+      const fn1 = store.fn(["x"], [int], alpha);
+      const fn2 = store.fn(["x"], [int], int);
+
+      u.unify(fn1, fn2);
+      expect(u.getResult().errors).toHaveLength(0);
+      expect(u.resolve(alpha)).toBe(int);
+    });
+
+    test("arity mismatch is an error", () => {
+      const int = store.primitive("int");
+      const fn1 = store.fn(["x"], [int], int);
+      const fn2 = store.fn(["x", "y"], [int, int], int);
+
+      u.unify(fn1, fn2);
+      expect(u.getResult().errors).toHaveLength(1);
+      expect(u.getResult().errors[0].errorKind).toBe("kind_mismatch");
+    });
+
+    test("parameter type mismatch is an error", () => {
+      const int = store.primitive("int");
+      const text = store.primitive("text");
+      const fn1 = store.fn(["x"], [int], int);
+      const fn2 = store.fn(["x"], [text], int);
+
+      u.unify(fn1, fn2);
+      expect(u.getResult().errors).toHaveLength(1);
+    });
+  });
+
+  describe("param type unification", () => {
+    const s1 = 0 as TypeSchemeId;
+    const s2 = 1 as TypeSchemeId;
+
+    test("same ParamType unifies with itself", () => {
+      const p = store.param(s1, 0);
+      u.unify(p, p);
+      expect(u.getResult().errors).toHaveLength(0);
+    });
+
+    test("different index is an error", () => {
+      const p0 = store.param(s1, 0);
+      const p1 = store.param(s1, 1);
+      u.unify(p0, p1);
+      expect(u.getResult().errors).toHaveLength(1);
+      expect(u.getResult().errors[0].errorKind).toBe("kind_mismatch");
+    });
+
+    test("different schemeId is an error", () => {
+      const pa = store.param(s1, 0);
+      const pb = store.param(s2, 0);
+      u.unify(pa, pb);
+      expect(u.getResult().errors).toHaveLength(1);
+      expect(u.getResult().errors[0].errorKind).toBe("kind_mismatch");
+    });
+
+    test("typevar binds to ParamType", () => {
+      const alpha = store.typevar("alpha");
+      const p = store.param(s1, 0);
+      u.unify(alpha, p);
+      expect(u.getResult().errors).toHaveLength(0);
+      expect(u.resolve(alpha)).toBe(p);
+    });
+
+    test("ParamType vs concrete type is an error", () => {
+      const p = store.param(s1, 0);
+      const int = store.primitive("int");
+      u.unify(p, int);
+      expect(u.getResult().errors).toHaveLength(1);
+      expect(u.getResult().errors[0].errorKind).toBe("kind_mismatch");
+    });
+
+    test("deepResolve passes through ParamType", () => {
+      const p = store.param(s1, 0);
+      const int = store.primitive("int");
+      const fnType = store.fn(["x"], [p], int);
+      const resolved = u.deepResolve(fnType);
+      expect(resolved).toBe(fnType);
+    });
+
+    test("deepResolve resolves typevar bound to ParamType", () => {
+      const alpha = store.typevar("alpha");
+      const p = store.param(s1, 0);
+      const int = store.primitive("int");
+      u.unify(alpha, p);
+
+      const fnType = store.fn(["x"], [alpha], int);
+      const resolved = u.deepResolve(fnType);
+      expect(resolved).not.toBe(fnType);
+      expect(resolved.kind).toBe("function");
+      if (resolved.kind === "function") {
+        expect(resolved.parameterTypes[0]).toBe(p);
+      }
+    });
   });
 
   // Note: Row polymorphism tests are in row-unification.test.ts

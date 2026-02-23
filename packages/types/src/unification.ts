@@ -1,7 +1,9 @@
 import type {
   AppliedType,
   ArrayType,
+  FunctionType,
   NullableType,
+  ParamType,
   PrimitiveType,
   RecordType,
   SourceLocation,
@@ -100,8 +102,22 @@ export class Unification {
           ? this.typeStore.apply(type.constructorId, resolvedArgs)
           : type;
       }
-      default:
-        throw new Error(`${JSON.stringify(type)} is not resolved`);
+      case "function": {
+        let changed = false;
+        const resolvedParams: Type[] = [];
+        for (const param of type.parameterTypes) {
+          const resolved = this.deepResolve(param);
+          if (resolved !== param) changed = true;
+          resolvedParams.push(resolved);
+        }
+        const resolvedReturn = this.deepResolve(type.returnType);
+        if (resolvedReturn !== type.returnType) changed = true;
+        return changed
+          ? this.typeStore.fn(type.parameters, resolvedParams, resolvedReturn)
+          : type;
+      }
+      case "param":
+        return type;
     }
   }
 
@@ -129,8 +145,15 @@ export class Unification {
       }
       case "applied":
         return type.arguments.some((arg) => this.occursIn(typeVarId, arg));
+      case "function":
+        return (
+          type.parameterTypes.some((p) => this.occursIn(typeVarId, p)) ||
+          this.occursIn(typeVarId, type.returnType)
+        );
       case "primitive":
       case "error":
+        return false;
+      case "param":
         return false;
     }
   }
@@ -365,6 +388,39 @@ export class Unification {
         // Unify arguments pointwise
         for (let i = 0; i < t1.arguments.length; i++) {
           this.unify(t1.arguments[i], t2a.arguments[i]);
+        }
+        return;
+      }
+
+      case "function": {
+        const t2f = t2 as FunctionType;
+
+        // Arity must match
+        if (t1.parameterTypes.length !== t2f.parameterTypes.length) {
+          this.errors.push({
+            errorKind: "kind_mismatch",
+            message: `Cannot unify functions with different arities: ${this.typeStore.typeToString(t1)} vs ${this.typeStore.typeToString(t2)}`,
+          });
+          return;
+        }
+
+        // Unify parameter types pointwise
+        for (let i = 0; i < t1.parameterTypes.length; i++) {
+          this.unify(t1.parameterTypes[i], t2f.parameterTypes[i]);
+        }
+
+        // Unify return types
+        this.unify(t1.returnType, t2f.returnType);
+        return;
+      }
+
+      case "param": {
+        const t2p = t2 as ParamType;
+        if (t1.schemeId !== t2p.schemeId || t1.index !== t2p.index) {
+          this.errors.push({
+            errorKind: "kind_mismatch",
+            message: `Cannot unify type parameter ${this.typeStore.typeToString(t1)} with ${this.typeStore.typeToString(t2)}`,
+          });
         }
         return;
       }

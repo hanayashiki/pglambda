@@ -8,9 +8,12 @@ import type {
   NullableType,
   ErrorType,
   AppliedType,
+  FunctionType,
+  ParamType,
   SourceLocation,
   TypeKind,
   TypeConstructorId,
+  TypeSchemeId,
 } from "./type.ts";
 import type { PrimitiveName } from "./primitives.ts";
 import { TypeConstructorStore } from "./type-constructor-store.js";
@@ -135,6 +138,16 @@ export class TypeStore {
         const argIds = type.arguments.map((arg) => arg.id).join(",");
         return `applied:${type.constructorId}:${argIds}` as CacheKey;
       }
+
+      case "function": {
+        const paramsKey = type.parameters
+          .map((name, i) => `${name}:${type.parameterTypes[i].id}`)
+          .join(",");
+        return `function:(${paramsKey}):${type.returnType.id}` as CacheKey;
+      }
+
+      case "param":
+        return `param:${type.schemeId}:${type.index}` as CacheKey;
     }
   }
 
@@ -306,12 +319,18 @@ export class TypeStore {
       case "error":
         return `<error: ${type.message}>`;
 
-      default: {
-        const exhaustive: never = type;
-        throw new Error(
-          `Unhandled type kind: ${JSON.stringify(exhaustive)}`,
-        );
+      case "function": {
+        const params = type.parameters
+          .map(
+            (name, i) =>
+              `${name}: ${this.typeToString(type.parameterTypes[i])}`,
+          )
+          .join(", ");
+        return `(${params}) => ${this.typeToString(type.returnType)}`;
       }
+
+      case "param":
+        return `$${type.schemeId}:${type.index}`;
     }
   }
 
@@ -338,6 +357,43 @@ export class TypeStore {
       kind: "applied",
       constructorId: ctorId,
       arguments: [...args], // Copy to prevent external mutation
+    });
+  }
+
+  /**
+   * Get or create a function type
+   * Function types are interned - same parameter names, parameter types,
+   * and return type → same instance.
+   *
+   * Parameter names participate in the cache key (they are significant
+   * for codegen) but NOT in unification.
+   */
+  fn(
+    parameters: readonly string[],
+    parameterTypes: readonly Type[],
+    returnType: Type,
+  ): FunctionType {
+    return this.ensure<FunctionType>({
+      kind: "function",
+      parameters: [...parameters],
+      parameterTypes: [...parameterTypes],
+      returnType,
+    });
+  }
+
+  /**
+   * Get or create a param type (type scheme parameter reference)
+   * Param types are interned by (schemeId, index).
+   *
+   * ParamType is a constant in unification — it only unifies with the
+   * exact same ParamType (matching both schemeId and index).
+   * TypeVariables can be bound to ParamType through unification.
+   */
+  param(schemeId: TypeSchemeId, index: number): ParamType {
+    return this.ensure<ParamType>({
+      kind: "param",
+      schemeId,
+      index,
     });
   }
 }
