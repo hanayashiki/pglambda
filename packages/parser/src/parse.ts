@@ -7,28 +7,23 @@ import {
   type ParserRuleContext,
 } from "@pglambda/antlr";
 import type { TextContent } from "@pglambda/utils";
-import md5 from "md5";
 import { CollectingErrorListener } from "./error-listener.js";
 import type { ParseResult, ResolvedMarker } from "./types.js";
 import type { ContentHash } from "@pglambda/antlr/antlr4";
 import type { AstStore } from "#ast-store.js";
 import { extractMarkersFromToken } from "./query-markers.js";
 import { resolveNodeAtPosition } from "./ast-lookup.js";
+import { DefinitionVisitor } from "./definition-visitor.js";
+
+let nextId = 0;
 
 class ContentHashListener extends PGLParserListener {
-  constructor(
-    private content: string,
-    private ctx: ParseContentContext,
-  ) {
+  constructor(private ctx: ParseContentContext) {
     super();
   }
 
   exitEveryRule(ctx: ParserRuleContext) {
-    const start = ctx.start?.start ?? 0;
-    const stop = (ctx.stop?.stop ?? start) + 1;
-    ctx.contentHash = md5(
-      ctx.ruleIndex + ":" + this.content.slice(start, stop),
-    ) as ContentHash;
+    ctx.contentHash = String(nextId++) as ContentHash;
     this.ctx.astStore.ensure(ctx);
   }
 }
@@ -59,7 +54,7 @@ export function parseContent(
     const parser = new PGLParser(tokenStream);
     parser.removeErrorListeners();
     parser.addErrorListener(errorListener);
-    parser.addParseListener(new ContentHashListener(content, context));
+    parser.addParseListener(new ContentHashListener(context));
 
     const parseTree = parser.prog();
     const errors = errorListener.getErrors();
@@ -77,6 +72,10 @@ export function parseContent(
         }
       }
     }
+
+    // Extract definitions and build scopes
+    const defVisitor = new DefinitionVisitor(context.astStore);
+    defVisitor.visit(parseTree);
 
     return { uri, parseTree, errors, markers, success: errors.length === 0 };
   } catch (error) {

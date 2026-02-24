@@ -1,11 +1,20 @@
 import type { ParserRuleContext } from "@pglambda/antlr";
 import type { ContentHash } from "@pglambda/antlr/antlr4";
+import type {
+  Definition,
+  DefinitionId,
+  Scope,
+  ScopeId,
+} from "./definitions.js";
 
 /**
  * Persistently store and retrieve AST nodes by content hash, to enable AST reuse across passes.
+ * Also stores definitions and scopes extracted by the DefinitionVisitor.
  */
 export class AstStore {
   private astCache = new Map<ContentHash, ParserRuleContext>();
+  private defs = new Map<DefinitionId, Definition>();
+  private scopes = new Map<ScopeId, Scope>();
 
   ensure<T extends ParserRuleContext>(ctx: T): T {
     const hash = ctx.contentHash;
@@ -28,5 +37,21 @@ export class AstStore {
     }
 
     return cached as any;
+  }
+
+  addDefinition(def: Definition): void {
+    this.defs.set(def.id, def);
+  }
+
+  getDefinition(id: DefinitionId): Definition | undefined {
+    return this.defs.get(id);
+  }
+
+  addScope(id: ScopeId, scope: Scope): void {
+    this.scopes.set(id, scope);
+  }
+
+  getScope(id: ScopeId): Scope | undefined {
+    return this.scopes.get(id);
   }
 }

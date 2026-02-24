@@ -48,49 +48,32 @@ describe("ANTLR Parser Snapshot Tests", () => {
 });
 
 describe("Content Hash", () => {
-  const queryA = `
-    query get_user_by_id($id: text) {
-      select * from users where id = $id
-    }
-  `;
-
-  const queryB = `
-    query get_all_users() {
-      select * from users
-    }
-  `;
-
-  test("same query produces same hash across modules", () => {
-    const moduleAB = parseContent(
+  test("each node gets a unique ID", () => {
+    const result = parseContent(
       {
-        content: `${queryA}\n${queryB}`,
-        uri: "file:///ab.pgl" as FileUri,
+        content: `query f($x: text) { select $x as x }`,
+        uri: "file:///test.pgl" as FileUri,
         success: true,
       },
-      ctx,
+      { astStore: new AstStore() },
     );
 
-    const moduleA = parseContent(
-      {
-        content: queryA,
-        uri: "file:///a.pgl" as FileUri,
-        success: true,
-      },
-      ctx,
-    );
+    const hashes = new Set<string>();
+    const tree = result.parseTree!;
 
-    const abDefs = moduleAB.parseTree!.def_list();
-    const aDefs = moduleA.parseTree!.def_list();
+    // Collect all content hashes via the ast store
+    function collectHashes(node: any) {
+      if (node.contentHash) {
+        expect(hashes.has(node.contentHash)).toBe(false);
+        hashes.add(node.contentHash);
+      }
+      const count = node.getChildCount?.() ?? 0;
+      for (let i = 0; i < count; i++) {
+        collectHashes(node.getChild(i));
+      }
+    }
 
-    const hashAinAB = abDefs[0].query_def().contentHash;
-    const hashAinA = aDefs[0].query_def().contentHash;
-
-    expect(hashAinAB).toBeTypeOf("string");
-    expect(hashAinAB).toBe(hashAinA);
-
-    // AstStore returns the same cached node for matching hashes
-    const cachedFromAB = ctx.astStore.ensure(abDefs[0].query_def());
-    const cachedFromA = ctx.astStore.ensure(aDefs[0].query_def());
-    expect(cachedFromAB).toBe(cachedFromA);
+    collectHashes(tree);
+    expect(hashes.size).toBeGreaterThan(0);
   });
 });
