@@ -19,7 +19,9 @@ def: query_def | type_def;
 // query_def
 
 query_def:
-	KW_QUERY identifier query_parameter_list L_CURLY query_body R_CURLY;
+	KW_QUERY identifier type_parameter_list? query_parameter_list L_CURLY query_body R_CURLY;
+
+type_parameter_list: LT identifier (COMMA identifier)* GT;
 
 query_parameter_list:
 	L_PAREN (query_parameter (COMMA query_parameter)* COMMA?)? R_PAREN;
@@ -102,7 +104,14 @@ a_expr_unary: (PLUS | MINUS)? c_expr;
 
 // c_expr — atomic expressions
 
-c_expr: columnref | PARAM | aexprconst | L_PAREN a_expr R_PAREN;
+c_expr: query_call | columnref | PARAM | aexprconst | L_PAREN a_expr R_PAREN;
+
+// query_call — invoke a query definition: f!(args) or f::<int, text>!(args)
+
+query_call:
+	qualified_name type_argument_list? EXCL L_PAREN (a_expr (COMMA a_expr)*)? R_PAREN;
+
+type_argument_list: COLONCOLON LT type_expression (COMMA type_expression)* GT;
 
 columnref: identifier (DOT (identifier | STAR))*;
 

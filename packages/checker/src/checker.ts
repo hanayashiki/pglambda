@@ -36,6 +36,9 @@ import {
   type AexprconstContext,
   type Type_defContext,
   type Type_expressionContext,
+  type Type_parameter_listContext,
+  type Query_callContext,
+  type Type_argument_listContext,
   RuleNode,
 } from "@pglambda/antlr";
 import type { Type, TypeStore } from "@pglambda/types";
@@ -177,6 +180,7 @@ export class Checker
   };
 
   visitC_expr = (ctx: C_exprContext): Type => {
+    if (ctx.query_call()) return this.visit(ctx.query_call());
     if (ctx.columnref()) return this.visit(ctx.columnref());
     if (ctx.aexprconst()) return this.visit(ctx.aexprconst());
     if (ctx.a_expr()) return this.visit(ctx.a_expr());
@@ -187,6 +191,12 @@ export class Checker
     }
     return this.typeStore.error("Unknown c_expr");
   };
+
+  visitQuery_call = (_ctx: Query_callContext): Type =>
+    this.typeStore.error("Query calls not supported yet");
+
+  visitType_argument_list = (_ctx: Type_argument_listContext): Type =>
+    this.typeStore.error("Type argument lists not supported yet");
 
   visitColumnref = (_ctx: ColumnrefContext): Type =>
     this.typeStore.error("Column references not supported yet");
@@ -242,9 +252,15 @@ export class Checker
   };
 
   visitQuery_def = (ctx: Query_defContext): Type => {
+    if (ctx.type_parameter_list()) {
+      this.visit(ctx.type_parameter_list());
+    }
     this.visit(ctx.query_parameter_list());
     return this.visit(ctx.query_body());
   };
+
+  visitType_parameter_list = (_ctx: Type_parameter_listContext): Type =>
+    this.typeStore.error("Type parameter lists not supported yet");
 
   visitQuery_parameter_list = (ctx: Query_parameter_listContext): Type => {
     for (const param of ctx.query_parameter_list()) {

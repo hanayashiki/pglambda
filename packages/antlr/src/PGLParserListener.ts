@@ -8,6 +8,7 @@ import { Qualified_nameContext } from "./PGLParser.js";
 import { ProgContext } from "./PGLParser.js";
 import { DefContext } from "./PGLParser.js";
 import { Query_defContext } from "./PGLParser.js";
+import { Type_parameter_listContext } from "./PGLParser.js";
 import { Query_parameter_listContext } from "./PGLParser.js";
 import { Query_parameterContext } from "./PGLParser.js";
 import { Query_bodyContext } from "./PGLParser.js";
@@ -34,6 +35,8 @@ import { A_expr_addContext } from "./PGLParser.js";
 import { A_expr_mulContext } from "./PGLParser.js";
 import { A_expr_unaryContext } from "./PGLParser.js";
 import { C_exprContext } from "./PGLParser.js";
+import { Query_callContext } from "./PGLParser.js";
+import { Type_argument_listContext } from "./PGLParser.js";
 import { ColumnrefContext } from "./PGLParser.js";
 import { AexprconstContext } from "./PGLParser.js";
 import { Type_defContext } from "./PGLParser.js";
@@ -95,6 +98,16 @@ export default class PGLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitQuery_def?: (ctx: Query_defContext) => void;
+	/**
+	 * Enter a parse tree produced by `PGLParser.type_parameter_list`.
+	 * @param ctx the parse tree
+	 */
+	enterType_parameter_list?: (ctx: Type_parameter_listContext) => void;
+	/**
+	 * Exit a parse tree produced by `PGLParser.type_parameter_list`.
+	 * @param ctx the parse tree
+	 */
+	exitType_parameter_list?: (ctx: Type_parameter_listContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.query_parameter_list`.
 	 * @param ctx the parse tree
@@ -359,6 +372,26 @@ export default class PGLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitC_expr?: (ctx: C_exprContext) => void;
+	/**
+	 * Enter a parse tree produced by `PGLParser.query_call`.
+	 * @param ctx the parse tree
+	 */
+	enterQuery_call?: (ctx: Query_callContext) => void;
+	/**
+	 * Exit a parse tree produced by `PGLParser.query_call`.
+	 * @param ctx the parse tree
+	 */
+	exitQuery_call?: (ctx: Query_callContext) => void;
+	/**
+	 * Enter a parse tree produced by `PGLParser.type_argument_list`.
+	 * @param ctx the parse tree
+	 */
+	enterType_argument_list?: (ctx: Type_argument_listContext) => void;
+	/**
+	 * Exit a parse tree produced by `PGLParser.type_argument_list`.
+	 * @param ctx the parse tree
+	 */
+	exitType_argument_list?: (ctx: Type_argument_listContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.columnref`.
 	 * @param ctx the parse tree

@@ -27,6 +27,7 @@ KW_LIKE: 'like';
 KW_BETWEEN: 'between';
 
 // Punctuation
+COLONCOLON: '::';
 COLON: ':';
 COMMA: ',';
 DOT: '.';
@@ -50,6 +51,7 @@ PLUS: '+';
 MINUS: '-';
 SLASH: '/';
 PERCENT: '%';
+EXCL: '!';
 
 // Literals
 INTEGER_LITERAL: [0-9]+;

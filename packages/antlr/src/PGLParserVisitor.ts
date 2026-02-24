@@ -8,6 +8,7 @@ import { Qualified_nameContext } from "./PGLParser.js";
 import { ProgContext } from "./PGLParser.js";
 import { DefContext } from "./PGLParser.js";
 import { Query_defContext } from "./PGLParser.js";
+import { Type_parameter_listContext } from "./PGLParser.js";
 import { Query_parameter_listContext } from "./PGLParser.js";
 import { Query_parameterContext } from "./PGLParser.js";
 import { Query_bodyContext } from "./PGLParser.js";
@@ -34,6 +35,8 @@ import { A_expr_addContext } from "./PGLParser.js";
 import { A_expr_mulContext } from "./PGLParser.js";
 import { A_expr_unaryContext } from "./PGLParser.js";
 import { C_exprContext } from "./PGLParser.js";
+import { Query_callContext } from "./PGLParser.js";
+import { Type_argument_listContext } from "./PGLParser.js";
 import { ColumnrefContext } from "./PGLParser.js";
 import { AexprconstContext } from "./PGLParser.js";
 import { Type_defContext } from "./PGLParser.js";
@@ -78,6 +81,12 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitQuery_def?: (ctx: Query_defContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.type_parameter_list`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitType_parameter_list?: (ctx: Type_parameter_listContext) => Result;
 	/**
 	 * Visit a parse tree produced by `PGLParser.query_parameter_list`.
 	 * @param ctx the parse tree
@@ -236,6 +245,18 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitC_expr?: (ctx: C_exprContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.query_call`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitQuery_call?: (ctx: Query_callContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.type_argument_list`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitType_argument_list?: (ctx: Type_argument_listContext) => Result;
 	/**
 	 * Visit a parse tree produced by `PGLParser.columnref`.
 	 * @param ctx the parse tree
