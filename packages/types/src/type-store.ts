@@ -13,6 +13,7 @@ import type {
   SourceLocation,
   TypeKind,
   TypeConstructorId,
+  TypeScheme,
   TypeSchemeId,
 } from "./type.ts";
 import type { PrimitiveName } from "./primitives.ts";
@@ -395,5 +396,84 @@ export class TypeStore {
       schemeId,
       index,
     });
+  }
+
+  /**
+   * Instantiate a type scheme by replacing all ParamType nodes
+   * (matching the scheme's id) with fresh type variables.
+   */
+  instantiate(scheme: TypeScheme): Type {
+    const freshVars = scheme.parameters.map((name) => this.typevar(name));
+    return this.substituteParams(scheme.id, freshVars, scheme.body);
+  }
+
+  /**
+   * Walk a type, replacing ParamType(schemeId, i) with subs[i].
+   * Uses structural sharing — returns the same instance when nothing changes.
+   */
+  private substituteParams(
+    schemeId: TypeSchemeId,
+    subs: readonly Type[],
+    type: Type,
+  ): Type {
+    switch (type.kind) {
+      case "param":
+        if (type.schemeId === schemeId) return subs[type.index];
+        return type;
+      case "primitive":
+      case "typevar":
+      case "error":
+        return type;
+      case "array": {
+        const elem = this.substituteParams(schemeId, subs, type.elementType);
+        return elem === type.elementType ? type : this.array(elem);
+      }
+      case "nullable": {
+        const inner = this.substituteParams(schemeId, subs, type.innerType);
+        return inner === type.innerType ? type : this.nullable(inner);
+      }
+      case "record": {
+        let changed = false;
+        const fields: Record<string, Type> = {};
+        for (const [name, fieldType] of Object.entries(type.fields)) {
+          const resolved = this.substituteParams(schemeId, subs, fieldType);
+          if (resolved !== fieldType) changed = true;
+          fields[name] = resolved;
+        }
+        const rest = type.rest
+          ? this.substituteParams(schemeId, subs, type.rest)
+          : null;
+        if (rest !== type.rest) changed = true;
+        return changed ? this.record(fields, rest) : type;
+      }
+      case "applied": {
+        let changed = false;
+        const resolvedArgs: Type[] = [];
+        for (const arg of type.arguments) {
+          const resolved = this.substituteParams(schemeId, subs, arg);
+          if (resolved !== arg) changed = true;
+          resolvedArgs.push(resolved);
+        }
+        return changed ? this.apply(type.constructorId, resolvedArgs) : type;
+      }
+      case "function": {
+        let changed = false;
+        const resolvedParams: Type[] = [];
+        for (const param of type.parameterTypes) {
+          const resolved = this.substituteParams(schemeId, subs, param);
+          if (resolved !== param) changed = true;
+          resolvedParams.push(resolved);
+        }
+        const resolvedReturn = this.substituteParams(
+          schemeId,
+          subs,
+          type.returnType,
+        );
+        if (resolvedReturn !== type.returnType) changed = true;
+        return changed
+          ? this.fn(type.parameters, resolvedParams, resolvedReturn)
+          : type;
+      }
+    }
   }
 }

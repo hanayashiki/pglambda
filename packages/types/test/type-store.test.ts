@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
-import type { TypeConstructorId } from "../src/type.ts";
+import { Unification } from "../src/unification.ts";
+import type { TypeConstructorId, TypeSchemeId, TypeScheme } from "../src/type.ts";
 
 describe("TypeStore", () => {
   let store: TypeStore;
@@ -453,6 +454,148 @@ describe("TypeStore", () => {
       const retrieved = store.getAs(applied.id, "applied");
       expect(retrieved).toBe(applied);
       expect(retrieved === applied).toBe(true);
+    });
+  });
+
+  describe("instantiate", () => {
+    const s1 = 0 as TypeSchemeId;
+
+    test("replaces param types with fresh type variables", () => {
+      const p0 = store.param(s1, 0);
+      const body = store.fn(["x"], [p0], p0);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "id",
+        parameters: ["T"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      expect(instantiated.kind).toBe("function");
+      if (instantiated.kind === "function") {
+        expect(instantiated.parameterTypes[0].kind).toBe("typevar");
+        expect(instantiated.returnType.kind).toBe("typevar");
+        // Same param index → same fresh var
+        expect(instantiated.parameterTypes[0]).toBe(instantiated.returnType);
+      }
+    });
+
+    test("multiple params get distinct type variables", () => {
+      const p0 = store.param(s1, 0);
+      const p1 = store.param(s1, 1);
+      const body = store.fn(["x", "y"], [p0, p1], p0);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "f",
+        parameters: ["A", "B"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      if (instantiated.kind === "function") {
+        expect(instantiated.parameterTypes[0].kind).toBe("typevar");
+        expect(instantiated.parameterTypes[1].kind).toBe("typevar");
+        expect(instantiated.parameterTypes[0]).not.toBe(
+          instantiated.parameterTypes[1],
+        );
+        expect(instantiated.returnType).toBe(instantiated.parameterTypes[0]);
+      }
+    });
+
+    test("preserves concrete types", () => {
+      const int = store.primitive("int");
+      const p0 = store.param(s1, 0);
+      const body = store.fn(["x"], [p0], int);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "f",
+        parameters: ["T"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      if (instantiated.kind === "function") {
+        expect(instantiated.parameterTypes[0].kind).toBe("typevar");
+        expect(instantiated.returnType).toBe(int);
+      }
+    });
+
+    test("does not substitute params from a different scheme", () => {
+      const s2 = 1 as TypeSchemeId;
+      const p0_s2 = store.param(s2, 0);
+      const p0_s1 = store.param(s1, 0);
+      const body = store.fn(["x"], [p0_s1], p0_s2);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "f",
+        parameters: ["T"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      if (instantiated.kind === "function") {
+        expect(instantiated.parameterTypes[0].kind).toBe("typevar");
+        expect(instantiated.returnType).toBe(p0_s2);
+      }
+    });
+
+    test("instantiated type variables unify with concrete types", () => {
+      const u = new Unification(store);
+      const int = store.primitive("int");
+      const p0 = store.param(s1, 0);
+      const body = store.fn(["x"], [p0], p0);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "id",
+        parameters: ["T"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      if (instantiated.kind === "function") {
+        u.unify(instantiated.parameterTypes[0], int);
+        expect(u.getResult().errors).toHaveLength(0);
+        expect(u.resolve(instantiated.returnType)).toBe(int);
+      }
+    });
+
+    test("two instantiations get independent type variables", () => {
+      const u = new Unification(store);
+      const int = store.primitive("int");
+      const text = store.primitive("text");
+      const p0 = store.param(s1, 0);
+      const body = store.fn(["x"], [p0], p0);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "id",
+        parameters: ["T"],
+        body,
+      };
+
+      const inst1 = store.instantiate(scheme);
+      const inst2 = store.instantiate(scheme);
+
+      if (inst1.kind === "function" && inst2.kind === "function") {
+        u.unify(inst1.parameterTypes[0], int);
+        u.unify(inst2.parameterTypes[0], text);
+        expect(u.getResult().errors).toHaveLength(0);
+        expect(u.resolve(inst1.returnType)).toBe(int);
+        expect(u.resolve(inst2.returnType)).toBe(text);
+      }
+    });
+
+    test("structural sharing when body has no params", () => {
+      const int = store.primitive("int");
+      const body = store.fn(["x"], [int], int);
+      const scheme: TypeScheme = {
+        id: s1,
+        name: "f",
+        parameters: ["T"],
+        body,
+      };
+
+      const instantiated = store.instantiate(scheme);
+      expect(instantiated).toBe(body);
     });
   });
 });
