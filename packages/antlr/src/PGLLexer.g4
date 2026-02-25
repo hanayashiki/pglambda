@@ -51,7 +51,7 @@ PLUS: '+';
 MINUS: '-';
 SLASH: '/';
 PERCENT: '%';
-EXCL: '!';
+DOLLAR_LCURLY: '${' ;
 
 // Literals
 INTEGER_LITERAL: [0-9]+;
@@ -60,10 +60,10 @@ STRING_LITERAL options { caseInsensitive = false; }:
 	'\'' ('\'\'' | ~['\r\n])* '\'';
 
 // Identifiers
-IDENTIFIER: [a-z_] [a-z_0-9]*;
+IDENTIFIER options { caseInsensitive = false; }:
+	[a-zA-Z_$] [a-zA-Z_0-9$]*;
 QUOTED_IDENTIFIER options { caseInsensitive = false; }:
 	'"' ('""' | ~["\r\n])* '"';
-PARAM: '$' [a-z_] [a-z_0-9]*;
 
 // Whitespace & comments
 WS: [ \t\r\n]+ -> skip;

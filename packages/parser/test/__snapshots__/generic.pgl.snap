@@ -12,7 +12,8 @@ prog
       query_parameter_list
         "("
         query_parameter
-          "$x"
+          identifier
+            "x"
           ":"
           type_expression
             identifier
@@ -38,7 +39,9 @@ prog
                                     a_expr_mul
                                       a_expr_unary
                                         c_expr
-                                          "$x"
+                                          columnref
+                                            identifier
+                                              "$x"
       "}"
   def
     query_def
@@ -48,7 +51,8 @@ prog
       query_parameter_list
         "("
         query_parameter
-          "$id"
+          identifier
+            "id"
           ":"
           type_expression
             identifier
@@ -85,35 +89,41 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        query_call
-                                          qualified_name
-                                            identifier
-                                              "identity"
-                                          "!"
-                                          "("
-                                          a_expr
-                                            a_expr_or
-                                              a_expr_and
-                                                a_expr_between
-                                                  a_expr_in
-                                                    a_expr_unary_not
-                                                      a_expr_isnull
-                                                        a_expr_is_not
-                                                          a_expr_compare
-                                                            a_expr_like
-                                                              a_expr_add
-                                                                a_expr_mul
-                                                                  a_expr_unary
-                                                                    c_expr
-                                                                      "$id"
-                                          ")"
+                                        pgl_expr
+                                          "${"
+                                          pgl_query_call
+                                            qualified_name
+                                              identifier
+                                                "identity"
+                                            "("
+                                            a_expr
+                                              a_expr_or
+                                                a_expr_and
+                                                  a_expr_between
+                                                    a_expr_in
+                                                      a_expr_unary_not
+                                                        a_expr_isnull
+                                                          a_expr_is_not
+                                                            a_expr_compare
+                                                              a_expr_like
+                                                                a_expr_add
+                                                                  a_expr_mul
+                                                                    a_expr_unary
+                                                                      c_expr
+                                                                        columnref
+                                                                          identifier
+                                                                            "$id"
+                                            ")"
+                                          "}"
                               "="
                               a_expr_like
                                 a_expr_add
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        "$id"
+                                        columnref
+                                          identifier
+                                            "$id"
       "}"
   def
     query_def
@@ -123,7 +133,8 @@ prog
       query_parameter_list
         "("
         query_parameter
-          "$id"
+          identifier
+            "id"
           ":"
           type_expression
             identifier
@@ -160,40 +171,46 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        query_call
-                                          qualified_name
-                                            identifier
-                                              "identity"
-                                          type_argument_list
-                                            "::"
-                                            "<"
-                                            type_expression
+                                        pgl_expr
+                                          "${"
+                                          pgl_query_call
+                                            qualified_name
                                               identifier
-                                                "text"
-                                            ">"
-                                          "!"
-                                          "("
-                                          a_expr
-                                            a_expr_or
-                                              a_expr_and
-                                                a_expr_between
-                                                  a_expr_in
-                                                    a_expr_unary_not
-                                                      a_expr_isnull
-                                                        a_expr_is_not
-                                                          a_expr_compare
-                                                            a_expr_like
-                                                              a_expr_add
-                                                                a_expr_mul
-                                                                  a_expr_unary
-                                                                    c_expr
-                                                                      "$id"
-                                          ")"
+                                                "identity"
+                                            type_argument_list
+                                              "::"
+                                              "<"
+                                              type_expression
+                                                identifier
+                                                  "text"
+                                              ">"
+                                            "("
+                                            a_expr
+                                              a_expr_or
+                                                a_expr_and
+                                                  a_expr_between
+                                                    a_expr_in
+                                                      a_expr_unary_not
+                                                        a_expr_isnull
+                                                          a_expr_is_not
+                                                            a_expr_compare
+                                                              a_expr_like
+                                                                a_expr_add
+                                                                  a_expr_mul
+                                                                    a_expr_unary
+                                                                      c_expr
+                                                                        columnref
+                                                                          identifier
+                                                                            "$id"
+                                            ")"
+                                          "}"
                               "="
                               a_expr_like
                                 a_expr_add
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        "$id"
+                                        columnref
+                                          identifier
+                                            "$id"
       "}"

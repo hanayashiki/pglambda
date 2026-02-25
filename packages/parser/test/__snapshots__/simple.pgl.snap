@@ -7,7 +7,8 @@ prog
       query_parameter_list
         "("
         query_parameter
-          "$id"
+          identifier
+            "id"
           ":"
           type_expression
             identifier
@@ -53,5 +54,7 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        "$id"
+                                        columnref
+                                          identifier
+                                            "$id"
       "}"

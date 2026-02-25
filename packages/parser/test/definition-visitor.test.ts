@@ -12,7 +12,7 @@ describe("Definition Extraction", () => {
     const store = new AstStore();
     const result = parseContent(
       {
-        content: `query f<T>($id: T) { select $id as x }`,
+        content: `query f<T>(id: T) { select $id as x }`,
         uri: "file:///test.pgl" as FileUri,
         success: true,
       },
@@ -31,7 +31,7 @@ describe("Definition Extraction", () => {
     expect(qd.data.typeParams).toHaveLength(1);
     expect(qd.data.typeParams[0].name).toBe("T");
     expect(qd.data.params).toHaveLength(1);
-    expect(qd.data.params[0].name).toBe("$id");
+    expect(qd.data.params[0].name).toBe("id");
     expect(qd.data.params[0].data.annotationHash).not.toBeNull();
 
     // File scope has "f"
@@ -40,12 +40,12 @@ describe("Definition Extraction", () => {
     expect(fileScope!.parent).toBeNull();
     expect(fileScope!.valueDefinitions.get("f")).toBe(qd.id);
 
-    // Query scope has "T" and "$id"
+    // Query scope has "T" and "id"
     const queryScope = store.getScope(queryDefCtx.contentHash);
     expect(queryScope).toBeDefined();
     expect(queryScope!.parent).toBe(tree.contentHash);
     expect(queryScope!.typeDefinitions.has("T")).toBe(true);
-    expect(queryScope!.valueDefinitions.has("$id")).toBe(true);
+    expect(queryScope!.valueDefinitions.has("id")).toBe(true);
   });
 
   test("extracts multiple queries in file scope", () => {
@@ -70,7 +70,7 @@ describe("Definition Extraction", () => {
     const store = new AstStore();
     const result = parseContent(
       {
-        content: `query g($x: text) { select $x as y }`,
+        content: `query g(x: text) { select $x as y }`,
         uri: "file:///test.pgl" as FileUri,
         success: true,
       },
@@ -82,6 +82,6 @@ describe("Definition Extraction", () => {
     const def = store.getDefinition(queryDefCtx.contentHash as DefinitionId) as QueryDefinition;
     expect(def.data.typeParams).toHaveLength(0);
     expect(def.data.params).toHaveLength(1);
-    expect(def.data.params[0].name).toBe("$x");
+    expect(def.data.params[0].name).toBe("x");
   });
 });

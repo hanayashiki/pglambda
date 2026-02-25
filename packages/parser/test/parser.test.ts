@@ -51,7 +51,7 @@ describe("Content Hash", () => {
   test("each node gets a unique ID", () => {
     const result = parseContent(
       {
-        content: `query f($x: text) { select $x as x }`,
+        content: `query f(x: text) { select $x as x }`,
         uri: "file:///test.pgl" as FileUri,
         success: true,
       },

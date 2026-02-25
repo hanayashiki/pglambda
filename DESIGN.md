@@ -5,7 +5,7 @@ We are building a type-safe SQL builder language called **pglambda**.
 Source code:
 
 ```pgl
-query get_user_by_id($id: text) {
+query get_user_by_id(id: text) {
     select * from users where id = $id
 }
 ```
@@ -35,25 +35,35 @@ class Client {
 ## Simple Query Builder
 
 ```pgl
-query get_user_by_id($id: text) {
+query get_user_by_id(id: text) {
     select * from users where id = $id
 }
 ```
 
+## PGL Identifiers
+
+PGL uses a unified identifier system where `$` is a legal character anywhere in identifiers (like JavaScript/TypeScript). The `$` prefix is a naming convention that distinguishes PGL references from SQL identifiers:
+
+- **Parameter declaration**: bare names — `query f(id: text) { ... }`
+- **PGL reference in SQL**: `$` prefix — `select * from users where id = $id`
+- **Query call**: `${...}` wrapper — `${user_by_id(users, $id)}`
+
+Identifiers are case-sensitive (like TypeScript), while SQL keywords remain case-insensitive (PostgreSQL convention).
+
 ## Nested Query Builder
 
-You can call one builder inside another using `!` syntax. This inlines the callee's body at compile time, distinguishing it from SQL function calls.
+You can call one builder inside another using `${...}` syntax. This inlines the callee's body at compile time, distinguishing it from SQL function calls.
 
 ```pgl
-query user_by_id(user: UserRow, $id: text) {
+query user_by_id(user: UserRow, id: text) {
     user.id = $id
 }
--- (user: UserRow, $id: text) => bool
+-- (user: UserRow, id: text) => bool
 
-query select_user_by_id($id: text) {
-    select * from users where user_by_id!(users, $id)
+query select_user_by_id(id: text) {
+    select * from users where ${user_by_id(users, $id)}
 }
--- ($id: text) => SetOf<UserRow>
+-- (id: text) => SetOf<UserRow>
 ```
 
 ## Modules & Imports
@@ -79,13 +89,13 @@ import "./users.pgl"
 
 query check_admin($id: text) {
     select * from admins
-    where user_id in users.get_user_by_id!($id).id
+    where user_id in ${users.get_user_by_id($id)}.id
 }
 
 query admin_by_email($email: text) {
     select a.*
     from admins a
-    join users.get_user_by_email!($email) u on a.user_id = u.id
+    join ${users.get_user_by_email($email)} u on a.user_id = u.id
 }
 ```
 

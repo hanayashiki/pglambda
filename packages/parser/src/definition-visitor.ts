@@ -111,12 +111,12 @@ export class DefinitionVisitor extends PGLParserVisitor<void> {
 
     // Extract value params
     for (const param of ctx.query_parameter_list().query_parameter_list()) {
-      const paramToken = param.PARAM();
+      const paramIdent = param.identifier();
       const typeExpr = param.type_expression();
       const def: QueryParamDefinition = {
         id: param.contentHash as DefinitionId,
         tag: "queryParam",
-        name: paramToken.getText(),
+        name: paramIdent.getText(),
         data: {
           annotationHash: typeExpr ? typeExpr.contentHash : null,
         },

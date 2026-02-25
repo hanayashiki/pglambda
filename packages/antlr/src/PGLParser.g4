@@ -26,7 +26,7 @@ type_parameter_list: LT identifier (COMMA identifier)* GT;
 query_parameter_list:
 	L_PAREN (query_parameter (COMMA query_parameter)* COMMA?)? R_PAREN;
 
-query_parameter: PARAM (COLON type_expression)?;
+query_parameter: identifier (COLON type_expression)?;
 
 // query_body
 
@@ -104,12 +104,16 @@ a_expr_unary: (PLUS | MINUS)? c_expr;
 
 // c_expr — atomic expressions
 
-c_expr: query_call | columnref | PARAM | aexprconst | L_PAREN a_expr R_PAREN;
+c_expr: pgl_expr | columnref | aexprconst | L_PAREN a_expr R_PAREN;
 
-// query_call — invoke a query definition: f!(args) or f::<int, text>!(args)
+// pgl_expr — ${...} wrapper for PGL expressions embedded in SQL
 
-query_call:
-	qualified_name type_argument_list? EXCL L_PAREN (a_expr (COMMA a_expr)*)? R_PAREN;
+pgl_expr: DOLLAR_LCURLY pgl_query_call R_CURLY;
+
+// pgl_query_call — PGL query call: f(x), mod.f::<T>(x)
+
+pgl_query_call:
+	qualified_name type_argument_list? L_PAREN (a_expr (COMMA a_expr)*)? R_PAREN;
 
 type_argument_list: COLONCOLON LT type_expression (COMMA type_expression)* GT;
 

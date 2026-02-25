@@ -37,7 +37,8 @@ import {
   type Type_defContext,
   type Type_expressionContext,
   type Type_parameter_listContext,
-  type Query_callContext,
+  type Pgl_exprContext,
+  type Pgl_query_callContext,
   type Type_argument_listContext,
   RuleNode,
 } from "@pglambda/antlr";
@@ -180,20 +181,18 @@ export class Checker
   };
 
   visitC_expr = (ctx: C_exprContext): Type => {
-    if (ctx.query_call()) return this.visit(ctx.query_call());
+    if (ctx.pgl_expr()) return this.visit(ctx.pgl_expr());
     if (ctx.columnref()) return this.visit(ctx.columnref());
     if (ctx.aexprconst()) return this.visit(ctx.aexprconst());
     if (ctx.a_expr()) return this.visit(ctx.a_expr());
-    if (ctx.PARAM()) {
-      return this.typeStore.error(
-        "Parameters in expressions not supported yet",
-      );
-    }
     return this.typeStore.error("Unknown c_expr");
   };
 
-  visitQuery_call = (_ctx: Query_callContext): Type =>
-    this.typeStore.error("Query calls not supported yet");
+  visitPgl_expr = (ctx: Pgl_exprContext): Type =>
+    this.visit(ctx.pgl_query_call());
+
+  visitPgl_query_call = (_ctx: Pgl_query_callContext): Type =>
+    this.typeStore.error("PGL query calls not supported yet");
 
   visitType_argument_list = (_ctx: Type_argument_listContext): Type =>
     this.typeStore.error("Type argument lists not supported yet");

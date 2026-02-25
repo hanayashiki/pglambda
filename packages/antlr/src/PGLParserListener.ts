@@ -35,7 +35,8 @@ import { A_expr_addContext } from "./PGLParser.js";
 import { A_expr_mulContext } from "./PGLParser.js";
 import { A_expr_unaryContext } from "./PGLParser.js";
 import { C_exprContext } from "./PGLParser.js";
-import { Query_callContext } from "./PGLParser.js";
+import { Pgl_exprContext } from "./PGLParser.js";
+import { Pgl_query_callContext } from "./PGLParser.js";
 import { Type_argument_listContext } from "./PGLParser.js";
 import { ColumnrefContext } from "./PGLParser.js";
 import { AexprconstContext } from "./PGLParser.js";
@@ -373,15 +374,25 @@ export default class PGLParserListener extends ParseTreeListener {
 	 */
 	exitC_expr?: (ctx: C_exprContext) => void;
 	/**
-	 * Enter a parse tree produced by `PGLParser.query_call`.
+	 * Enter a parse tree produced by `PGLParser.pgl_expr`.
 	 * @param ctx the parse tree
 	 */
-	enterQuery_call?: (ctx: Query_callContext) => void;
+	enterPgl_expr?: (ctx: Pgl_exprContext) => void;
 	/**
-	 * Exit a parse tree produced by `PGLParser.query_call`.
+	 * Exit a parse tree produced by `PGLParser.pgl_expr`.
 	 * @param ctx the parse tree
 	 */
-	exitQuery_call?: (ctx: Query_callContext) => void;
+	exitPgl_expr?: (ctx: Pgl_exprContext) => void;
+	/**
+	 * Enter a parse tree produced by `PGLParser.pgl_query_call`.
+	 * @param ctx the parse tree
+	 */
+	enterPgl_query_call?: (ctx: Pgl_query_callContext) => void;
+	/**
+	 * Exit a parse tree produced by `PGLParser.pgl_query_call`.
+	 * @param ctx the parse tree
+	 */
+	exitPgl_query_call?: (ctx: Pgl_query_callContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.type_argument_list`.
 	 * @param ctx the parse tree

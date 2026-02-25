@@ -1,11 +1,11 @@
-query identity<T>($x: T) {
+query identity<T>(x: T) {
     select $x
 }
 
-query filter_users($id: text) {
-    select * from users where identity!($id) = $id
+query filter_users(id: text) {
+    select * from users where ${identity($id)} = $id
 }
 
-query typed_call($id: text) {
-    select * from users where identity::<text>!($id) = $id
+query typed_call(id: text) {
+    select * from users where ${identity::<text>($id)} = $id
 }
