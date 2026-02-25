@@ -5,6 +5,7 @@ import {
   type Pgl_query_callContext,
   type Pgl_ident_refContext,
   type Columnref_or_pgl_dollar_ident_refContext,
+  type Type_refContext,
 } from "@pglambda/antlr";
 import type { AstStore } from "#ast-store.js";
 import type { DefinitionId, ScopeId } from "./definitions.js";
@@ -39,6 +40,20 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
   visitPgl_query_call = (ctx: Pgl_query_callContext): void => {
     this.resolveQualifiedName(ctx.qualified_name());
     this.visitChildren(ctx);
+  };
+
+  visitType_ref = (ctx: Type_refContext): void => {
+    const qname = ctx.pgl_ident_ref().qualified_name();
+    const identifiers = qname.identifier_list();
+    if (identifiers.length !== 1) return;
+
+    const name = identifiers[0].getText();
+    const defId = this.lookupTypeName(name);
+    if (defId !== undefined) {
+      this.store.addResolution(identifiers[0].contentHash, defId);
+    }
+    // Don't call visitChildren — type_ref resolution uses typeDefinitions,
+    // not valueDefinitions like visitPgl_ident_ref would.
   };
 
   visitPgl_ident_ref = (ctx: Pgl_ident_refContext): void => {
@@ -77,6 +92,18 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
       const scope = this.store.getScope(current);
       if (!scope) break;
       const defId = scope.valueDefinitions.get(name);
+      if (defId !== undefined) return defId;
+      current = scope.parent;
+    }
+    return undefined;
+  }
+
+  private lookupTypeName(name: string): DefinitionId | undefined {
+    let current: ScopeId | null = this.currentScopeId;
+    while (current !== null) {
+      const scope = this.store.getScope(current);
+      if (!scope) break;
+      const defId = scope.typeDefinitions.get(name);
       if (defId !== undefined) return defId;
       current = scope.parent;
     }

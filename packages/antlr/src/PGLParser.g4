@@ -104,7 +104,11 @@ a_expr_unary: (PLUS | MINUS)? c_expr;
 
 // c_expr — atomic expressions
 
-c_expr: DOLLAR_LCURLY pgl_expr R_CURLY | columnref_or_pgl_dollar_ident_ref | aexprconst | L_PAREN a_expr R_PAREN;
+c_expr:
+	DOLLAR_LCURLY pgl_expr R_CURLY
+	| columnref_or_pgl_dollar_ident_ref
+	| aexprconst
+	| L_PAREN a_expr R_PAREN;
 
 // pgl_expr — PGL expression language (inside ${...})
 
@@ -113,11 +117,15 @@ pgl_expr: pgl_query_call | pgl_ident_ref;
 pgl_ident_ref: qualified_name;
 
 pgl_query_call:
-	qualified_name type_argument_list? L_PAREN (pgl_expr (COMMA pgl_expr)*)? R_PAREN;
+	qualified_name type_argument_list? L_PAREN (
+		pgl_expr (COMMA pgl_expr)*
+	)? R_PAREN;
 
-type_argument_list: COLONCOLON LT type_expression (COMMA type_expression)* GT;
+type_argument_list:
+	COLONCOLON LT type_expression (COMMA type_expression)* GT;
 
-columnref_or_pgl_dollar_ident_ref: identifier (DOT (identifier | STAR))*;
+columnref_or_pgl_dollar_ident_ref:
+	identifier (DOT (identifier | STAR))*;
 
 aexprconst:
 	INTEGER_LITERAL
@@ -133,4 +141,6 @@ type_def: KW_TYPE;
 
 // type_expression
 
-type_expression: identifier;
+type_expression: type_ref;
+
+type_ref: pgl_ident_ref;

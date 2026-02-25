@@ -137,6 +137,21 @@ export class CheckContext {
     return undefined;
   }
 
+  /**
+   * Get or lazily create a typevar placeholder for a node hash.
+   * Safe for forward references — callers constrain the typevar later.
+   */
+  getOrCreateTypeVar(hash: ContentHash): Type {
+    if (this.sccIn.imports.has(hash)) {
+      return this.sccIn.imports.get(hash)!;
+    }
+    const existing = this.astToType.get(hash);
+    if (existing) return existing;
+    const tv = this.store.typevar();
+    this.astToType.set(hash, tv);
+    return tv;
+  }
+
   getOrInsert(hash: ContentHash, check: () => Type): Type {
     if (this.sccIn.imports.has(hash)) {
       return this.sccIn.imports.get(hash)!;

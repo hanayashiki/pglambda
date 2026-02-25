@@ -41,9 +41,15 @@ import {
   type Pgl_ident_refContext,
   type Pgl_query_callContext,
   type Type_argument_listContext,
+  type Type_refContext,
   RuleNode,
 } from "@pglambda/antlr";
-import type { PrimitiveName, Type, TypeStore } from "@pglambda/types";
+import type {
+  PrimitiveName,
+  Type,
+  TypeStore,
+  TypeSchemeId,
+} from "@pglambda/types";
 import type { CheckContext } from "./check-context.js";
 
 export class Checker
@@ -70,9 +76,7 @@ export class Checker
   }
 
   visitChildren(_: RuleNode): never {
-    throw new Error(
-      `every syntax rule must be explictly handled.`,
-    );
+    throw new Error(`every syntax rule must be explictly handled.`);
   }
 
   // --- Expression visitors (binary-or-passthrough) ---
@@ -183,7 +187,8 @@ export class Checker
 
   visitC_expr = (ctx: C_exprContext): Type => {
     if (ctx.pgl_expr()) return this.visit(ctx.pgl_expr());
-    if (ctx.columnref_or_pgl_dollar_ident_ref()) return this.visit(ctx.columnref_or_pgl_dollar_ident_ref());
+    if (ctx.columnref_or_pgl_dollar_ident_ref())
+      return this.visit(ctx.columnref_or_pgl_dollar_ident_ref());
     if (ctx.aexprconst()) return this.visit(ctx.aexprconst());
     if (ctx.a_expr()) return this.visit(ctx.a_expr());
     return this.typeStore.error("Unknown c_expr");
@@ -204,12 +209,11 @@ export class Checker
       }
       const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
       if (!defId) return this.typeStore.error("Unresolved reference");
-      const existing = this.ctx.getType(defId);
-      if (!existing) return this.typeStore.error("Reference to unchecked definition");
+      const defType = this.ctx.getOrCreateTypeVar(defId);
       // Propagate type to qualified_name and identifier for marker resolution
-      this.ctx.getOrInsert(qname.contentHash, () => existing);
-      this.ctx.getOrInsert(idents[0].contentHash, () => existing);
-      return existing;
+      this.ctx.getOrInsert(qname.contentHash, () => defType);
+      this.ctx.getOrInsert(idents[0].contentHash, () => defType);
+      return defType;
     });
 
   visitPgl_query_call = (_ctx: Pgl_query_callContext): Type =>
@@ -218,7 +222,9 @@ export class Checker
   visitType_argument_list = (_ctx: Type_argument_listContext): Type =>
     this.typeStore.error("Type argument lists not supported yet");
 
-  visitColumnref_or_pgl_dollar_ident_ref = (ctx: Columnref_or_pgl_dollar_ident_refContext): Type =>
+  visitColumnref_or_pgl_dollar_ident_ref = (
+    ctx: Columnref_or_pgl_dollar_ident_refContext,
+  ): Type =>
     this.ctx.getOrInsert(ctx.contentHash, () => {
       const idents = ctx.identifier_list();
       if (idents.length !== 1) {
@@ -230,10 +236,9 @@ export class Checker
       }
       const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
       if (!defId) return this.typeStore.error("Unresolved reference");
-      const existing = this.ctx.getType(defId);
-      if (!existing) return this.typeStore.error("Reference to unchecked definition");
-      this.ctx.getOrInsert(idents[0].contentHash, () => existing);
-      return existing;
+      const defType = this.ctx.getOrCreateTypeVar(defId);
+      this.ctx.getOrInsert(idents[0].contentHash, () => defType);
+      return defType;
     });
 
   // --- Statement visitors ---
@@ -286,16 +291,42 @@ export class Checker
     return this.typeStore.error("Unknown def");
   };
 
-  visitQuery_def = (ctx: Query_defContext): Type => {
-    if (ctx.type_parameter_list()) {
-      this.visit(ctx.type_parameter_list());
+  visitQuery_def = (ctx: Query_defContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const typeParamList = ctx.type_parameter_list();
+      if (typeParamList) {
+        const schemeId = this.typeStore.schemes.freshId();
+        this.checkTypeParameterList(typeParamList, schemeId);
+      }
+      this.visit(ctx.query_parameter_list());
+      return this.visit(ctx.query_body());
+    });
+
+  private checkTypeParameterList(
+    ctx: Type_parameter_listContext,
+    schemeId: TypeSchemeId,
+  ): void {
+    const idents = ctx.identifier_list();
+    const names = idents.map((id) => id.getText());
+    // FIXME: Per 03_TYPE_CHECKER.md, trivial SCCs should skip Phase 1 and
+    // construct the scheme from the body's result type after Phase 2.
+    // Non-trivial SCCs need Phase 1 to pre-build schemes from explicit
+    // annotations before checking bodies. Currently we always register a
+    // placeholder scheme here.
+    this.typeStore.schemes.register({
+      id: schemeId,
+      name: "",
+      parameters: names,
+      body: this.typeStore.error("unresolved scheme body"),
+    });
+    for (let i = 0; i < idents.length; i++) {
+      const tv = this.ctx.getOrCreateTypeVar(idents[i].contentHash);
+      this.ctx.addEquality({ t1: tv, t2: this.typeStore.param(schemeId, i) });
     }
-    this.visit(ctx.query_parameter_list());
-    return this.visit(ctx.query_body());
-  };
+  }
 
   visitType_parameter_list = (_ctx: Type_parameter_listContext): Type =>
-    this.typeStore.error("Type parameter lists not supported yet");
+    this.typeStore.error("type_parameter_list");
 
   visitQuery_parameter_list = (ctx: Query_parameter_listContext): Type => {
     for (const param of ctx.query_parameter_list()) {
@@ -365,9 +396,29 @@ export class Checker
   visitType_def = (_ctx: Type_defContext): Type =>
     this.typeStore.error("Type definitions not supported yet");
 
-  visitType_expression = (ctx: Type_expressionContext): Type => {
-    // TODO: For now we only support primitive type expressions, which are just identifiers
-    const name = ctx.identifier().getText() as PrimitiveName;
-    return this.typeStore.primitive(name);
-  };
+  visitType_expression = (ctx: Type_expressionContext): Type =>
+    this.visit(ctx.type_ref());
+
+  visitType_ref = (ctx: Type_refContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const pglRef = ctx.pgl_ident_ref();
+      const qname = pglRef.qualified_name();
+      const idents = qname.identifier_list();
+      if (idents.length !== 1) {
+        return this.typeStore.error("Qualified type names not supported yet");
+      }
+      let type: Type;
+      const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
+      if (defId) {
+        type = this.ctx.getOrCreateTypeVar(defId);
+      } else {
+        // Not resolved — treat as primitive type name
+        type = this.typeStore.primitive(idents[0].getText() as PrimitiveName);
+      }
+      // Propagate type to inner nodes for marker resolution
+      this.ctx.getOrInsert(pglRef.contentHash, () => type);
+      this.ctx.getOrInsert(qname.contentHash, () => type);
+      this.ctx.getOrInsert(idents[0].contentHash, () => type);
+      return type;
+    });
 }

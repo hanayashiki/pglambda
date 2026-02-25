@@ -21,7 +21,7 @@ describe("ANTLR Parser Snapshot Tests", () => {
     .filter((f) => f.endsWith(".pgl"))
     .sort(); // Consistent order across platforms
 
-  test.each(fixtures)("parses %s", (filename: string) => {
+  test.each(fixtures)("parses %s", async (filename: string) => {
     const filepath = join(inputDir, filename);
     const input = readFileSync(filepath, "utf-8");
 
@@ -38,7 +38,7 @@ describe("ANTLR Parser Snapshot Tests", () => {
     const formattedTree = formatParseTree(result.parseTree!);
 
     // Snapshot the parse tree to individual file
-    expect(formattedTree).toMatchFileSnapshot(`fixtures/parser/__snapshots__/${filename}.snap`);
+    await expect(formattedTree).toMatchFileSnapshot(`fixtures/parser/__snapshots__/${filename}.snap`);
   });
 
   // Ensure we have at least one test

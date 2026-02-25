@@ -43,6 +43,7 @@ import { Columnref_or_pgl_dollar_ident_refContext } from "./PGLParser.js";
 import { AexprconstContext } from "./PGLParser.js";
 import { Type_defContext } from "./PGLParser.js";
 import { Type_expressionContext } from "./PGLParser.js";
+import { Type_refContext } from "./PGLParser.js";
 
 
 /**
@@ -295,5 +296,11 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitType_expression?: (ctx: Type_expressionContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.type_ref`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitType_ref?: (ctx: Type_refContext) => Result;
 }
 

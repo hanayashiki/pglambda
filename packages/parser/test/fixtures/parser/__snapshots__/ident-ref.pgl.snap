@@ -11,8 +11,11 @@ prog
             "x"
           ":"
           type_expression
-            identifier
-              "text"
+            type_ref
+              pgl_ident_ref
+                qualified_name
+                  identifier
+                    "text"
         ")"
       "{"
       query_body

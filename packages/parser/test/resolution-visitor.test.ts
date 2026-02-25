@@ -56,10 +56,10 @@ describe("ResolutionVisitor", () => {
     .filter((f) => f.endsWith(".pgl"))
     .sort();
 
-  test.each(fixtures)("resolves %s", (filename: string) => {
+  test.each(fixtures)("resolves %s", async (filename: string) => {
     const source = readFileSync(join(inputDir, filename), "utf-8");
     const snapshot = formatResolutions(source, filename);
-    expect(snapshot).toMatchFileSnapshot(
+    await expect(snapshot).toMatchFileSnapshot(
       `fixtures/resolution/__snapshots__/${filename}.snap`,
     );
   });

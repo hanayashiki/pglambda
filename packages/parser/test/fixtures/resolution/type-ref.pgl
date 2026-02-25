@@ -1,0 +1,2 @@
+query f<T>(x: T) { select $x as col }
+--            ^ ref1

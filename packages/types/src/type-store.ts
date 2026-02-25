@@ -18,6 +18,7 @@ import type {
 } from "./type.ts";
 import type { PrimitiveName } from "./primitives.ts";
 import { TypeConstructorStore } from "./type-constructor-store.js";
+import { TypeSchemeStore } from "./type-scheme-store.js";
 
 type CacheKey = string & { __brand: "CacheKey" };
 
@@ -36,6 +37,7 @@ export class TypeStore {
   private typeCache = new Map<CacheKey, Type>();
   private typeById = new Map<TypeId, Type>();
   private typeCtorStore = new TypeConstructorStore();
+  private typeSchemeStore = new TypeSchemeStore();
 
   constructor() {}
 
@@ -44,6 +46,10 @@ export class TypeStore {
    */
   get ctors(): TypeConstructorStore {
     return this.typeCtorStore;
+  }
+
+  get schemes(): TypeSchemeStore {
+    return this.typeSchemeStore;
   }
 
   /**
@@ -330,8 +336,13 @@ export class TypeStore {
         return `(${params}) => ${this.typeToString(type.returnType)}`;
       }
 
-      case "param":
+      case "param": {
+        const scheme = this.typeSchemeStore.get(type.schemeId);
+        if (scheme && type.index < scheme.parameters.length) {
+          return scheme.parameters[type.index];
+        }
         return `$${type.schemeId}:${type.index}`;
+      }
     }
   }
 

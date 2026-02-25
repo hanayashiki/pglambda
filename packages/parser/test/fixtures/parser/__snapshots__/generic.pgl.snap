@@ -16,8 +16,11 @@ prog
             "x"
           ":"
           type_expression
-            identifier
-              "T"
+            type_ref
+              pgl_ident_ref
+                qualified_name
+                  identifier
+                    "T"
         ")"
       "{"
       query_body
@@ -55,8 +58,11 @@ prog
             "id"
           ":"
           type_expression
-            identifier
-              "text"
+            type_ref
+              pgl_ident_ref
+                qualified_name
+                  identifier
+                    "text"
         ")"
       "{"
       query_body
@@ -125,8 +131,11 @@ prog
             "id"
           ":"
           type_expression
-            identifier
-              "text"
+            type_ref
+              pgl_ident_ref
+                qualified_name
+                  identifier
+                    "text"
         ")"
       "{"
       query_body
@@ -169,8 +178,11 @@ prog
                                               "::"
                                               "<"
                                               type_expression
-                                                identifier
-                                                  "text"
+                                                type_ref
+                                                  pgl_ident_ref
+                                                    qualified_name
+                                                      identifier
+                                                        "text"
                                               ">"
                                             "("
                                             pgl_expr
