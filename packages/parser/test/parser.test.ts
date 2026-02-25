@@ -16,7 +16,7 @@ const ctx: ParseContentContext = {
 };
 
 describe("ANTLR Parser Snapshot Tests", () => {
-  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input");
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "parser");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
     .sort(); // Consistent order across platforms
@@ -38,7 +38,7 @@ describe("ANTLR Parser Snapshot Tests", () => {
     const formattedTree = formatParseTree(result.parseTree!);
 
     // Snapshot the parse tree to individual file
-    expect(formattedTree).toMatchFileSnapshot(`__snapshots__/${filename}.snap`);
+    expect(formattedTree).toMatchFileSnapshot(`fixtures/parser/__snapshots__/${filename}.snap`);
   });
 
   // Ensure we have at least one test

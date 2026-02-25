@@ -1,0 +1,2 @@
+query g() { select ${unknown()} as y }
+--                   ^ call

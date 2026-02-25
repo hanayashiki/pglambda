@@ -15,6 +15,7 @@ export class AstStore {
   private astCache = new Map<ContentHash, ParserRuleContext>();
   private defs = new Map<DefinitionId, Definition>();
   private scopes = new Map<ScopeId, Scope>();
+  private resolutions = new Map<ContentHash, DefinitionId>();
 
   ensure<T extends ParserRuleContext>(ctx: T): T {
     const hash = ctx.contentHash;
@@ -53,5 +54,13 @@ export class AstStore {
 
   getScope(id: ScopeId): Scope | undefined {
     return this.scopes.get(id);
+  }
+
+  addResolution(hash: ContentHash, defId: DefinitionId): void {
+    this.resolutions.set(hash, defId);
+  }
+
+  getResolution(hash: ContentHash): DefinitionId | undefined {
+    return this.resolutions.get(hash);
   }
 }

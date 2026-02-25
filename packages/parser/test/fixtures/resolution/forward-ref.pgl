@@ -1,0 +1,3 @@
+query g() { select ${f()} as y }
+--                   ^ call
+query f() { select 1 as x }
