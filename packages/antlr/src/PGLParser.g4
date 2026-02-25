@@ -104,16 +104,16 @@ a_expr_unary: (PLUS | MINUS)? c_expr;
 
 // c_expr — atomic expressions
 
-c_expr: pgl_expr | columnref | aexprconst | L_PAREN a_expr R_PAREN;
+c_expr: DOLLAR_LCURLY pgl_expr R_CURLY | columnref | aexprconst | L_PAREN a_expr R_PAREN;
 
-// pgl_expr — ${...} wrapper for PGL expressions embedded in SQL
+// pgl_expr — PGL expression language (inside ${...})
 
-pgl_expr: DOLLAR_LCURLY pgl_query_call R_CURLY;
+pgl_expr: pgl_query_call | pgl_ident_ref;
 
-// pgl_query_call — PGL query call: f(x), mod.f::<T>(x)
+pgl_ident_ref: qualified_name;
 
 pgl_query_call:
-	qualified_name type_argument_list? L_PAREN (a_expr (COMMA a_expr)*)? R_PAREN;
+	qualified_name type_argument_list? L_PAREN (pgl_expr (COMMA pgl_expr)*)? R_PAREN;
 
 type_argument_list: COLONCOLON LT type_expression (COMMA type_expression)* GT;
 

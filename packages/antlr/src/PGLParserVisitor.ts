@@ -36,6 +36,7 @@ import { A_expr_mulContext } from "./PGLParser.js";
 import { A_expr_unaryContext } from "./PGLParser.js";
 import { C_exprContext } from "./PGLParser.js";
 import { Pgl_exprContext } from "./PGLParser.js";
+import { Pgl_ident_refContext } from "./PGLParser.js";
 import { Pgl_query_callContext } from "./PGLParser.js";
 import { Type_argument_listContext } from "./PGLParser.js";
 import { ColumnrefContext } from "./PGLParser.js";
@@ -252,6 +253,12 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitPgl_expr?: (ctx: Pgl_exprContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.pgl_ident_ref`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPgl_ident_ref?: (ctx: Pgl_ident_refContext) => Result;
 	/**
 	 * Visit a parse tree produced by `PGLParser.pgl_query_call`.
 	 * @param ctx the parse tree

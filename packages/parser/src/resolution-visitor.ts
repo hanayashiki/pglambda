@@ -1,14 +1,16 @@
 import {
   type ProgContext,
+  type Qualified_nameContext,
   ParserRuleContext,
   Pgl_query_callContext,
+  Pgl_ident_refContext,
 } from "@pglambda/antlr";
 import type { AstStore } from "#ast-store.js";
 import type { DefinitionId, ScopeId } from "./definitions.js";
 
 /**
  * Post-definition resolution pass.
- * Walks query bodies and resolves `qualified_name` references in `pgl_query_call`
+ * Walks query bodies and resolves `qualified_name` references in pgl_expr
  * nodes to their definitions via the scope chain.
  *
  * Runs after DefinitionVisitor, so all definitions (including forward-referenced
@@ -29,7 +31,9 @@ export class ResolutionVisitor {
 
   private walk(ctx: ParserRuleContext, scopeId: ScopeId): void {
     if (ctx instanceof Pgl_query_callContext) {
-      this.resolvePglQueryCall(ctx, scopeId);
+      this.resolveQualifiedName(ctx.qualified_name(), scopeId);
+    } else if (ctx instanceof Pgl_ident_refContext) {
+      this.resolveQualifiedName(ctx.qualified_name(), scopeId);
     }
 
     for (let i = 0; i < ctx.getChildCount(); i++) {
@@ -40,11 +44,10 @@ export class ResolutionVisitor {
     }
   }
 
-  private resolvePglQueryCall(
-    ctx: Pgl_query_callContext,
+  private resolveQualifiedName(
+    qname: Qualified_nameContext,
     scopeId: ScopeId,
   ): void {
-    const qname = ctx.qualified_name();
     const identifiers = qname.identifier_list();
 
     if (identifiers.length !== 1) return;

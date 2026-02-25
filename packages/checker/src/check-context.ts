@@ -54,6 +54,14 @@ export class CheckContext {
     return this.store;
   }
 
+  get astStore(): AstStore {
+    return this.ast;
+  }
+
+  getType(hash: ContentHash): Type | undefined {
+    return this.sccIn.imports.get(hash) ?? this.astToType.get(hash);
+  }
+
   addEquality(constraint: EqualityConstraint): void {
     this.constraints.push(constraint);
   }

@@ -89,32 +89,20 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
+                                        "${"
                                         pgl_expr
-                                          "${"
                                           pgl_query_call
                                             qualified_name
                                               identifier
                                                 "identity"
                                             "("
-                                            a_expr
-                                              a_expr_or
-                                                a_expr_and
-                                                  a_expr_between
-                                                    a_expr_in
-                                                      a_expr_unary_not
-                                                        a_expr_isnull
-                                                          a_expr_is_not
-                                                            a_expr_compare
-                                                              a_expr_like
-                                                                a_expr_add
-                                                                  a_expr_mul
-                                                                    a_expr_unary
-                                                                      c_expr
-                                                                        columnref
-                                                                          identifier
-                                                                            "$id"
+                                            pgl_expr
+                                              pgl_ident_ref
+                                                qualified_name
+                                                  identifier
+                                                    "$id"
                                             ")"
-                                          "}"
+                                        "}"
                               "="
                               a_expr_like
                                 a_expr_add
@@ -171,8 +159,8 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
+                                        "${"
                                         pgl_expr
-                                          "${"
                                           pgl_query_call
                                             qualified_name
                                               identifier
@@ -185,25 +173,13 @@ prog
                                                   "text"
                                               ">"
                                             "("
-                                            a_expr
-                                              a_expr_or
-                                                a_expr_and
-                                                  a_expr_between
-                                                    a_expr_in
-                                                      a_expr_unary_not
-                                                        a_expr_isnull
-                                                          a_expr_is_not
-                                                            a_expr_compare
-                                                              a_expr_like
-                                                                a_expr_add
-                                                                  a_expr_mul
-                                                                    a_expr_unary
-                                                                      c_expr
-                                                                        columnref
-                                                                          identifier
-                                                                            "$id"
+                                            pgl_expr
+                                              pgl_ident_ref
+                                                qualified_name
+                                                  identifier
+                                                    "$id"
                                             ")"
-                                          "}"
+                                        "}"
                               "="
                               a_expr_like
                                 a_expr_add

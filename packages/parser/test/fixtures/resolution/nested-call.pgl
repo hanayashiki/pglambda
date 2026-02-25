@@ -1,4 +1,4 @@
 query f(x: text) { select $x as v }
 query g(x: text) { select $x as v }
-query h(x: text) { select ${f(${g($x)})} as y }
---                          ^ a ^ b
+query h(x: text) { select ${f( g($x) )} as y }
+--                          ^ a^ b

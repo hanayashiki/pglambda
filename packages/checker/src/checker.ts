@@ -38,11 +38,12 @@ import {
   type Type_expressionContext,
   type Type_parameter_listContext,
   type Pgl_exprContext,
+  type Pgl_ident_refContext,
   type Pgl_query_callContext,
   type Type_argument_listContext,
   RuleNode,
 } from "@pglambda/antlr";
-import type { Type, TypeStore } from "@pglambda/types";
+import type { PrimitiveName, Type, TypeStore } from "@pglambda/types";
 import type { CheckContext } from "./check-context.js";
 
 export class Checker
@@ -188,8 +189,28 @@ export class Checker
     return this.typeStore.error("Unknown c_expr");
   };
 
-  visitPgl_expr = (ctx: Pgl_exprContext): Type =>
-    this.visit(ctx.pgl_query_call());
+  visitPgl_expr = (ctx: Pgl_exprContext): Type => {
+    if (ctx.pgl_query_call()) return this.visit(ctx.pgl_query_call());
+    if (ctx.pgl_ident_ref()) return this.visit(ctx.pgl_ident_ref());
+    return this.typeStore.error("Unknown pgl_expr");
+  };
+
+  visitPgl_ident_ref = (ctx: Pgl_ident_refContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const qname = ctx.qualified_name();
+      const idents = qname.identifier_list();
+      if (idents.length !== 1) {
+        throw new Error("Module-qualified references not implemented");
+      }
+      const defId = this.ctx.astStore.getResolution(qname.contentHash);
+      if (!defId) return this.typeStore.error("Unresolved reference");
+      const existing = this.ctx.getType(defId);
+      if (!existing) return this.typeStore.error("Reference to unchecked definition");
+      // Propagate type to qualified_name and identifier for marker resolution
+      this.ctx.getOrInsert(qname.contentHash, () => existing);
+      this.ctx.getOrInsert(idents[0].contentHash, () => existing);
+      return existing;
+    });
 
   visitPgl_query_call = (_ctx: Pgl_query_callContext): Type =>
     this.typeStore.error("PGL query calls not supported yet");
@@ -268,8 +289,12 @@ export class Checker
     return this.typeStore.error("query_parameter_list");
   };
 
-  visitQuery_parameter = (_ctx: Query_parameterContext): Type =>
-    this.typeStore.error("query_parameter");
+  visitQuery_parameter = (ctx: Query_parameterContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const typeExpr = ctx.type_expression();
+      if (typeExpr) return this.visit(typeExpr);
+      return this.typeStore.typevar();
+    });
 
   visitQuery_body = (ctx: Query_bodyContext): Type =>
     this.visit(ctx.simple_select());
@@ -325,6 +350,9 @@ export class Checker
   visitType_def = (_ctx: Type_defContext): Type =>
     this.typeStore.error("Type definitions not supported yet");
 
-  visitType_expression = (_ctx: Type_expressionContext): Type =>
-    this.typeStore.error("Type expressions not supported yet");
+  visitType_expression = (ctx: Type_expressionContext): Type => {
+    // TODO: For now we only support primitive type expressions, which are just identifiers
+    const name = ctx.identifier().getText() as PrimitiveName;
+    return this.typeStore.primitive(name);
+  };
 }

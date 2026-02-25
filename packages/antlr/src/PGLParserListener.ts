@@ -36,6 +36,7 @@ import { A_expr_mulContext } from "./PGLParser.js";
 import { A_expr_unaryContext } from "./PGLParser.js";
 import { C_exprContext } from "./PGLParser.js";
 import { Pgl_exprContext } from "./PGLParser.js";
+import { Pgl_ident_refContext } from "./PGLParser.js";
 import { Pgl_query_callContext } from "./PGLParser.js";
 import { Type_argument_listContext } from "./PGLParser.js";
 import { ColumnrefContext } from "./PGLParser.js";
@@ -383,6 +384,16 @@ export default class PGLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitPgl_expr?: (ctx: Pgl_exprContext) => void;
+	/**
+	 * Enter a parse tree produced by `PGLParser.pgl_ident_ref`.
+	 * @param ctx the parse tree
+	 */
+	enterPgl_ident_ref?: (ctx: Pgl_ident_refContext) => void;
+	/**
+	 * Exit a parse tree produced by `PGLParser.pgl_ident_ref`.
+	 * @param ctx the parse tree
+	 */
+	exitPgl_ident_ref?: (ctx: Pgl_ident_refContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.pgl_query_call`.
 	 * @param ctx the parse tree
