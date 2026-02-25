@@ -338,8 +338,9 @@ export class Checker
   visitQuery_parameter = (ctx: Query_parameterContext): Type =>
     this.ctx.getOrInsert(ctx.contentHash, () => {
       const typeExpr = ctx.type_expression();
-      if (typeExpr) return this.visit(typeExpr);
-      return this.typeStore.typevar();
+      const type = typeExpr ? this.visit(typeExpr) : this.typeStore.typevar();
+      this.ctx.getOrInsert(ctx.identifier().contentHash, () => type);
+      return type;
     });
 
   visitQuery_body = (ctx: Query_bodyContext): Type =>
