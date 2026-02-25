@@ -39,7 +39,7 @@ import { Pgl_exprContext } from "./PGLParser.js";
 import { Pgl_ident_refContext } from "./PGLParser.js";
 import { Pgl_query_callContext } from "./PGLParser.js";
 import { Type_argument_listContext } from "./PGLParser.js";
-import { ColumnrefContext } from "./PGLParser.js";
+import { Columnref_or_pgl_dollar_ident_refContext } from "./PGLParser.js";
 import { AexprconstContext } from "./PGLParser.js";
 import { Type_defContext } from "./PGLParser.js";
 import { Type_expressionContext } from "./PGLParser.js";
@@ -415,15 +415,15 @@ export default class PGLParserListener extends ParseTreeListener {
 	 */
 	exitType_argument_list?: (ctx: Type_argument_listContext) => void;
 	/**
-	 * Enter a parse tree produced by `PGLParser.columnref`.
+	 * Enter a parse tree produced by `PGLParser.columnref_or_pgl_dollar_ident_ref`.
 	 * @param ctx the parse tree
 	 */
-	enterColumnref?: (ctx: ColumnrefContext) => void;
+	enterColumnref_or_pgl_dollar_ident_ref?: (ctx: Columnref_or_pgl_dollar_ident_refContext) => void;
 	/**
-	 * Exit a parse tree produced by `PGLParser.columnref`.
+	 * Exit a parse tree produced by `PGLParser.columnref_or_pgl_dollar_ident_ref`.
 	 * @param ctx the parse tree
 	 */
-	exitColumnref?: (ctx: ColumnrefContext) => void;
+	exitColumnref_or_pgl_dollar_ident_ref?: (ctx: Columnref_or_pgl_dollar_ident_refContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.aexprconst`.
 	 * @param ctx the parse tree

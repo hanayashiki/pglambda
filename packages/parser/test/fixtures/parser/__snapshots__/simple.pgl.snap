@@ -45,7 +45,7 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        columnref
+                                        columnref_or_pgl_dollar_ident_ref
                                           identifier
                                             "id"
                               "="
@@ -54,7 +54,7 @@ prog
                                   a_expr_mul
                                     a_expr_unary
                                       c_expr
-                                        columnref
+                                        columnref_or_pgl_dollar_ident_ref
                                           identifier
                                             "$id"
       "}"

@@ -4,6 +4,7 @@ import {
   type Qualified_nameContext,
   type Pgl_query_callContext,
   type Pgl_ident_refContext,
+  type Columnref_or_pgl_dollar_ident_refContext,
 } from "@pglambda/antlr";
 import type { AstStore } from "#ast-store.js";
 import type { DefinitionId, ScopeId } from "./definitions.js";
@@ -44,6 +45,20 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
     this.resolveQualifiedName(ctx.qualified_name());
   };
 
+  visitColumnref_or_pgl_dollar_ident_ref = (ctx: Columnref_or_pgl_dollar_ident_refContext): void => {
+    const identifiers = ctx.identifier_list();
+    if (identifiers.length !== 1) return;
+
+    const text = identifiers[0].getText();
+    if (!text.startsWith("$")) return;
+
+    const name = text.slice(1);
+    const defId = this.lookupName(name);
+    if (defId !== undefined) {
+      this.store.addResolution(identifiers[0].contentHash, defId);
+    }
+  };
+
   private resolveQualifiedName(qname: Qualified_nameContext): void {
     const identifiers = qname.identifier_list();
 
@@ -52,7 +67,7 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
     const name = identifiers[0].getText();
     const defId = this.lookupName(name);
     if (defId !== undefined) {
-      this.store.addResolution(qname.contentHash, defId);
+      this.store.addResolution(identifiers[0].contentHash, defId);
     }
   }
 

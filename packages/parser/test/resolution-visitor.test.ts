@@ -26,14 +26,14 @@ function formatResolutions(source: string, filename: string): string {
       continue;
     }
 
-    // Marker lands on identifier; parent is qualified_name
-    const qname = marker.node.parentCtx!;
-    if (qname.ruleIndex !== PGLParser.RULE_qualified_name) {
-      lines.push(`${marker.label}: <not a qualified_name>`);
+    // Marker lands on identifier (the deepest rule node)
+    const ident = marker.node;
+    if (ident.ruleIndex !== PGLParser.RULE_identifier) {
+      lines.push(`${marker.label}: <not an identifier>`);
       continue;
     }
 
-    const defId = store.getResolution(qname.contentHash);
+    const defId = store.getResolution(ident.contentHash);
     if (!defId) {
       lines.push(`${marker.label}: <unresolved>`);
       continue;

@@ -1,1 +1,2 @@
-ref: queryParam(x)
+ref1: queryParam(x)
+ref2: queryParam(x)

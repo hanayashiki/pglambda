@@ -32,7 +32,7 @@ import {
   type A_expr_mulContext,
   type A_expr_unaryContext,
   type C_exprContext,
-  type ColumnrefContext,
+  type Columnref_or_pgl_dollar_ident_refContext,
   type AexprconstContext,
   type Type_defContext,
   type Type_expressionContext,
@@ -183,7 +183,7 @@ export class Checker
 
   visitC_expr = (ctx: C_exprContext): Type => {
     if (ctx.pgl_expr()) return this.visit(ctx.pgl_expr());
-    if (ctx.columnref()) return this.visit(ctx.columnref());
+    if (ctx.columnref_or_pgl_dollar_ident_ref()) return this.visit(ctx.columnref_or_pgl_dollar_ident_ref());
     if (ctx.aexprconst()) return this.visit(ctx.aexprconst());
     if (ctx.a_expr()) return this.visit(ctx.a_expr());
     return this.typeStore.error("Unknown c_expr");
@@ -202,7 +202,7 @@ export class Checker
       if (idents.length !== 1) {
         throw new Error("Module-qualified references not implemented");
       }
-      const defId = this.ctx.astStore.getResolution(qname.contentHash);
+      const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
       if (!defId) return this.typeStore.error("Unresolved reference");
       const existing = this.ctx.getType(defId);
       if (!existing) return this.typeStore.error("Reference to unchecked definition");
@@ -218,8 +218,23 @@ export class Checker
   visitType_argument_list = (_ctx: Type_argument_listContext): Type =>
     this.typeStore.error("Type argument lists not supported yet");
 
-  visitColumnref = (_ctx: ColumnrefContext): Type =>
-    this.typeStore.error("Column references not supported yet");
+  visitColumnref_or_pgl_dollar_ident_ref = (ctx: Columnref_or_pgl_dollar_ident_refContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const idents = ctx.identifier_list();
+      if (idents.length !== 1) {
+        return this.typeStore.error("Column references not supported yet");
+      }
+      const text = idents[0].getText();
+      if (!text.startsWith("$")) {
+        return this.typeStore.error("Column references not supported yet");
+      }
+      const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
+      if (!defId) return this.typeStore.error("Unresolved reference");
+      const existing = this.ctx.getType(defId);
+      if (!existing) return this.typeStore.error("Reference to unchecked definition");
+      this.ctx.getOrInsert(idents[0].contentHash, () => existing);
+      return existing;
+    });
 
   // --- Statement visitors ---
 

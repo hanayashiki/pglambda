@@ -19,9 +19,8 @@
   ],
   "scripts": {
     "check": "tsc",
-    "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript -visitor src/PGLParser.g4",
     "build": "pnpm gen && tsup",
-    "prepublishOnly": "pnpm run gen && pnpm run build",
+    "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript -visitor src/PGLParser.g4",
     "lint": "eslint"
   },
   "license": "MIT",

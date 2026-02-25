@@ -103,7 +103,7 @@ export default class PGLParser extends Parser {
 	public static readonly RULE_pgl_ident_ref = 32;
 	public static readonly RULE_pgl_query_call = 33;
 	public static readonly RULE_type_argument_list = 34;
-	public static readonly RULE_columnref = 35;
+	public static readonly RULE_columnref_or_pgl_dollar_ident_ref = 35;
 	public static readonly RULE_aexprconst = 36;
 	public static readonly RULE_type_def = 37;
 	public static readonly RULE_type_expression = 38;
@@ -172,7 +172,7 @@ export default class PGLParser extends Parser {
 		"where_clause", "a_expr", "a_expr_or", "a_expr_and", "a_expr_between", 
 		"a_expr_in", "a_expr_unary_not", "a_expr_isnull", "a_expr_is_not", "a_expr_compare", 
 		"a_expr_like", "a_expr_add", "a_expr_mul", "a_expr_unary", "c_expr", "pgl_expr", 
-		"pgl_ident_ref", "pgl_query_call", "type_argument_list", "columnref", 
+		"pgl_ident_ref", "pgl_query_call", "type_argument_list", "columnref_or_pgl_dollar_ident_ref", 
 		"aexprconst", "type_def", "type_expression",
 	];
 	public get grammarFileName(): string { return "PGLParser.g4"; }
@@ -1549,7 +1549,7 @@ export default class PGLParser extends Parser {
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 300;
-				this.columnref();
+				this.columnref_or_pgl_dollar_ident_ref();
 				}
 				break;
 			case 10:
@@ -1771,9 +1771,9 @@ export default class PGLParser extends Parser {
 		return localctx;
 	}
 	// @RuleVersion(0)
-	public columnref(): ColumnrefContext {
-		let localctx: ColumnrefContext = new ColumnrefContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 70, PGLParser.RULE_columnref);
+	public columnref_or_pgl_dollar_ident_ref(): Columnref_or_pgl_dollar_ident_refContext {
+		let localctx: Columnref_or_pgl_dollar_ident_refContext = new Columnref_or_pgl_dollar_ident_refContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 70, PGLParser.RULE_columnref_or_pgl_dollar_ident_ref);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
@@ -3330,8 +3330,8 @@ export class C_exprContext extends ParserRuleContext {
 	public R_CURLY(): TerminalNode {
 		return this.getToken(PGLParser.R_CURLY, 0);
 	}
-	public columnref(): ColumnrefContext {
-		return this.getTypedRuleContext(ColumnrefContext, 0) as ColumnrefContext;
+	public columnref_or_pgl_dollar_ident_ref(): Columnref_or_pgl_dollar_ident_refContext {
+		return this.getTypedRuleContext(Columnref_or_pgl_dollar_ident_refContext, 0) as Columnref_or_pgl_dollar_ident_refContext;
 	}
 	public aexprconst(): AexprconstContext {
 		return this.getTypedRuleContext(AexprconstContext, 0) as AexprconstContext;
@@ -3539,7 +3539,7 @@ export class Type_argument_listContext extends ParserRuleContext {
 }
 
 
-export class ColumnrefContext extends ParserRuleContext {
+export class Columnref_or_pgl_dollar_ident_refContext extends ParserRuleContext {
 	constructor(parser?: PGLParser, parent?: ParserRuleContext, invokingState?: number) {
 		super(parent, invokingState);
     	this.parser = parser;
@@ -3563,22 +3563,22 @@ export class ColumnrefContext extends ParserRuleContext {
 		return this.getToken(PGLParser.STAR, i);
 	}
     public get ruleIndex(): number {
-    	return PGLParser.RULE_columnref;
+    	return PGLParser.RULE_columnref_or_pgl_dollar_ident_ref;
 	}
 	public enterRule(listener: PGLParserListener): void {
-	    if(listener.enterColumnref) {
-	 		listener.enterColumnref(this);
+	    if(listener.enterColumnref_or_pgl_dollar_ident_ref) {
+	 		listener.enterColumnref_or_pgl_dollar_ident_ref(this);
 		}
 	}
 	public exitRule(listener: PGLParserListener): void {
-	    if(listener.exitColumnref) {
-	 		listener.exitColumnref(this);
+	    if(listener.exitColumnref_or_pgl_dollar_ident_ref) {
+	 		listener.exitColumnref_or_pgl_dollar_ident_ref(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
-		if (visitor.visitColumnref) {
-			return visitor.visitColumnref(this);
+		if (visitor.visitColumnref_or_pgl_dollar_ident_ref) {
+			return visitor.visitColumnref_or_pgl_dollar_ident_ref(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

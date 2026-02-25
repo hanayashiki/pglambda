@@ -1,2 +1,5 @@
 query f(x: text) { select ${x} as col }
---                          ^ ref
+--                          ^ ref1
+
+query f(x: text) { select $x as col }
+--                         ^ ref2
