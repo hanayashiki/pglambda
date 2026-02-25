@@ -80,7 +80,7 @@ export function parseContent(
 
     // Resolve name references in query bodies
     const resolver = new ResolutionVisitor(context.astStore);
-    resolver.resolve(parseTree);
+    resolver.visit(parseTree);
 
     return { uri, parseTree, errors, markers, success: errors.length === 0 };
   } catch (error) {
