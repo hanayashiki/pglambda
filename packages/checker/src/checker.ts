@@ -293,36 +293,38 @@ export class Checker
 
   visitQuery_def = (ctx: Query_defContext): Type =>
     this.ctx.getOrInsert(ctx.contentHash, () => {
+      let schemeBodyTypeVar: Type | undefined;
       const typeParamList = ctx.type_parameter_list();
       if (typeParamList) {
         const schemeId = this.typeStore.schemes.freshId();
-        this.checkTypeParameterList(typeParamList, schemeId);
+        schemeBodyTypeVar = this.checkTypeParameterList(typeParamList, schemeId);
       }
       this.visit(ctx.query_parameter_list());
-      return this.visit(ctx.query_body());
+      const bodyType = this.visit(ctx.query_body());
+      if (schemeBodyTypeVar) {
+        this.ctx.addEquality({ t1: schemeBodyTypeVar, t2: bodyType });
+      }
+      return bodyType;
     });
 
   private checkTypeParameterList(
     ctx: Type_parameter_listContext,
     schemeId: TypeSchemeId,
-  ): void {
+  ): Type {
     const idents = ctx.identifier_list();
     const names = idents.map((id) => id.getText());
-    // FIXME: Per 03_TYPE_CHECKER.md, trivial SCCs should skip Phase 1 and
-    // construct the scheme from the body's result type after Phase 2.
-    // Non-trivial SCCs need Phase 1 to pre-build schemes from explicit
-    // annotations before checking bodies. Currently we always register a
-    // placeholder scheme here.
+    const bodyTypeVar = this.typeStore.typevar();
     this.typeStore.schemes.register({
       id: schemeId,
       name: "",
       parameters: names,
-      body: this.typeStore.error("unresolved scheme body"),
+      body: bodyTypeVar,
     });
     for (let i = 0; i < idents.length; i++) {
       const tv = this.ctx.getOrCreateTypeVar(idents[i].contentHash);
       this.ctx.addEquality({ t1: tv, t2: this.typeStore.param(schemeId, i) });
     }
+    return bodyTypeVar;
   }
 
   visitType_parameter_list = (_ctx: Type_parameter_listContext): Type =>

@@ -43,7 +43,7 @@ export function checkAndExtractMarkers(source: string, filename = "test.pgl"): s
   const markerEntries = markers
     .filter((m) => m.node !== null)
     .map((m) => {
-      const type = result.scc.exports.get(m.node!.contentHash);
+      const type = result.scc.exportedTypes.get(m.node!.contentHash);
       const typeStr = type ? store.typeToString(type) : "<unresolved>";
       return { label: m.label, typeStr };
     })
@@ -51,6 +51,14 @@ export function checkAndExtractMarkers(source: string, filename = "test.pgl"): s
 
   for (const { label, typeStr } of markerEntries) {
     lines.push(`${label}: ${typeStr}`);
+  }
+
+  if (result.scc.exportedTypeSchemes.length > 0) {
+    lines.push("");
+    lines.push("schemes:");
+    for (const scheme of result.scc.exportedTypeSchemes) {
+      lines.push(`  ${store.typeSchemeToString(scheme)}`);
+    }
   }
 
   if (result.errors.length > 0) {

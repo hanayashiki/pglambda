@@ -1,5 +1,5 @@
 import type { ContentHash } from "@pglambda/antlr/antlr4";
-import type { Type } from "@pglambda/types";
+import type { Type, TypeScheme } from "@pglambda/types";
 
 export type { ContentHash };
 
@@ -8,7 +8,8 @@ export type { ContentHash };
  *
  * An SCC has clear boundaries:
  * - imports: external AST nodes this SCC depends on (their types are already solved)
- * - exports: AST nodes this SCC makes available to the outside (types produced by solving)
+ * - exportedTypes: AST nodes this SCC makes available to the outside (types produced by solving)
+ * - exportedTypeSchemes: resolved type schemes for generic definitions in this SCC
  *
  * Internal nodes (literals, intermediate expressions) are resolved during
  * solving but are not part of the signature.
@@ -19,7 +20,9 @@ export type SCC = {
   /** External dependencies: hash → already-solved type */
   readonly imports: ReadonlyMap<ContentHash, Type>;
   /** Produced types: hash → resolved type */
-  readonly exports: Map<ContentHash, Type>;
+  readonly exportedTypes: Map<ContentHash, Type>;
+  /** Resolved type schemes for generic definitions */
+  readonly exportedTypeSchemes: TypeScheme[];
 };
 
 export type SCCIn = {

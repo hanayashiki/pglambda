@@ -15,4 +15,8 @@ export class TypeSchemeStore {
   get(id: TypeSchemeId): TypeScheme | undefined {
     return this.schemeById.get(id);
   }
+
+  values(): IterableIterator<TypeScheme> {
+    return this.schemeById.values();
+  }
 }

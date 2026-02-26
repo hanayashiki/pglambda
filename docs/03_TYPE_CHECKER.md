@@ -230,12 +230,12 @@ Constraints are solved **per SCC** in topological order. Each SCC follows a mult
 
 #### Phase 1: Resolve Generic Signatures
 
-Phase 1 pre-builds TypeSchemes for generic definitions from their annotations, so that other members of the same SCC can instantiate them during Phase 2.
+Every generic definition produces a TypeScheme. The two SCC cases differ in **when** and **from what** the scheme is constructed:
 
-**Rule:**
+- **Trivial SCC** (single item, no self-recursion): **Scheme from body.** No scheme is needed during Phase 2 (nothing in the SCC instantiates it). The definition proceeds directly to Phase 2 where its body is checked with declared type parameters represented as `ParamType` nodes (scoped to the definition's scheme ID). The scheme is constructed after Phase 2 from the body's result type, which already contains `ParamType` — no generalization step needed.
+- **Non-trivial SCC** (multiple items, or a single self-recursive item): **Scheme from annotations.** Generic definitions must have an explicit full signature (including return type). Phase 1 builds their TypeSchemes from annotations before Phase 2 begins, so other SCC members (or self-recursive calls) can instantiate them. A self-recursive generic definition (e.g., `query f<T>(x: T) { ... f!(x) ... }`) needs its own scheme to instantiate the recursive call, creating the same circular dependency as mutual recursion.
 
-- **Trivial SCC** (single item, no self-recursion): **Skip Phase 1.** The body does not reference itself, so no scheme is needed during Phase 2. The definition proceeds directly to Phase 2 where its body is checked with declared type parameters represented as `ParamType` nodes (scoped to the definition's scheme ID). The scheme is constructed directly from the body's result type, which already contains `ParamType` — no generalization step needed.
-- **Non-trivial SCC** (multiple items, or a single self-recursive item): Generic definitions must have an explicit full signature (including return type). Phase 1 builds their TypeSchemes from annotations before Phase 2 begins. A self-recursive generic definition (e.g., `query f<T>(x: T) { ... f!(x) ... }`) needs its own scheme to instantiate the recursive call, creating the same circular dependency as mutual recursion.
+Both cases allocate a scheme ID and create `ParamType` nodes scoped to it. Both end up with a TypeScheme whose body contains `ParamType`. The difference is only the source: inferred from the body (trivial) vs. pre-built from annotations (non-trivial).
 
 For each generic def in a non-trivial SCC:
 1. Verify the signature is fully annotated (error if not)
@@ -243,11 +243,11 @@ For each generic def in a non-trivial SCC:
 3. Build the TypeScheme from annotations (parameter types + return type, using `ParamType`)
 4. The scheme is now available for instantiation in Phase 2
 
-**Rationale:** In a non-trivial SCC, a generic def's scheme is needed by other SCC members during Phase 2, but building the scheme from the body would require checking the body, which depends on the other members — a circular dependency. Requiring an explicit signature breaks the cycle. In a trivial SCC, this circularity doesn't exist: no other member needs the scheme, so we can skip Phase 1 and infer the scheme from the body in Phase 2.
+**Rationale:** In a non-trivial SCC, a generic def's scheme is needed by other SCC members during Phase 2, but building the scheme from the body would require checking the body, which depends on the other members — a circular dependency. Requiring an explicit signature breaks the cycle. In a trivial SCC, this circularity doesn't exist: no other member needs the scheme, so the scheme can be constructed from the body after Phase 2.
 
 **ParamType scoping:** Each `ParamType` carries a `schemeId` identifying which generic definition it belongs to. `ParamType(schemeA, 0)` and `ParamType(schemeB, 0)` are different types that will not unify — even if both represent "the first type parameter." This ensures soundness regardless of how constraints are generated or whether multiple generic definitions are checked in the same unification context.
 
-**Example — non-trivial SCC (Phase 1 required):**
+**Example — non-trivial SCC (scheme from annotations):**
 ```pgl
 -- Both form an SCC (f1 → f2 → f1). Both are generic.
 -- Return type annotations required because they're in a non-trivial SCC.
@@ -263,11 +263,11 @@ query f2<U>(y: U): SetOf<{val: U}> {
 
 Phase 1 builds both schemes purely from annotations, each with its own scheme ID: `f1: ∀T. (x: T) => SetOf<{val: T}>`, `f2: ∀U. (y: U) => SetOf<{val: U}>`. Phase 2 checks bodies with both schemes available for instantiation — call sites replace `ParamType` with fresh type vars.
 
-**Example — trivial SCC (Phase 1 skipped):**
+**Example — trivial SCC (scheme from body):**
 ```pgl
--- Single definition, no mutual recursion → skip Phase 1.
+-- Single definition, no mutual recursion → scheme built after Phase 2.
 -- Phase 2 checks the body with T, U as ParamType nodes.
--- Scheme is constructed directly from the result.
+-- Scheme is constructed from the body's result type.
 query map<T, U>(hmms: T, f: (s: T) => U) {
   f(s)
 }

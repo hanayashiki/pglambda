@@ -347,6 +347,19 @@ export class TypeStore {
   }
 
   /**
+   * Convert a type scheme to a human-readable string representation
+   * Uses Rust-like `for<T>` syntax for type parameters.
+   *
+   * @example
+   * store.typeSchemeToString(scheme) // "for<T> SetOf<{col: T}>"
+   */
+  typeSchemeToString(scheme: TypeScheme): string {
+    const params = scheme.parameters.join(", ");
+    const body = this.typeToString(scheme.body);
+    return `for<${params}> ${body}`;
+  }
+
+  /**
    * Apply a type constructor to type arguments
    * Validates arity and creates an AppliedType
    *

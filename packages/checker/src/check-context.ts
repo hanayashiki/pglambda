@@ -3,6 +3,7 @@ import {
   type Type,
   type TypeStore,
   type TypeConstructorId,
+  type TypeScheme,
   type AppliedType,
 } from "@pglambda/types";
 import type { EqualityConstraint } from "./constraint.js";
@@ -64,6 +65,7 @@ export class CheckContext {
 
   addEquality(constraint: EqualityConstraint): void {
     this.constraints.push(constraint);
+    this.unification.unify(constraint.t1, constraint.t2);
   }
 
   addError(message: string): void {
@@ -80,32 +82,43 @@ export class CheckContext {
 
   /** Collect all constraints from AST and solve the types. */
   check(): CheckResult {
-    // 1. Visit all SCC nodes — populates astToType and constraints
+    // 0. Partition nodes: generic defs first, then the rest
+    const sortedNodes = this.partitionNodes();
+
+    // 1. Visit generic defs first to resolve the type scheme, then other nodes
     const checker = new Checker(this);
-    for (const node of this.sccIn.nodes) {
+    for (const node of sortedNodes) {
       checker.visit(this.ast.getAs(node));
     }
 
-    // 2. Unify all collected constraints
-    for (const { t1, t2 } of this.constraints) {
-      this.unification.unify(t1, t2);
-    }
+    // 2. Constraints already unified during visitor via addEquality
     const unificationResult = this.unification.getResult();
 
     // 3. Resolve exported node types through substitution
-    const typeExports = new Map<ContentHash, Type>();
+    const exportedTypes = new Map<ContentHash, Type>();
     for (const hash of this.sccIn.exportedNodes) {
       const type = this.resolveExport(hash);
       if (type) {
-        typeExports.set(hash, this.unification.deepResolve(type));
+        exportedTypes.set(hash, this.unification.deepResolve(type));
       }
+    }
+
+    // 4. Resolve type scheme bodies through substitution
+    const exportedTypeSchemes: TypeScheme[] = [];
+    for (const scheme of this.store.schemes.values()) {
+      const resolvedBody = this.unification.deepResolve(scheme.body);
+      exportedTypeSchemes.push({
+        ...scheme,
+        body: resolvedBody,
+      });
     }
 
     return {
       scc: {
         nodes: this.sccIn.nodes,
         imports: this.sccIn.imports,
-        exports: typeExports,
+        exportedTypes,
+        exportedTypeSchemes,
       },
       errors: [
         ...this.errors,
@@ -135,6 +148,31 @@ export class CheckContext {
     }
 
     return undefined;
+  }
+
+  /**
+   * Partition SCC nodes: generic defs first, then the rest.
+   * Errors if multiple generic defs are found (non-trivial SCC not supported yet).
+   */
+  private partitionNodes(): ContentHash[] {
+    const genericDefNodes: ContentHash[] = [];
+    const otherNodes: ContentHash[] = [];
+    for (const node of this.sccIn.nodes) {
+      const def = this.ast.getDefinition(node);
+      if (def && def.tag === "query" && def.data.typeParams.length > 0) {
+        genericDefNodes.push(node);
+      } else {
+        otherNodes.push(node);
+      }
+    }
+
+    if (genericDefNodes.length > 1) {
+      this.errors.push({
+        message: "Non-trivial SCC with multiple generic definitions not supported yet",
+      });
+    }
+
+    return [...genericDefNodes, ...otherNodes];
   }
 
   /**
