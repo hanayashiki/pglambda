@@ -1,0 +1,7 @@
+/* PGL syntax highlighting — extends mdbook's hljs theme */
+code.language-pgl .hljs-variable {
+  color: #e06c75;
+}
+code.language-pgl .hljs-punctuation {
+  color: #abb2bf;
+}

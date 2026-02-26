@@ -8,6 +8,7 @@
     "build": "mdbook build"
   },
   "dependencies": {
+    "@pglambda/antlr": "workspace:*",
     "@pglambda/parser": "workspace:*",
     "@pglambda/utils": "workspace:*",
     "mdast-util-from-markdown": "^2.0.2"

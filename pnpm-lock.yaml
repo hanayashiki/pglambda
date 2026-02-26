@@ -38,6 +38,9 @@ importers:
 
   docs:
     dependencies:
+      '@pglambda/antlr':
+        specifier: workspace:*
+        version: link:../packages/antlr
       '@pglambda/parser':
         specifier: workspace:*
         version: link:../packages/parser
