@@ -16,22 +16,6 @@ query get_user($id: text) {
 
 This requires the full pipeline: parsing → DDL extraction → table-to-row-type mapping → constraint generation → type checking → code generation → runtime result validation.
 
-### Completed
-
-- [x] TypeStore with structural sharing
-- [x] Row polymorphism support (open/closed records)
-- [x] Unification algorithm with row types
-- [x] Substitution with provenance tracking
-- [x] VFS implementation with better-result
-- [x] Compiler folder structure with query-based architecture
-- [x] `loadTextContent` input query (reads .pgl files)
-- [x] Type constructor, e.g. `SetOf<UserRow>`
-- [x] Constraint generation for `simple_select` (literals, target aliases)
-- [x] Generic query call instantiation with type schemes
-- [x] PGL literal support (`${1}`, `${true}`)
-- [x] Parameter references (`$x` shorthand)
-- [x] Type scheme resolution for trivial SCCs via unification
-
 ### In Progress
 
 - [ ] `database` block: parse PostgreSQL DDL, extract table → row type mappings

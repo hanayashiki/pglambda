@@ -1,6 +1,6 @@
 # pglambda Project Guide
 
-> **📖 Full Design Documentation:** See [DESIGN.md](DESIGN.md) for comprehensive project design, architecture, and implementation roadmap.
+> **📖 Full Design Documentation:** See [./docs/src/SUMMARY.md](./docs/src/SUMMARY.md) for comprehensive project design, architecture, and implementation roadmap.
 
 ## Project Overview
 
