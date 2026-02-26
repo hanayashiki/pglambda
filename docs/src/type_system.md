@@ -10,7 +10,7 @@ pglambda uses a constraint-based type inference system to provide type safety wi
 
 **PostgreSQL allows (with implicit casts):**
 
-```sql
+```pgl-unchecked
 SELECT '1' + 1;        -- Works: '1' coerced to int → 2
 SELECT 1 + 1.5;        -- Works: 1 coerced to numeric → 2.5
 SELECT 'hello' || 123; -- Works: 123 coerced to text → 'hello123'
@@ -18,7 +18,7 @@ SELECT 'hello' || 123; -- Works: 123 coerced to text → 'hello123'
 
 **pglambda rejects (strict typing):**
 
-```pgl
+```pgl-unchecked
 select '1' + 1         -- ERROR: Cannot add text and int
 select 1 + 1.5         -- ERROR: Cannot add int and numeric
 select 'hello' || 123  -- ERROR: Cannot concat text and int
@@ -26,7 +26,7 @@ select 'hello' || 123  -- ERROR: Cannot concat text and int
 
 **Users must be explicit:**
 
-```pgl
+```pgl-unchecked
 select '1'::int + 1           -- OK: explicit cast
 select 1::numeric + 1.5       -- OK: explicit cast
 select 'hello' || 123::text   -- OK: explicit cast
@@ -43,7 +43,7 @@ select 'hello' || 123::text   -- OK: explicit cast
 
 While we don't support implicit coercion, we **do** support function and operator overloading, because PostgreSQL operators are genuinely polymorphic:
 
-```pgl
+```pgl-unchecked
 -- Different overloads of +
 1 + 2                           -- int + int → int
 1.5 + 2.5                       -- numeric + numeric → numeric

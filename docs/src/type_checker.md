@@ -90,7 +90,7 @@ Dependencies:
 
 **Example with cycles:**
 
-```pgl
+```pgl-unchecked
 -- Mutually recursive CTEs
 with recursive
   a as (select * from b where x > 0),
@@ -248,7 +248,7 @@ For each generic def in a non-trivial SCC:
 **ParamType scoping:** Each `ParamType` carries a `schemeId` identifying which generic definition it belongs to. `ParamType(schemeA, 0)` and `ParamType(schemeB, 0)` are different types that will not unify — even if both represent "the first type parameter." This ensures soundness regardless of how constraints are generated or whether multiple generic definitions are checked in the same unification context.
 
 **Example — non-trivial SCC (scheme from annotations):**
-```pgl
+```pgl-unchecked
 -- Both form an SCC (f1 → f2 → f1). Both are generic.
 -- Return type annotations required because they're in a non-trivial SCC.
 
@@ -264,7 +264,7 @@ query f2<U>(y: U): SetOf<{val: U}> {
 Phase 1 builds both schemes purely from annotations, each with its own scheme ID: `f1: ∀T. (x: T) => SetOf<{val: T}>`, `f2: ∀U. (y: U) => SetOf<{val: U}>`. Phase 2 checks bodies with both schemes available for instantiation — call sites replace `ParamType` with fresh type vars.
 
 **Example — trivial SCC (scheme from body):**
-```pgl
+```pgl-unchecked
 -- Single definition, no mutual recursion → scheme built after Phase 2.
 -- Phase 2 checks the body with T, U as ParamType nodes.
 -- Scheme is constructed from the body's result type.
@@ -348,7 +348,7 @@ All variables resolved → monomorphic scheme: () => {x: int}
 
 #### Example Flow
 
-```pgl
+```pgl-unchecked
 select x + 1 where x : α (unknown)
 ```
 
@@ -438,7 +438,7 @@ Phase 3 (Overload - Type Validation):
 
 ### Example 3: SCC with Mutual Recursion
 
-```pgl
+```pgl-unchecked
 with recursive
   evens as (select 0 as n union all select n+2 from odds where n < 10),
   odds  as (select 1 as n union all select n+2 from evens where n < 10)

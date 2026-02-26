@@ -1,0 +1,18 @@
+{
+  "name": "@pglambda/docs",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-pgl": "tsx preprocessor-pgl-check.ts",
+    "build": "mdbook build"
+  },
+  "dependencies": {
+    "@pglambda/parser": "workspace:*",
+    "@pglambda/utils": "workspace:*",
+    "mdast-util-from-markdown": "^2.0.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

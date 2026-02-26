@@ -4,7 +4,7 @@
 
 A `database` block contains pure PostgreSQL DDL. It defines the tables, constraints, and indexes that pglambda type-checks queries against.
 
-```sql
+```pgl-unchecked
 database {
   create table public.users (
     id int4 primary key,
@@ -26,7 +26,7 @@ The content inside `database { }` is standard PostgreSQL DDL — no invented syn
 
 Table names in `database` blocks should use fully qualified names (`schema.table`). PostgreSQL's `search_path` is **not** applied inside DDL blocks — what you write is what you get.
 
-```sql
+```pgl-unchecked
 database {
   create table public.users (id text, name text);   -- explicit schema
 }
@@ -50,7 +50,7 @@ The `search_path` is a **compile-time setting** in the compiler configuration, n
 }
 ```
 
-```sql
+```pgl-unchecked
 -- user writes
 select id from users
 
@@ -72,14 +72,14 @@ This reflects reality — a PostgreSQL database has one definition per table, gl
 
 Query files must explicitly declare which DDL files they depend on via `use`. Referencing a table without `use`ing its DDL file is a compile error.
 
-```sql
+```pgl-unchecked
 -- schema/users.pgl
 database {
   create table public.users (id text primary key, name text);
 }
 ```
 
-```sql
+```pgl-unchecked
 -- schema/posts.pgl
 database {
   create table public.posts (
@@ -89,7 +89,7 @@ database {
 }
 ```
 
-```sql
+```pgl-unchecked
 -- queries/user-queries.pgl
 use "./schema/users.pgl"  -- declares dependency on users table
 
@@ -98,7 +98,7 @@ query get_user($id: text) {
 }
 ```
 
-```sql
+```pgl
 -- queries/bad.pgl
 -- no `use` for users-schema
 query bad($id: text) {
@@ -116,7 +116,7 @@ query bad($id: text) {
 
 This enables cross-table references like foreign keys across files:
 
-```sql
+```pgl-unchecked
 -- schema/posts.pgl
 use "./schema/users.pgl"
 
@@ -132,7 +132,7 @@ database {
 
 A `database` block in the same file is implicitly in scope — no `use` needed:
 
-```sql
+```pgl-unchecked
 database {
   create table public.users (id text, name text);
 }
@@ -162,7 +162,7 @@ Some PostgreSQL types don't map cleanly to host language types. `jsonb` is untyp
 
 A codec declares a named type that maps to a pg type. The host-side type and encode/decode logic live in the host language (TypeScript), not in pglambda.
 
-```sql
+```pgl-unchecked
 codec CustomJsonb<T> = jsonb
 codec CustomTz = timestamptz
 codec CustomNumeric = numeric
@@ -174,7 +174,7 @@ Pglambda knows: `CustomJsonb<T>` has pg type `jsonb`. It type-checks SQL using t
 
 Codecs can be referenced in `database` blocks via `${}` escape:
 
-```sql
+```pgl-unchecked
 database {
   create table public.events (
     id int4 primary key,
@@ -202,7 +202,7 @@ Since pglambda must carry row type information to runtime for codec decode (e.g.
 
 Codecs are one instance of a general **host bridge** pattern: pglambda declares a signature, the host language provides the implementation. This pattern extends to host-side functions:
 
-```sql
+```pgl-unchecked
 bridge getFullName(first: text, last: text): text
 ```
 

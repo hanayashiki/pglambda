@@ -46,14 +46,14 @@ PostgreSQL returns field metadata for each column in a query result. The `pg` dr
 Table aliases in SQL are local to the FROM clause. They do not survive subquery boundaries.
 
 **Aliases work within a FROM clause:**
-```sql
+```pgl
 -- u and o are valid qualifiers here
 SELECT u.id, o.id
 FROM users u JOIN orders o ON u.id = o.user_id
 ```
 
 **Aliases do not survive subqueries:**
-```sql
+```pgl
 -- ERROR: missing FROM-clause entry for table "users"
 SELECT users.id
 FROM (SELECT * FROM users JOIN orders ON users.id = orders.user_id) sub
@@ -68,7 +68,7 @@ FROM (SELECT * FROM users JOIN orders ON users.id = orders.user_id) sub
 ```
 
 **Set-returning functions are worse:**
-```sql
+```pgl
 -- Both columns named "id", completely indistinguishable
 SELECT * FROM unnest(array[1,2]) AS x(id), unnest(array[3,4]) AS y(id)
 -- x.id and y.id work inside the FROM clause

@@ -7,7 +7,7 @@ PGL source contains two distinct expression languages that compile to different 
 1. **SQL expressions** (`a_expr`): Compile to SQL text sent to PostgreSQL. These are the expressions inside `select`, `where`, `join on`, etc.
 2. **PGL expressions** (`pgl_expr`, inside `${...}`): Compile to host-language code (TypeScript, Rust, etc.) that runs during query construction.
 
-```pgl
+```pgl-unchecked
 query example(id: text) {
     select $id || '_suffix' as name       -- SQL expression: compiles to SQL text
     where id = ${find_id($id)}            -- PGL expression: compiles to host code
@@ -72,7 +72,7 @@ Once a value passes the boundary check, all subsequent operations within PGL-gen
 
 PGL arithmetic follows PostgreSQL semantics. PostgreSQL **errors on integer overflow** rather than silently wrapping:
 
-```sql
+```pgl-unchecked
 SELECT 2147483647 + 1;
 -- ERROR: integer out of range
 ```

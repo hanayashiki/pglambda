@@ -4,7 +4,7 @@
 
 The immediate goal: end-to-end type-safe compilation of a simple query against a declared schema.
 
-```sql
+```pgl-unchecked
 database {
   create table public.users (id text, name text);
 }

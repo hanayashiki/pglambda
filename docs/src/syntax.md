@@ -22,7 +22,7 @@ Identifiers are case-sensitive (like TypeScript), while SQL keywords remain case
 
 You can call one builder inside another using `${...}` syntax. Each `query` definition compiles to a host-language function that builds and returns a SQL query. The `${...}` syntax calls other query-builder functions during query construction.
 
-```pgl
+```pgl-unchecked
 query user_by_id(user: UserRow, id: text) {
     user.id = $id
 }
@@ -40,7 +40,7 @@ Each `.pgl` file is a module. Use `export` to make queries available to other mo
 
 **Example:**
 
-```pgl
+```pgl-unchecked
 // users.pgl
 export query get_user_by_id($id: text) {
     select * from users where id = $id
@@ -51,7 +51,7 @@ export query get_user_by_email($email: text) {
 }
 ```
 
-```pgl
+```pgl-unchecked
 // admin.pgl
 import "./users.pgl"
 
