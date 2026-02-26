@@ -4,6 +4,7 @@ import {
   type TypeStore,
   type TypeConstructorId,
   type TypeScheme,
+  type TypeSchemeId,
   type AppliedType,
 } from "@pglambda/types";
 import type { EqualityConstraint } from "./constraint.js";
@@ -30,6 +31,7 @@ export type CheckResult = {
 export class CheckContext {
   private readonly errors: CheckError[] = [];
   private readonly astToType: Map<ContentHash, Type>;
+  private readonly defToScheme = new Map<ContentHash, TypeSchemeId>();
 
   private constraints: EqualityConstraint[] = [];
   private unification: Unification;
@@ -70,6 +72,22 @@ export class CheckContext {
 
   addError(message: string): void {
     this.errors.push({ message });
+  }
+
+  setDefScheme(defHash: ContentHash, schemeId: TypeSchemeId): void {
+    this.defToScheme.set(defHash, schemeId);
+  }
+
+  getDefScheme(defHash: ContentHash): TypeSchemeId | undefined {
+    return this.defToScheme.get(defHash);
+  }
+
+  /**
+   * Instantiate a type scheme, resolving typevars through unification
+   * bindings so that ParamType nodes inside bound types get replaced.
+   */
+  instantiate(scheme: TypeScheme): Type {
+    return this.store.instantiate(scheme, (t) => this.unification.resolve(t));
   }
 
   /**

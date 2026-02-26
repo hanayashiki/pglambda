@@ -197,6 +197,7 @@ export class Checker
   visitPgl_expr = (ctx: Pgl_exprContext): Type => {
     if (ctx.pgl_query_call()) return this.visit(ctx.pgl_query_call());
     if (ctx.pgl_ident_ref()) return this.visit(ctx.pgl_ident_ref());
+    if (ctx.aexprconst()) return this.visit(ctx.aexprconst());
     return this.typeStore.error("Unknown pgl_expr");
   };
 
@@ -216,8 +217,46 @@ export class Checker
       return defType;
     });
 
-  visitPgl_query_call = (_ctx: Pgl_query_callContext): Type =>
-    this.typeStore.error("PGL query calls not supported yet");
+  visitPgl_query_call = (ctx: Pgl_query_callContext): Type =>
+    this.ctx.getOrInsert(ctx.contentHash, () => {
+      const qname = ctx.qualified_name();
+      const idents = qname.identifier_list();
+      if (idents.length !== 1) {
+        return this.typeStore.error("Module-qualified calls not supported yet");
+      }
+      const defId = this.ctx.astStore.getResolution(idents[0].contentHash);
+      if (!defId) return this.typeStore.error("Unresolved function call");
+
+      // Check if the definition has a type scheme (generic)
+      const schemeId = this.ctx.getDefScheme(defId);
+      let calledType: Type;
+      if (schemeId !== undefined) {
+        // Generic: instantiate scheme (replaces ParamTypes with fresh typevars)
+        const scheme = this.typeStore.schemes.get(schemeId)!;
+        calledType = this.ctx.instantiate(scheme);
+      } else {
+        // Non-generic: use the definition's type directly
+        calledType = this.ctx.getOrCreateTypeVar(defId);
+      }
+
+      // Visit arguments
+      const args = ctx.pgl_expr_list();
+      const argTypes = args.map((arg) => this.visit(arg));
+
+      // Create expected function type: (argTypes...) => freshResult
+      const resultTypeVar = this.typeStore.typevar();
+      const paramNames = argTypes.map((_, i) => `$${i}`);
+      const expectedFnType = this.typeStore.fn(
+        paramNames,
+        argTypes,
+        resultTypeVar,
+      );
+
+      // Unify called type with expected type
+      this.ctx.addEquality({ t1: calledType, t2: expectedFnType });
+
+      return resultTypeVar;
+    });
 
   visitType_argument_list = (_ctx: Type_argument_listContext): Type =>
     this.typeStore.error("Type argument lists not supported yet");
@@ -298,13 +337,27 @@ export class Checker
       if (typeParamList) {
         const schemeId = this.typeStore.schemes.freshId();
         schemeBodyTypeVar = this.checkTypeParameterList(typeParamList, schemeId);
+        this.ctx.setDefScheme(ctx.contentHash, schemeId);
       }
-      this.visit(ctx.query_parameter_list());
+
+      // Collect parameter names and types
+      const paramNames: string[] = [];
+      const paramTypes: Type[] = [];
+      for (const param of ctx.query_parameter_list().query_parameter_list()) {
+        const paramType = this.visit(param);
+        paramNames.push(param.identifier().getText());
+        paramTypes.push(paramType);
+      }
+
       const bodyType = this.visit(ctx.query_body());
+
+      // Build function type
+      const fnType = this.typeStore.fn(paramNames, paramTypes, bodyType);
+
       if (schemeBodyTypeVar) {
-        this.ctx.addEquality({ t1: schemeBodyTypeVar, t2: bodyType });
+        this.ctx.addEquality({ t1: schemeBodyTypeVar, t2: fnType });
       }
-      return bodyType;
+      return fnType;
     });
 
   private checkTypeParameterList(
@@ -321,8 +374,9 @@ export class Checker
       body: bodyTypeVar,
     });
     for (let i = 0; i < idents.length; i++) {
-      const tv = this.ctx.getOrCreateTypeVar(idents[i].contentHash);
-      this.ctx.addEquality({ t1: tv, t2: this.typeStore.param(schemeId, i) });
+      this.ctx.getOrInsert(idents[i].contentHash, () =>
+        this.typeStore.param(schemeId, i),
+      );
     }
     return bodyTypeVar;
   }

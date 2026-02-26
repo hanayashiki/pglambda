@@ -1,0 +1,3 @@
+query pair<T>(x: T, y: T) { select $x as a, $y as b }
+query f() { select ${pair(1, 2)} as result }
+--                  ^ s

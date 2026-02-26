@@ -1,0 +1,3 @@
+query swap<T, U>(x: T, y: U) { select $y as a, $x as b }
+query f() { select ${swap(1, 'hello')} as result }
+--                  ^ s

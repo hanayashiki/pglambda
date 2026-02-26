@@ -1,0 +1,4 @@
+s: SetOf<{a: text, b: int}>
+
+schemes:
+  for<T, U> (x: T, y: U) => SetOf<{a: U, b: T}>

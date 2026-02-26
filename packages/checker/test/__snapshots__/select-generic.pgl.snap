@@ -1,6 +1,0 @@
-x: T
-y: T
-z: T
-
-schemes:
-  for<T> SetOf<{col: T}>

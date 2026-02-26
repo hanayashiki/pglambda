@@ -1,0 +1,6 @@
+x: T
+y: T
+z: T
+
+schemes:
+  for<T> (x: T) => SetOf<{col: T}>

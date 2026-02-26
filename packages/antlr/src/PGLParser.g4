@@ -112,7 +112,7 @@ c_expr:
 
 // pgl_expr — PGL expression language (inside ${...})
 
-pgl_expr: pgl_query_call | pgl_ident_ref;
+pgl_expr: pgl_query_call | pgl_ident_ref | aexprconst;
 
 pgl_ident_ref: qualified_name;
 

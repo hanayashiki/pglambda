@@ -1,0 +1,3 @@
+query identity<T>(x: T) { select $x as col }
+query f() { select ${identity(1)} as result }
+--                  ^ s

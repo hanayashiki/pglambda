@@ -17,7 +17,7 @@ describe("Checker Snapshot Tests", () => {
     const snapshot = checkAndExtractMarkers(input, filename);
 
     await expect(snapshot).toMatchFileSnapshot(
-      `__snapshots__/${filename}.snap`,
+      `input/${filename}.snap`,
     );
   });
 

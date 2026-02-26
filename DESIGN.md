@@ -50,9 +50,9 @@ PGL uses a unified identifier system where `$` is a legal character anywhere in 
 
 Identifiers are case-sensitive (like TypeScript), while SQL keywords remain case-insensitive (PostgreSQL convention).
 
-## Nested Query Builder
+## Query Composition
 
-You can call one builder inside another using `${...}` syntax. This inlines the callee's body at compile time, distinguishing it from SQL function calls.
+You can call one builder inside another using `${...}` syntax. Each `query` definition compiles to a host-language function that builds and returns a SQL query. The `${...}` syntax calls other query-builder functions during query construction.
 
 ```pgl
 query user_by_id(user: UserRow, id: text) {
@@ -106,6 +106,12 @@ query admin_by_email($email: text) {
 - Access exported items with dot notation: `users.get_user_by_id`
 - Only `export` marked queries are visible to other modules
 - Files are compilation units — type inference stays within file boundaries
+
+---
+
+## Execution Model
+
+See [04_EXECUTION_MODEL.md](./docs/04_EXECUTION_MODEL.md) — covers the two expression worlds (SQL vs PGL), compilation targets, the bridge type system, and soundness requirements.
 
 ---
 
@@ -240,18 +246,22 @@ See [03_TYPE_CHECKER.md](./docs/03_TYPE_CHECKER.md)
 - [ ] Implement Solver (thin wrapper around Unification)
 - [x] Test: `select 1 as a, 'x' as b` → `SetOf<{a: int, b: text}>`
 
-### Phase 3: Minimal TypeScript Generation
+### Phase 3: Code Generation
 
-- [ ] Design an interface representation of a generated library
-- [ ] Use that interface to generate TypeScript query client
-  - Map our types to their types
+- [ ] Design a target-agnostic IR for generated query-builder functions
+- [ ] Implement TypeScript backend as first target
+  - PGL type → TS type mapping (`int` → `number`, `text` → `string`, etc.)
+  - Query function → TS function that returns `{ sql: string, params: unknown[] }`
   - Handle tsconfig for import syntax
+- [ ] Future: additional backends (Rust, Go, etc.)
 
 ### Roadmap
 
 - Expressions & operators (binary ops, overload resolution)
+- PGL expression language (`pgl_expr` — literals, arithmetic, function calls in `${...}`)
 - Schema & FROM clause (table references, column resolution)
 - Query parameters & function types (`query_def`)
+- Lambda definitions (`identity(x) => x` — PGL-level functions)
 - Module system (imports, exports, file boundaries)
 - SCC decomposition (Tarjan's, mutual recursion)
 - Error reporting & diagnostics

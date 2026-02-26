@@ -425,21 +425,34 @@ export class TypeStore {
   /**
    * Instantiate a type scheme by replacing all ParamType nodes
    * (matching the scheme's id) with fresh type variables.
+   *
+   * @param resolve Optional function to resolve typevars through
+   *   unification bindings. Needed because the scheme body and types
+   *   within it may contain typevars bound to ParamType nodes.
    */
-  instantiate(scheme: TypeScheme): Type {
+  instantiate(scheme: TypeScheme, resolve?: (t: Type) => Type): Type {
     const freshVars = scheme.parameters.map((name) => this.typevar(name));
-    return this.substituteParams(scheme.id, freshVars, scheme.body);
+    return this.substituteParams(scheme.id, freshVars, scheme.body, resolve);
   }
 
   /**
    * Walk a type, replacing ParamType(schemeId, i) with subs[i].
    * Uses structural sharing — returns the same instance when nothing changes.
+   * When a resolve function is provided, typevars are chased through
+   * unification bindings before being returned.
    */
   private substituteParams(
     schemeId: TypeSchemeId,
     subs: readonly Type[],
     type: Type,
+    resolve?: (t: Type) => Type,
   ): Type {
+    if (resolve && type.kind === "typevar") {
+      const resolved = resolve(type);
+      if (resolved !== type) {
+        return this.substituteParams(schemeId, subs, resolved, resolve);
+      }
+    }
     switch (type.kind) {
       case "param":
         if (type.schemeId === schemeId) return subs[type.index];
@@ -449,23 +462,23 @@ export class TypeStore {
       case "error":
         return type;
       case "array": {
-        const elem = this.substituteParams(schemeId, subs, type.elementType);
+        const elem = this.substituteParams(schemeId, subs, type.elementType, resolve);
         return elem === type.elementType ? type : this.array(elem);
       }
       case "nullable": {
-        const inner = this.substituteParams(schemeId, subs, type.innerType);
+        const inner = this.substituteParams(schemeId, subs, type.innerType, resolve);
         return inner === type.innerType ? type : this.nullable(inner);
       }
       case "record": {
         let changed = false;
         const fields: Record<string, Type> = {};
         for (const [name, fieldType] of Object.entries(type.fields)) {
-          const resolved = this.substituteParams(schemeId, subs, fieldType);
+          const resolved = this.substituteParams(schemeId, subs, fieldType, resolve);
           if (resolved !== fieldType) changed = true;
           fields[name] = resolved;
         }
         const rest = type.rest
-          ? this.substituteParams(schemeId, subs, type.rest)
+          ? this.substituteParams(schemeId, subs, type.rest, resolve)
           : null;
         if (rest !== type.rest) changed = true;
         return changed ? this.record(fields, rest) : type;
@@ -474,7 +487,7 @@ export class TypeStore {
         let changed = false;
         const resolvedArgs: Type[] = [];
         for (const arg of type.arguments) {
-          const resolved = this.substituteParams(schemeId, subs, arg);
+          const resolved = this.substituteParams(schemeId, subs, arg, resolve);
           if (resolved !== arg) changed = true;
           resolvedArgs.push(resolved);
         }
@@ -484,7 +497,7 @@ export class TypeStore {
         let changed = false;
         const resolvedParams: Type[] = [];
         for (const param of type.parameterTypes) {
-          const resolved = this.substituteParams(schemeId, subs, param);
+          const resolved = this.substituteParams(schemeId, subs, param, resolve);
           if (resolved !== param) changed = true;
           resolvedParams.push(resolved);
         }
@@ -492,6 +505,7 @@ export class TypeStore {
           schemeId,
           subs,
           type.returnType,
+          resolve,
         );
         if (resolvedReturn !== type.returnType) changed = true;
         return changed
