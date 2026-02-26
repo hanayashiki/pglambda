@@ -192,77 +192,10 @@ See [03_TYPE_CHECKER.md](./docs/03_TYPE_CHECKER.md)
 
 ---
 
-## Implementation Phases
+## Roadmap
 
-**Philosophy:** Implement the novel/unclear parts first (constraint algorithm), then add standard algorithms (module system, SCC) later.
+See [00_ROADMAP.md](./docs/00_ROADMAP.md)
 
-**Architecture:** PGL files are modules and define the boundary of compilation. Each file is type-checked independently (after its dependencies), with SCCs confined to within-file recursion. This simplifies analysis and provides a predictable compilation model.
+## Data Definition Language
 
-### Phase 1: Constraint-Based Type Inference (Core Algorithm) with Internal Row Polymorphism
-
-**Goal:** Implement constraint-based type inference using row polymorphism internally to eliminate fixed-point loops. Row types are not exposed to users — they're used only during inference and closed to produce user-facing closed record types.
-
-**Key insight:** Field access on type variables generates equality constraints with open record types (e.g., `α.field` → `α = {field: β | ρ}`). Unification solves all constraints in one pass. After inference, close all unbound row variables to produce closed record types.
-
-- [x] Define type representation (TypeStore with structural sharing)
-- [x] Extend type representation for row polymorphism:
-  - [x] Add `rest: Type | null` field to RecordType (`null` = closed record, TypeVariable = open record)
-  - [x] Update TypeStore.record() to support optional `rest` parameter
-  - [x] Hash-consing for open records (canonicalize by fields + rest)
-  - [x] Test: create and cache open/closed records
-- [x] Implement unification algorithm (equality constraints only):
-  - [x] Core unification: `unify(T1, T2)` mutates shared substitution
-  - [x] Handle type variable = type variable
-  - [x] Handle type variable = concrete type
-  - [x] Handle concrete type = concrete type (structural equality)
-  - [x] Occurs check (prevent infinite types: `α = α[]`)
-  - [x] Substitution with provenance tracking (BindingSource)
-  - [x] Test basic unification (primitives, arrays, nullables, closed records)
-  - [x] Extend unification for row polymorphism:
-    - [x] Unify closed with open record: `{a: int, b: text} = {a: β | ρ}` → `β = int, ρ = {b: text}`
-    - [x] Unify two open records: `{a: int | ρ1} = {b: text | ρ2}` → merge non-common fields into row variables
-    - [x] Row variable occurs check: prevent `ρ = {a: int, b: ρ}`
-    - [x] Test row unification
-- [x] Define equality constraint type: `T1 = T2` (handled by Unification)
-
-### Phase 2: Minimal Checker PoC
-
-**Goal:** Type-check `select 1 as col` → row type `{col: int}`. The checker operates on `simple_select` (not `query_def` — that requires function types).
-
-**Core concepts:**
-
-- **SCC** as the unit of type checking, with imports (external types depended on) and exports (types produced) keyed by AST ContentHash
-- **Constraint generation** from `simple_select`: literals → primitive types, target aliases → record fields
-- **Solver** wrapping Unification to resolve constraints
-
-- [x] Define SCC type (imports/exports by ContentHash)
-- [x] Define equality constraint type
-- [x] Implement constraint generator for `simple_select`:
-  - Literals: `42 → int`, `'hello' → text`, `true/false → bool`, `null → nullable`
-  - Target list with aliases → record fields
-  - `simple_select` → row type (RecordType) from target list wrapped by `SetOf`
-- [x] Type constructor, e.g. `SetOf<UserRow>`
-- [ ] `query fn() { select 1 as col } → () => SetOf<{ col: int }>`
-- [ ] Implement Solver (thin wrapper around Unification)
-- [x] Test: `select 1 as a, 'x' as b` → `SetOf<{a: int, b: text}>`
-
-### Phase 3: Code Generation
-
-- [ ] Design a target-agnostic IR for generated query-builder functions
-- [ ] Implement TypeScript backend as first target
-  - PGL type → TS type mapping (`int` → `number`, `text` → `string`, etc.)
-  - Query function → TS function that returns `{ sql: string, params: unknown[] }`
-  - Handle tsconfig for import syntax
-- [ ] Future: additional backends (Rust, Go, etc.)
-
-### Roadmap
-
-- Expressions & operators (binary ops, overload resolution)
-- PGL expression language (`pgl_expr` — literals, arithmetic, function calls in `${...}`)
-- Schema & FROM clause (table references, column resolution)
-- Query parameters & function types (`query_def`)
-- Lambda definitions (`identity(x) => x` — PGL-level functions)
-- Module system (imports, exports, file boundaries)
-- SCC decomposition (Tarjan's, mutual recursion)
-- Error reporting & diagnostics
-- Advanced features (aggregations, subqueries, CASE, catalog integration)
+See [05_DATA_DEFINITION_LANGUAGE.md](./docs/05_DATA_DEFINITION_LANGUAGE.md)
