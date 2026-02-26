@@ -11,7 +11,9 @@ import { Query_defContext } from "./PGLParser.js";
 import { Type_parameter_listContext } from "./PGLParser.js";
 import { Query_parameter_listContext } from "./PGLParser.js";
 import { Query_parameterContext } from "./PGLParser.js";
-import { Query_bodyContext } from "./PGLParser.js";
+import { Simple_select_bodyContext } from "./PGLParser.js";
+import { Pgl_expr_bodyContext } from "./PGLParser.js";
+import { Pgl_dollar_ident_ref_bodyContext } from "./PGLParser.js";
 import { Simple_selectContext } from "./PGLParser.js";
 import { Target_listContext } from "./PGLParser.js";
 import { Target_labelContext } from "./PGLParser.js";
@@ -103,11 +105,26 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 */
 	visitQuery_parameter?: (ctx: Query_parameterContext) => Result;
 	/**
-	 * Visit a parse tree produced by `PGLParser.query_body`.
+	 * Visit a parse tree produced by the `simple_select_body`
+	 * labeled alternative in `PGLParser.query_body`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitQuery_body?: (ctx: Query_bodyContext) => Result;
+	visitSimple_select_body?: (ctx: Simple_select_bodyContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `pgl_expr_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPgl_expr_body?: (ctx: Pgl_expr_bodyContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `pgl_dollar_ident_ref_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPgl_dollar_ident_ref_body?: (ctx: Pgl_dollar_ident_ref_bodyContext) => Result;
 	/**
 	 * Visit a parse tree produced by `PGLParser.simple_select`.
 	 * @param ctx the parse tree

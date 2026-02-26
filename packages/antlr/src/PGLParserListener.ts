@@ -11,7 +11,9 @@ import { Query_defContext } from "./PGLParser.js";
 import { Type_parameter_listContext } from "./PGLParser.js";
 import { Query_parameter_listContext } from "./PGLParser.js";
 import { Query_parameterContext } from "./PGLParser.js";
-import { Query_bodyContext } from "./PGLParser.js";
+import { Simple_select_bodyContext } from "./PGLParser.js";
+import { Pgl_expr_bodyContext } from "./PGLParser.js";
+import { Pgl_dollar_ident_ref_bodyContext } from "./PGLParser.js";
 import { Simple_selectContext } from "./PGLParser.js";
 import { Target_listContext } from "./PGLParser.js";
 import { Target_labelContext } from "./PGLParser.js";
@@ -132,15 +134,41 @@ export default class PGLParserListener extends ParseTreeListener {
 	 */
 	exitQuery_parameter?: (ctx: Query_parameterContext) => void;
 	/**
-	 * Enter a parse tree produced by `PGLParser.query_body`.
+	 * Enter a parse tree produced by the `simple_select_body`
+	 * labeled alternative in `PGLParser.query_body`.
 	 * @param ctx the parse tree
 	 */
-	enterQuery_body?: (ctx: Query_bodyContext) => void;
+	enterSimple_select_body?: (ctx: Simple_select_bodyContext) => void;
 	/**
-	 * Exit a parse tree produced by `PGLParser.query_body`.
+	 * Exit a parse tree produced by the `simple_select_body`
+	 * labeled alternative in `PGLParser.query_body`.
 	 * @param ctx the parse tree
 	 */
-	exitQuery_body?: (ctx: Query_bodyContext) => void;
+	exitSimple_select_body?: (ctx: Simple_select_bodyContext) => void;
+	/**
+	 * Enter a parse tree produced by the `pgl_expr_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 */
+	enterPgl_expr_body?: (ctx: Pgl_expr_bodyContext) => void;
+	/**
+	 * Exit a parse tree produced by the `pgl_expr_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 */
+	exitPgl_expr_body?: (ctx: Pgl_expr_bodyContext) => void;
+	/**
+	 * Enter a parse tree produced by the `pgl_dollar_ident_ref_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 */
+	enterPgl_dollar_ident_ref_body?: (ctx: Pgl_dollar_ident_ref_bodyContext) => void;
+	/**
+	 * Exit a parse tree produced by the `pgl_dollar_ident_ref_body`
+	 * labeled alternative in `PGLParser.query_body`.
+	 * @param ctx the parse tree
+	 */
+	exitPgl_dollar_ident_ref_body?: (ctx: Pgl_dollar_ident_ref_bodyContext) => void;
 	/**
 	 * Enter a parse tree produced by `PGLParser.simple_select`.
 	 * @param ctx the parse tree

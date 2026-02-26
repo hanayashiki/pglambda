@@ -1,3 +1,7 @@
-query identity<T>(x: T) { select $x as col }
-query f() { select ${identity(1)} as result }
+query inferred_generic1<T>(x: T) { select $x as col }
+query f() { select ${inferred_generic1(1)} as result }
+--                  ^ s
+
+query inferred_generic2<T>(x: T) { $x }
+query g() { select ${inferred_generic2(1)} as result }
 --                  ^ s

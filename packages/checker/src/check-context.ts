@@ -184,12 +184,6 @@ export class CheckContext {
       }
     }
 
-    if (genericDefNodes.length > 1) {
-      this.errors.push({
-        message: "Non-trivial SCC with multiple generic definitions not supported yet",
-      });
-    }
-
     return [...genericDefNodes, ...otherNodes];
   }
 

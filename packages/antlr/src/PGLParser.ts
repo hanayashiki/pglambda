@@ -547,10 +547,40 @@ export default class PGLParser extends Parser {
 		let localctx: Query_bodyContext = new Query_bodyContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 16, PGLParser.RULE_query_body);
 		try {
-			this.enterOuterAlt(localctx, 1);
-			{
-			this.state = 144;
-			this.simple_select();
+			this.state = 150;
+			this._errHandler.sync(this);
+			switch (this._input.LA(1)) {
+			case 3:
+				localctx = new Simple_select_bodyContext(this, localctx);
+				this.enterOuterAlt(localctx, 1);
+				{
+				this.state = 144;
+				this.simple_select();
+				}
+				break;
+			case 39:
+				localctx = new Pgl_expr_bodyContext(this, localctx);
+				this.enterOuterAlt(localctx, 2);
+				{
+				this.state = 145;
+				this.match(PGLParser.DOLLAR_LCURLY);
+				this.state = 146;
+				this.pgl_expr();
+				this.state = 147;
+				this.match(PGLParser.R_CURLY);
+				}
+				break;
+			case 43:
+			case 44:
+				localctx = new Pgl_dollar_ident_ref_bodyContext(this, localctx);
+				this.enterOuterAlt(localctx, 3);
+				{
+				this.state = 149;
+				this.columnref_or_pgl_dollar_ident_ref();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (re) {
@@ -575,26 +605,26 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 146;
+			this.state = 152;
 			this.match(PGLParser.KW_SELECT);
-			this.state = 147;
+			this.state = 153;
 			this.target_list();
-			this.state = 149;
+			this.state = 155;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===4) {
 				{
-				this.state = 148;
+				this.state = 154;
 				this.from_clause();
 				}
 			}
 
-			this.state = 152;
+			this.state = 158;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===5) {
 				{
-				this.state = 151;
+				this.state = 157;
 				this.where_clause();
 				}
 			}
@@ -623,21 +653,21 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 154;
+			this.state = 160;
 			this.target_el();
-			this.state = 159;
+			this.state = 165;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===19) {
 				{
 				{
-				this.state = 155;
+				this.state = 161;
 				this.match(PGLParser.COMMA);
-				this.state = 156;
+				this.state = 162;
 				this.target_el();
 				}
 				}
-				this.state = 161;
+				this.state = 167;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -663,7 +693,7 @@ export default class PGLParser extends Parser {
 		this.enterRule(localctx, 22, PGLParser.RULE_target_el);
 		let _la: number;
 		try {
-			this.state = 170;
+			this.state = 176;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case 9:
@@ -682,24 +712,24 @@ export default class PGLParser extends Parser {
 				localctx = new Target_labelContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 162;
+				this.state = 168;
 				this.a_expr();
-				this.state = 167;
+				this.state = 173;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===6 || _la===43 || _la===44) {
 					{
-					this.state = 164;
+					this.state = 170;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 					if (_la===6) {
 						{
-						this.state = 163;
+						this.state = 169;
 						this.match(PGLParser.KW_AS);
 						}
 					}
 
-					this.state = 166;
+					this.state = 172;
 					this.identifier();
 					}
 				}
@@ -710,7 +740,7 @@ export default class PGLParser extends Parser {
 				localctx = new Target_starContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 169;
+				this.state = 175;
 				this.match(PGLParser.STAR);
 				}
 				break;
@@ -739,9 +769,9 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 172;
+			this.state = 178;
 			this.match(PGLParser.KW_FROM);
-			this.state = 173;
+			this.state = 179;
 			this.from_list();
 			}
 		}
@@ -767,21 +797,21 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 175;
+			this.state = 181;
 			this.table_ref();
-			this.state = 180;
+			this.state = 186;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===19) {
 				{
 				{
-				this.state = 176;
+				this.state = 182;
 				this.match(PGLParser.COMMA);
-				this.state = 177;
+				this.state = 183;
 				this.table_ref();
 				}
 				}
-				this.state = 182;
+				this.state = 188;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -809,24 +839,24 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 183;
+			this.state = 189;
 			this.relation_expr();
-			this.state = 188;
+			this.state = 194;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===6 || _la===43 || _la===44) {
 				{
-				this.state = 185;
+				this.state = 191;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===6) {
 					{
-					this.state = 184;
+					this.state = 190;
 					this.match(PGLParser.KW_AS);
 					}
 				}
 
-				this.state = 187;
+				this.state = 193;
 				this.identifier();
 				}
 			}
@@ -854,7 +884,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 190;
+			this.state = 196;
 			this.qualified_name();
 			}
 		}
@@ -879,9 +909,9 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 192;
+			this.state = 198;
 			this.match(PGLParser.KW_WHERE);
-			this.state = 193;
+			this.state = 199;
 			this.a_expr();
 			}
 		}
@@ -906,7 +936,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 195;
+			this.state = 201;
 			this.a_expr_or();
 			}
 		}
@@ -932,21 +962,21 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 197;
+			this.state = 203;
 			this.a_expr_and();
-			this.state = 202;
+			this.state = 208;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===8) {
 				{
 				{
-				this.state = 198;
+				this.state = 204;
 				this.match(PGLParser.KW_OR);
-				this.state = 199;
+				this.state = 205;
 				this.a_expr_and();
 				}
 				}
-				this.state = 204;
+				this.state = 210;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -974,21 +1004,21 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 205;
+			this.state = 211;
 			this.a_expr_between();
-			this.state = 210;
+			this.state = 216;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===7) {
 				{
 				{
-				this.state = 206;
+				this.state = 212;
 				this.match(PGLParser.KW_AND);
-				this.state = 207;
+				this.state = 213;
 				this.a_expr_between();
 				}
 				}
-				this.state = 212;
+				this.state = 218;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1016,30 +1046,30 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 213;
+			this.state = 219;
 			this.a_expr_in();
-			this.state = 222;
+			this.state = 228;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===9 || _la===16) {
 				{
-				this.state = 215;
+				this.state = 221;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===9) {
 					{
-					this.state = 214;
+					this.state = 220;
 					this.match(PGLParser.KW_NOT);
 					}
 				}
 
-				this.state = 217;
+				this.state = 223;
 				this.match(PGLParser.KW_BETWEEN);
-				this.state = 218;
+				this.state = 224;
 				this.a_expr_in();
-				this.state = 219;
+				this.state = 225;
 				this.match(PGLParser.KW_AND);
-				this.state = 220;
+				this.state = 226;
 				this.a_expr_in();
 				}
 			}
@@ -1068,54 +1098,54 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 224;
+			this.state = 230;
 			this.a_expr_unary_not();
-			this.state = 241;
+			this.state = 247;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 25, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 26, this._ctx) ) {
 			case 1:
 				{
-				this.state = 226;
+				this.state = 232;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===9) {
 					{
-					this.state = 225;
+					this.state = 231;
 					this.match(PGLParser.KW_NOT);
 					}
 				}
 
-				this.state = 228;
+				this.state = 234;
 				this.match(PGLParser.KW_IN);
-				this.state = 229;
+				this.state = 235;
 				this.match(PGLParser.L_PAREN);
-				this.state = 238;
+				this.state = 244;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 8396288) !== 0) || ((((_la - 35)) & ~0x1F) === 0 && ((1 << (_la - 35)) & 1011) !== 0)) {
 					{
-					this.state = 230;
+					this.state = 236;
 					this.a_expr();
-					this.state = 235;
+					this.state = 241;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 					while (_la===19) {
 						{
 						{
-						this.state = 231;
+						this.state = 237;
 						this.match(PGLParser.COMMA);
-						this.state = 232;
+						this.state = 238;
 						this.a_expr();
 						}
 						}
-						this.state = 237;
+						this.state = 243;
 						this._errHandler.sync(this);
 						_la = this._input.LA(1);
 					}
 					}
 				}
 
-				this.state = 240;
+				this.state = 246;
 				this.match(PGLParser.R_PAREN);
 				}
 				break;
@@ -1141,15 +1171,15 @@ export default class PGLParser extends Parser {
 		let localctx: A_expr_unary_notContext = new A_expr_unary_notContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 44, PGLParser.RULE_a_expr_unary_not);
 		try {
-			this.state = 246;
+			this.state = 252;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case 9:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 243;
+				this.state = 249;
 				this.match(PGLParser.KW_NOT);
-				this.state = 244;
+				this.state = 250;
 				this.a_expr_unary_not();
 				}
 				break;
@@ -1167,7 +1197,7 @@ export default class PGLParser extends Parser {
 			case 44:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 245;
+				this.state = 251;
 				this.a_expr_isnull();
 				}
 				break;
@@ -1197,26 +1227,26 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 248;
-			this.a_expr_is_not();
 			this.state = 254;
+			this.a_expr_is_not();
+			this.state = 260;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===13) {
 				{
-				this.state = 249;
+				this.state = 255;
 				this.match(PGLParser.KW_IS);
-				this.state = 251;
+				this.state = 257;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===9) {
 					{
-					this.state = 250;
+					this.state = 256;
 					this.match(PGLParser.KW_NOT);
 					}
 				}
 
-				this.state = 253;
+				this.state = 259;
 				this.match(PGLParser.KW_NULL);
 				}
 			}
@@ -1245,26 +1275,26 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 256;
-			this.a_expr_compare();
 			this.state = 262;
+			this.a_expr_compare();
+			this.state = 268;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 30, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 31, this._ctx) ) {
 			case 1:
 				{
-				this.state = 257;
+				this.state = 263;
 				this.match(PGLParser.KW_IS);
-				this.state = 259;
+				this.state = 265;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===9) {
 					{
-					this.state = 258;
+					this.state = 264;
 					this.match(PGLParser.KW_NOT);
 					}
 				}
 
-				this.state = 261;
+				this.state = 267;
 				_la = this._input.LA(1);
 				if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 7168) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -1300,14 +1330,14 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 264;
+			this.state = 270;
 			this.a_expr_like();
-			this.state = 267;
+			this.state = 273;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (((((_la - 29)) & ~0x1F) === 0 && ((1 << (_la - 29)) & 63) !== 0)) {
 				{
-				this.state = 265;
+				this.state = 271;
 				_la = this._input.LA(1);
 				if(!(((((_la - 29)) & ~0x1F) === 0 && ((1 << (_la - 29)) & 63) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -1316,7 +1346,7 @@ export default class PGLParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 266;
+				this.state = 272;
 				this.a_expr_like();
 				}
 			}
@@ -1345,26 +1375,26 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 269;
-			this.a_expr_add();
 			this.state = 275;
+			this.a_expr_add();
+			this.state = 281;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 33, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 34, this._ctx) ) {
 			case 1:
 				{
-				this.state = 271;
+				this.state = 277;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				if (_la===9) {
 					{
-					this.state = 270;
+					this.state = 276;
 					this.match(PGLParser.KW_NOT);
 					}
 				}
 
-				this.state = 273;
+				this.state = 279;
 				this.match(PGLParser.KW_LIKE);
-				this.state = 274;
+				this.state = 280;
 				this.a_expr_add();
 				}
 				break;
@@ -1393,15 +1423,15 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 277;
+			this.state = 283;
 			this.a_expr_mul();
-			this.state = 282;
+			this.state = 288;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===35 || _la===36) {
 				{
 				{
-				this.state = 278;
+				this.state = 284;
 				_la = this._input.LA(1);
 				if(!(_la===35 || _la===36)) {
 				this._errHandler.recoverInline(this);
@@ -1410,11 +1440,11 @@ export default class PGLParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 279;
+				this.state = 285;
 				this.a_expr_mul();
 				}
 				}
-				this.state = 284;
+				this.state = 290;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1442,15 +1472,15 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 285;
+			this.state = 291;
 			this.a_expr_unary();
-			this.state = 290;
+			this.state = 296;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (((((_la - 22)) & ~0x1F) === 0 && ((1 << (_la - 22)) & 98305) !== 0)) {
 				{
 				{
-				this.state = 286;
+				this.state = 292;
 				_la = this._input.LA(1);
 				if(!(((((_la - 22)) & ~0x1F) === 0 && ((1 << (_la - 22)) & 98305) !== 0))) {
 				this._errHandler.recoverInline(this);
@@ -1459,11 +1489,11 @@ export default class PGLParser extends Parser {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 287;
+				this.state = 293;
 				this.a_expr_unary();
 				}
 				}
-				this.state = 292;
+				this.state = 298;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1491,12 +1521,12 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 294;
+			this.state = 300;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===35 || _la===36) {
 				{
-				this.state = 293;
+				this.state = 299;
 				_la = this._input.LA(1);
 				if(!(_la===35 || _la===36)) {
 				this._errHandler.recoverInline(this);
@@ -1508,7 +1538,7 @@ export default class PGLParser extends Parser {
 				}
 			}
 
-			this.state = 296;
+			this.state = 302;
 			this.c_expr();
 			}
 		}
@@ -1531,17 +1561,17 @@ export default class PGLParser extends Parser {
 		let localctx: C_exprContext = new C_exprContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 60, PGLParser.RULE_c_expr);
 		try {
-			this.state = 308;
+			this.state = 314;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case 39:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 298;
+				this.state = 304;
 				this.match(PGLParser.DOLLAR_LCURLY);
-				this.state = 299;
+				this.state = 305;
 				this.pgl_expr();
-				this.state = 300;
+				this.state = 306;
 				this.match(PGLParser.R_CURLY);
 				}
 				break;
@@ -1549,7 +1579,7 @@ export default class PGLParser extends Parser {
 			case 44:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 302;
+				this.state = 308;
 				this.columnref_or_pgl_dollar_ident_ref();
 				}
 				break;
@@ -1561,18 +1591,18 @@ export default class PGLParser extends Parser {
 			case 42:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 303;
+				this.state = 309;
 				this.aexprconst();
 				}
 				break;
 			case 23:
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 304;
+				this.state = 310;
 				this.match(PGLParser.L_PAREN);
-				this.state = 305;
+				this.state = 311;
 				this.a_expr();
-				this.state = 306;
+				this.state = 312;
 				this.match(PGLParser.R_PAREN);
 				}
 				break;
@@ -1599,27 +1629,27 @@ export default class PGLParser extends Parser {
 		let localctx: Pgl_exprContext = new Pgl_exprContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 62, PGLParser.RULE_pgl_expr);
 		try {
-			this.state = 313;
+			this.state = 319;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 38, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 39, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 310;
+				this.state = 316;
 				this.pgl_query_call();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 311;
+				this.state = 317;
 				this.pgl_ident_ref();
 				}
 				break;
 			case 3:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 312;
+				this.state = 318;
 				this.aexprconst();
 				}
 				break;
@@ -1646,7 +1676,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 315;
+			this.state = 321;
 			this.qualified_name();
 			}
 		}
@@ -1672,47 +1702,47 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 317;
+			this.state = 323;
 			this.qualified_name();
-			this.state = 319;
+			this.state = 325;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if (_la===17) {
 				{
-				this.state = 318;
+				this.state = 324;
 				this.type_argument_list();
 				}
 			}
 
-			this.state = 321;
+			this.state = 327;
 			this.match(PGLParser.L_PAREN);
-			this.state = 330;
+			this.state = 336;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 7168) !== 0) || ((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & 31) !== 0)) {
 				{
-				this.state = 322;
+				this.state = 328;
 				this.pgl_expr();
-				this.state = 327;
+				this.state = 333;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 				while (_la===19) {
 					{
 					{
-					this.state = 323;
+					this.state = 329;
 					this.match(PGLParser.COMMA);
-					this.state = 324;
+					this.state = 330;
 					this.pgl_expr();
 					}
 					}
-					this.state = 329;
+					this.state = 335;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
 				}
 			}
 
-			this.state = 332;
+			this.state = 338;
 			this.match(PGLParser.R_PAREN);
 			}
 		}
@@ -1738,29 +1768,29 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 334;
+			this.state = 340;
 			this.match(PGLParser.COLONCOLON);
-			this.state = 335;
-			this.match(PGLParser.LT);
-			this.state = 336;
-			this.type_expression();
 			this.state = 341;
+			this.match(PGLParser.LT);
+			this.state = 342;
+			this.type_expression();
+			this.state = 347;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===19) {
 				{
 				{
-				this.state = 337;
+				this.state = 343;
 				this.match(PGLParser.COMMA);
-				this.state = 338;
+				this.state = 344;
 				this.type_expression();
 				}
 				}
-				this.state = 343;
+				this.state = 349;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 344;
+			this.state = 350;
 			this.match(PGLParser.GT);
 			}
 		}
@@ -1786,29 +1816,29 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 346;
+			this.state = 352;
 			this.identifier();
-			this.state = 354;
+			this.state = 360;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			while (_la===20) {
 				{
 				{
-				this.state = 347;
+				this.state = 353;
 				this.match(PGLParser.DOT);
-				this.state = 350;
+				this.state = 356;
 				this._errHandler.sync(this);
 				switch (this._input.LA(1)) {
 				case 43:
 				case 44:
 					{
-					this.state = 348;
+					this.state = 354;
 					this.identifier();
 					}
 					break;
 				case 22:
 					{
-					this.state = 349;
+					this.state = 355;
 					this.match(PGLParser.STAR);
 					}
 					break;
@@ -1817,7 +1847,7 @@ export default class PGLParser extends Parser {
 				}
 				}
 				}
-				this.state = 356;
+				this.state = 362;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
@@ -1845,7 +1875,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 357;
+			this.state = 363;
 			_la = this._input.LA(1);
 			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 7168) !== 0) || ((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & 7) !== 0))) {
 			this._errHandler.recoverInline(this);
@@ -1877,7 +1907,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 359;
+			this.state = 365;
 			this.match(PGLParser.KW_TYPE);
 			}
 		}
@@ -1902,7 +1932,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 361;
+			this.state = 367;
 			this.type_ref();
 			}
 		}
@@ -1927,7 +1957,7 @@ export default class PGLParser extends Parser {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 363;
+			this.state = 369;
 			this.pgl_ident_ref();
 			}
 		}
@@ -1946,7 +1976,7 @@ export default class PGLParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,48,366,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,48,372,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,
 	10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,
 	7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,
@@ -1956,113 +1986,115 @@ export default class PGLParser extends Parser {
 	10,2,12,2,95,9,2,1,2,1,2,1,3,1,3,3,3,101,8,3,1,4,1,4,1,4,3,4,106,8,4,1,
 	4,1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,5,5,117,8,5,10,5,12,5,120,9,5,1,5,1,5,
 	1,6,1,6,1,6,1,6,5,6,128,8,6,10,6,12,6,131,9,6,1,6,3,6,134,8,6,3,6,136,8,
-	6,1,6,1,6,1,7,1,7,1,7,3,7,143,8,7,1,8,1,8,1,9,1,9,1,9,3,9,150,8,9,1,9,3,
-	9,153,8,9,1,10,1,10,1,10,5,10,158,8,10,10,10,12,10,161,9,10,1,11,1,11,3,
-	11,165,8,11,1,11,3,11,168,8,11,1,11,3,11,171,8,11,1,12,1,12,1,12,1,13,1,
-	13,1,13,5,13,179,8,13,10,13,12,13,182,9,13,1,14,1,14,3,14,186,8,14,1,14,
-	3,14,189,8,14,1,15,1,15,1,16,1,16,1,16,1,17,1,17,1,18,1,18,1,18,5,18,201,
-	8,18,10,18,12,18,204,9,18,1,19,1,19,1,19,5,19,209,8,19,10,19,12,19,212,
-	9,19,1,20,1,20,3,20,216,8,20,1,20,1,20,1,20,1,20,1,20,3,20,223,8,20,1,21,
-	1,21,3,21,227,8,21,1,21,1,21,1,21,1,21,1,21,5,21,234,8,21,10,21,12,21,237,
-	9,21,3,21,239,8,21,1,21,3,21,242,8,21,1,22,1,22,1,22,3,22,247,8,22,1,23,
-	1,23,1,23,3,23,252,8,23,1,23,3,23,255,8,23,1,24,1,24,1,24,3,24,260,8,24,
-	1,24,3,24,263,8,24,1,25,1,25,1,25,3,25,268,8,25,1,26,1,26,3,26,272,8,26,
-	1,26,1,26,3,26,276,8,26,1,27,1,27,1,27,5,27,281,8,27,10,27,12,27,284,9,
-	27,1,28,1,28,1,28,5,28,289,8,28,10,28,12,28,292,9,28,1,29,3,29,295,8,29,
-	1,29,1,29,1,30,1,30,1,30,1,30,1,30,1,30,1,30,1,30,1,30,1,30,3,30,309,8,
-	30,1,31,1,31,1,31,3,31,314,8,31,1,32,1,32,1,33,1,33,3,33,320,8,33,1,33,
-	1,33,1,33,1,33,5,33,326,8,33,10,33,12,33,329,9,33,3,33,331,8,33,1,33,1,
-	33,1,34,1,34,1,34,1,34,1,34,5,34,340,8,34,10,34,12,34,343,9,34,1,34,1,34,
-	1,35,1,35,1,35,1,35,3,35,351,8,35,5,35,353,8,35,10,35,12,35,356,9,35,1,
-	36,1,36,1,37,1,37,1,38,1,38,1,39,1,39,1,39,0,0,40,0,2,4,6,8,10,12,14,16,
-	18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,
-	66,68,70,72,74,76,78,0,6,1,0,43,44,1,0,10,12,1,0,29,34,1,0,35,36,2,0,22,
-	22,37,38,2,0,10,12,40,42,373,0,80,1,0,0,0,2,82,1,0,0,0,4,93,1,0,0,0,6,100,
-	1,0,0,0,8,102,1,0,0,0,10,112,1,0,0,0,12,123,1,0,0,0,14,139,1,0,0,0,16,144,
-	1,0,0,0,18,146,1,0,0,0,20,154,1,0,0,0,22,170,1,0,0,0,24,172,1,0,0,0,26,
-	175,1,0,0,0,28,183,1,0,0,0,30,190,1,0,0,0,32,192,1,0,0,0,34,195,1,0,0,0,
-	36,197,1,0,0,0,38,205,1,0,0,0,40,213,1,0,0,0,42,224,1,0,0,0,44,246,1,0,
-	0,0,46,248,1,0,0,0,48,256,1,0,0,0,50,264,1,0,0,0,52,269,1,0,0,0,54,277,
-	1,0,0,0,56,285,1,0,0,0,58,294,1,0,0,0,60,308,1,0,0,0,62,313,1,0,0,0,64,
-	315,1,0,0,0,66,317,1,0,0,0,68,334,1,0,0,0,70,346,1,0,0,0,72,357,1,0,0,0,
-	74,359,1,0,0,0,76,361,1,0,0,0,78,363,1,0,0,0,80,81,7,0,0,0,81,1,1,0,0,0,
-	82,87,3,0,0,0,83,84,5,20,0,0,84,86,3,0,0,0,85,83,1,0,0,0,86,89,1,0,0,0,
-	87,85,1,0,0,0,87,88,1,0,0,0,88,3,1,0,0,0,89,87,1,0,0,0,90,92,3,6,3,0,91,
-	90,1,0,0,0,92,95,1,0,0,0,93,91,1,0,0,0,93,94,1,0,0,0,94,96,1,0,0,0,95,93,
-	1,0,0,0,96,97,5,0,0,1,97,5,1,0,0,0,98,101,3,8,4,0,99,101,3,74,37,0,100,
-	98,1,0,0,0,100,99,1,0,0,0,101,7,1,0,0,0,102,103,5,1,0,0,103,105,3,0,0,0,
-	104,106,3,10,5,0,105,104,1,0,0,0,105,106,1,0,0,0,106,107,1,0,0,0,107,108,
-	3,12,6,0,108,109,5,25,0,0,109,110,3,16,8,0,110,111,5,26,0,0,111,9,1,0,0,
-	0,112,113,5,31,0,0,113,118,3,0,0,0,114,115,5,19,0,0,115,117,3,0,0,0,116,
-	114,1,0,0,0,117,120,1,0,0,0,118,116,1,0,0,0,118,119,1,0,0,0,119,121,1,0,
-	0,0,120,118,1,0,0,0,121,122,5,32,0,0,122,11,1,0,0,0,123,135,5,23,0,0,124,
-	129,3,14,7,0,125,126,5,19,0,0,126,128,3,14,7,0,127,125,1,0,0,0,128,131,
-	1,0,0,0,129,127,1,0,0,0,129,130,1,0,0,0,130,133,1,0,0,0,131,129,1,0,0,0,
-	132,134,5,19,0,0,133,132,1,0,0,0,133,134,1,0,0,0,134,136,1,0,0,0,135,124,
-	1,0,0,0,135,136,1,0,0,0,136,137,1,0,0,0,137,138,5,24,0,0,138,13,1,0,0,0,
-	139,142,3,0,0,0,140,141,5,18,0,0,141,143,3,76,38,0,142,140,1,0,0,0,142,
-	143,1,0,0,0,143,15,1,0,0,0,144,145,3,18,9,0,145,17,1,0,0,0,146,147,5,3,
-	0,0,147,149,3,20,10,0,148,150,3,24,12,0,149,148,1,0,0,0,149,150,1,0,0,0,
-	150,152,1,0,0,0,151,153,3,32,16,0,152,151,1,0,0,0,152,153,1,0,0,0,153,19,
-	1,0,0,0,154,159,3,22,11,0,155,156,5,19,0,0,156,158,3,22,11,0,157,155,1,
-	0,0,0,158,161,1,0,0,0,159,157,1,0,0,0,159,160,1,0,0,0,160,21,1,0,0,0,161,
-	159,1,0,0,0,162,167,3,34,17,0,163,165,5,6,0,0,164,163,1,0,0,0,164,165,1,
-	0,0,0,165,166,1,0,0,0,166,168,3,0,0,0,167,164,1,0,0,0,167,168,1,0,0,0,168,
-	171,1,0,0,0,169,171,5,22,0,0,170,162,1,0,0,0,170,169,1,0,0,0,171,23,1,0,
-	0,0,172,173,5,4,0,0,173,174,3,26,13,0,174,25,1,0,0,0,175,180,3,28,14,0,
-	176,177,5,19,0,0,177,179,3,28,14,0,178,176,1,0,0,0,179,182,1,0,0,0,180,
-	178,1,0,0,0,180,181,1,0,0,0,181,27,1,0,0,0,182,180,1,0,0,0,183,188,3,30,
-	15,0,184,186,5,6,0,0,185,184,1,0,0,0,185,186,1,0,0,0,186,187,1,0,0,0,187,
-	189,3,0,0,0,188,185,1,0,0,0,188,189,1,0,0,0,189,29,1,0,0,0,190,191,3,2,
-	1,0,191,31,1,0,0,0,192,193,5,5,0,0,193,194,3,34,17,0,194,33,1,0,0,0,195,
-	196,3,36,18,0,196,35,1,0,0,0,197,202,3,38,19,0,198,199,5,8,0,0,199,201,
-	3,38,19,0,200,198,1,0,0,0,201,204,1,0,0,0,202,200,1,0,0,0,202,203,1,0,0,
-	0,203,37,1,0,0,0,204,202,1,0,0,0,205,210,3,40,20,0,206,207,5,7,0,0,207,
-	209,3,40,20,0,208,206,1,0,0,0,209,212,1,0,0,0,210,208,1,0,0,0,210,211,1,
-	0,0,0,211,39,1,0,0,0,212,210,1,0,0,0,213,222,3,42,21,0,214,216,5,9,0,0,
-	215,214,1,0,0,0,215,216,1,0,0,0,216,217,1,0,0,0,217,218,5,16,0,0,218,219,
-	3,42,21,0,219,220,5,7,0,0,220,221,3,42,21,0,221,223,1,0,0,0,222,215,1,0,
-	0,0,222,223,1,0,0,0,223,41,1,0,0,0,224,241,3,44,22,0,225,227,5,9,0,0,226,
-	225,1,0,0,0,226,227,1,0,0,0,227,228,1,0,0,0,228,229,5,14,0,0,229,238,5,
-	23,0,0,230,235,3,34,17,0,231,232,5,19,0,0,232,234,3,34,17,0,233,231,1,0,
-	0,0,234,237,1,0,0,0,235,233,1,0,0,0,235,236,1,0,0,0,236,239,1,0,0,0,237,
-	235,1,0,0,0,238,230,1,0,0,0,238,239,1,0,0,0,239,240,1,0,0,0,240,242,5,24,
-	0,0,241,226,1,0,0,0,241,242,1,0,0,0,242,43,1,0,0,0,243,244,5,9,0,0,244,
-	247,3,44,22,0,245,247,3,46,23,0,246,243,1,0,0,0,246,245,1,0,0,0,247,45,
-	1,0,0,0,248,254,3,48,24,0,249,251,5,13,0,0,250,252,5,9,0,0,251,250,1,0,
-	0,0,251,252,1,0,0,0,252,253,1,0,0,0,253,255,5,12,0,0,254,249,1,0,0,0,254,
-	255,1,0,0,0,255,47,1,0,0,0,256,262,3,50,25,0,257,259,5,13,0,0,258,260,5,
-	9,0,0,259,258,1,0,0,0,259,260,1,0,0,0,260,261,1,0,0,0,261,263,7,1,0,0,262,
-	257,1,0,0,0,262,263,1,0,0,0,263,49,1,0,0,0,264,267,3,52,26,0,265,266,7,
-	2,0,0,266,268,3,52,26,0,267,265,1,0,0,0,267,268,1,0,0,0,268,51,1,0,0,0,
-	269,275,3,54,27,0,270,272,5,9,0,0,271,270,1,0,0,0,271,272,1,0,0,0,272,273,
-	1,0,0,0,273,274,5,15,0,0,274,276,3,54,27,0,275,271,1,0,0,0,275,276,1,0,
-	0,0,276,53,1,0,0,0,277,282,3,56,28,0,278,279,7,3,0,0,279,281,3,56,28,0,
-	280,278,1,0,0,0,281,284,1,0,0,0,282,280,1,0,0,0,282,283,1,0,0,0,283,55,
-	1,0,0,0,284,282,1,0,0,0,285,290,3,58,29,0,286,287,7,4,0,0,287,289,3,58,
-	29,0,288,286,1,0,0,0,289,292,1,0,0,0,290,288,1,0,0,0,290,291,1,0,0,0,291,
-	57,1,0,0,0,292,290,1,0,0,0,293,295,7,3,0,0,294,293,1,0,0,0,294,295,1,0,
-	0,0,295,296,1,0,0,0,296,297,3,60,30,0,297,59,1,0,0,0,298,299,5,39,0,0,299,
-	300,3,62,31,0,300,301,5,26,0,0,301,309,1,0,0,0,302,309,3,70,35,0,303,309,
-	3,72,36,0,304,305,5,23,0,0,305,306,3,34,17,0,306,307,5,24,0,0,307,309,1,
-	0,0,0,308,298,1,0,0,0,308,302,1,0,0,0,308,303,1,0,0,0,308,304,1,0,0,0,309,
-	61,1,0,0,0,310,314,3,66,33,0,311,314,3,64,32,0,312,314,3,72,36,0,313,310,
-	1,0,0,0,313,311,1,0,0,0,313,312,1,0,0,0,314,63,1,0,0,0,315,316,3,2,1,0,
-	316,65,1,0,0,0,317,319,3,2,1,0,318,320,3,68,34,0,319,318,1,0,0,0,319,320,
-	1,0,0,0,320,321,1,0,0,0,321,330,5,23,0,0,322,327,3,62,31,0,323,324,5,19,
-	0,0,324,326,3,62,31,0,325,323,1,0,0,0,326,329,1,0,0,0,327,325,1,0,0,0,327,
-	328,1,0,0,0,328,331,1,0,0,0,329,327,1,0,0,0,330,322,1,0,0,0,330,331,1,0,
-	0,0,331,332,1,0,0,0,332,333,5,24,0,0,333,67,1,0,0,0,334,335,5,17,0,0,335,
-	336,5,31,0,0,336,341,3,76,38,0,337,338,5,19,0,0,338,340,3,76,38,0,339,337,
-	1,0,0,0,340,343,1,0,0,0,341,339,1,0,0,0,341,342,1,0,0,0,342,344,1,0,0,0,
-	343,341,1,0,0,0,344,345,5,32,0,0,345,69,1,0,0,0,346,354,3,0,0,0,347,350,
-	5,20,0,0,348,351,3,0,0,0,349,351,5,22,0,0,350,348,1,0,0,0,350,349,1,0,0,
-	0,351,353,1,0,0,0,352,347,1,0,0,0,353,356,1,0,0,0,354,352,1,0,0,0,354,355,
-	1,0,0,0,355,71,1,0,0,0,356,354,1,0,0,0,357,358,7,5,0,0,358,73,1,0,0,0,359,
-	360,5,2,0,0,360,75,1,0,0,0,361,362,3,78,39,0,362,77,1,0,0,0,363,364,3,64,
-	32,0,364,79,1,0,0,0,45,87,93,100,105,118,129,133,135,142,149,152,159,164,
-	167,170,180,185,188,202,210,215,222,226,235,238,241,246,251,254,259,262,
-	267,271,275,282,290,294,308,313,319,327,330,341,350,354];
+	6,1,6,1,6,1,7,1,7,1,7,3,7,143,8,7,1,8,1,8,1,8,1,8,1,8,1,8,3,8,151,8,8,1,
+	9,1,9,1,9,3,9,156,8,9,1,9,3,9,159,8,9,1,10,1,10,1,10,5,10,164,8,10,10,10,
+	12,10,167,9,10,1,11,1,11,3,11,171,8,11,1,11,3,11,174,8,11,1,11,3,11,177,
+	8,11,1,12,1,12,1,12,1,13,1,13,1,13,5,13,185,8,13,10,13,12,13,188,9,13,1,
+	14,1,14,3,14,192,8,14,1,14,3,14,195,8,14,1,15,1,15,1,16,1,16,1,16,1,17,
+	1,17,1,18,1,18,1,18,5,18,207,8,18,10,18,12,18,210,9,18,1,19,1,19,1,19,5,
+	19,215,8,19,10,19,12,19,218,9,19,1,20,1,20,3,20,222,8,20,1,20,1,20,1,20,
+	1,20,1,20,3,20,229,8,20,1,21,1,21,3,21,233,8,21,1,21,1,21,1,21,1,21,1,21,
+	5,21,240,8,21,10,21,12,21,243,9,21,3,21,245,8,21,1,21,3,21,248,8,21,1,22,
+	1,22,1,22,3,22,253,8,22,1,23,1,23,1,23,3,23,258,8,23,1,23,3,23,261,8,23,
+	1,24,1,24,1,24,3,24,266,8,24,1,24,3,24,269,8,24,1,25,1,25,1,25,3,25,274,
+	8,25,1,26,1,26,3,26,278,8,26,1,26,1,26,3,26,282,8,26,1,27,1,27,1,27,5,27,
+	287,8,27,10,27,12,27,290,9,27,1,28,1,28,1,28,5,28,295,8,28,10,28,12,28,
+	298,9,28,1,29,3,29,301,8,29,1,29,1,29,1,30,1,30,1,30,1,30,1,30,1,30,1,30,
+	1,30,1,30,1,30,3,30,315,8,30,1,31,1,31,1,31,3,31,320,8,31,1,32,1,32,1,33,
+	1,33,3,33,326,8,33,1,33,1,33,1,33,1,33,5,33,332,8,33,10,33,12,33,335,9,
+	33,3,33,337,8,33,1,33,1,33,1,34,1,34,1,34,1,34,1,34,5,34,346,8,34,10,34,
+	12,34,349,9,34,1,34,1,34,1,35,1,35,1,35,1,35,3,35,357,8,35,5,35,359,8,35,
+	10,35,12,35,362,9,35,1,36,1,36,1,37,1,37,1,38,1,38,1,39,1,39,1,39,0,0,40,
+	0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,
+	52,54,56,58,60,62,64,66,68,70,72,74,76,78,0,6,1,0,43,44,1,0,10,12,1,0,29,
+	34,1,0,35,36,2,0,22,22,37,38,2,0,10,12,40,42,381,0,80,1,0,0,0,2,82,1,0,
+	0,0,4,93,1,0,0,0,6,100,1,0,0,0,8,102,1,0,0,0,10,112,1,0,0,0,12,123,1,0,
+	0,0,14,139,1,0,0,0,16,150,1,0,0,0,18,152,1,0,0,0,20,160,1,0,0,0,22,176,
+	1,0,0,0,24,178,1,0,0,0,26,181,1,0,0,0,28,189,1,0,0,0,30,196,1,0,0,0,32,
+	198,1,0,0,0,34,201,1,0,0,0,36,203,1,0,0,0,38,211,1,0,0,0,40,219,1,0,0,0,
+	42,230,1,0,0,0,44,252,1,0,0,0,46,254,1,0,0,0,48,262,1,0,0,0,50,270,1,0,
+	0,0,52,275,1,0,0,0,54,283,1,0,0,0,56,291,1,0,0,0,58,300,1,0,0,0,60,314,
+	1,0,0,0,62,319,1,0,0,0,64,321,1,0,0,0,66,323,1,0,0,0,68,340,1,0,0,0,70,
+	352,1,0,0,0,72,363,1,0,0,0,74,365,1,0,0,0,76,367,1,0,0,0,78,369,1,0,0,0,
+	80,81,7,0,0,0,81,1,1,0,0,0,82,87,3,0,0,0,83,84,5,20,0,0,84,86,3,0,0,0,85,
+	83,1,0,0,0,86,89,1,0,0,0,87,85,1,0,0,0,87,88,1,0,0,0,88,3,1,0,0,0,89,87,
+	1,0,0,0,90,92,3,6,3,0,91,90,1,0,0,0,92,95,1,0,0,0,93,91,1,0,0,0,93,94,1,
+	0,0,0,94,96,1,0,0,0,95,93,1,0,0,0,96,97,5,0,0,1,97,5,1,0,0,0,98,101,3,8,
+	4,0,99,101,3,74,37,0,100,98,1,0,0,0,100,99,1,0,0,0,101,7,1,0,0,0,102,103,
+	5,1,0,0,103,105,3,0,0,0,104,106,3,10,5,0,105,104,1,0,0,0,105,106,1,0,0,
+	0,106,107,1,0,0,0,107,108,3,12,6,0,108,109,5,25,0,0,109,110,3,16,8,0,110,
+	111,5,26,0,0,111,9,1,0,0,0,112,113,5,31,0,0,113,118,3,0,0,0,114,115,5,19,
+	0,0,115,117,3,0,0,0,116,114,1,0,0,0,117,120,1,0,0,0,118,116,1,0,0,0,118,
+	119,1,0,0,0,119,121,1,0,0,0,120,118,1,0,0,0,121,122,5,32,0,0,122,11,1,0,
+	0,0,123,135,5,23,0,0,124,129,3,14,7,0,125,126,5,19,0,0,126,128,3,14,7,0,
+	127,125,1,0,0,0,128,131,1,0,0,0,129,127,1,0,0,0,129,130,1,0,0,0,130,133,
+	1,0,0,0,131,129,1,0,0,0,132,134,5,19,0,0,133,132,1,0,0,0,133,134,1,0,0,
+	0,134,136,1,0,0,0,135,124,1,0,0,0,135,136,1,0,0,0,136,137,1,0,0,0,137,138,
+	5,24,0,0,138,13,1,0,0,0,139,142,3,0,0,0,140,141,5,18,0,0,141,143,3,76,38,
+	0,142,140,1,0,0,0,142,143,1,0,0,0,143,15,1,0,0,0,144,151,3,18,9,0,145,146,
+	5,39,0,0,146,147,3,62,31,0,147,148,5,26,0,0,148,151,1,0,0,0,149,151,3,70,
+	35,0,150,144,1,0,0,0,150,145,1,0,0,0,150,149,1,0,0,0,151,17,1,0,0,0,152,
+	153,5,3,0,0,153,155,3,20,10,0,154,156,3,24,12,0,155,154,1,0,0,0,155,156,
+	1,0,0,0,156,158,1,0,0,0,157,159,3,32,16,0,158,157,1,0,0,0,158,159,1,0,0,
+	0,159,19,1,0,0,0,160,165,3,22,11,0,161,162,5,19,0,0,162,164,3,22,11,0,163,
+	161,1,0,0,0,164,167,1,0,0,0,165,163,1,0,0,0,165,166,1,0,0,0,166,21,1,0,
+	0,0,167,165,1,0,0,0,168,173,3,34,17,0,169,171,5,6,0,0,170,169,1,0,0,0,170,
+	171,1,0,0,0,171,172,1,0,0,0,172,174,3,0,0,0,173,170,1,0,0,0,173,174,1,0,
+	0,0,174,177,1,0,0,0,175,177,5,22,0,0,176,168,1,0,0,0,176,175,1,0,0,0,177,
+	23,1,0,0,0,178,179,5,4,0,0,179,180,3,26,13,0,180,25,1,0,0,0,181,186,3,28,
+	14,0,182,183,5,19,0,0,183,185,3,28,14,0,184,182,1,0,0,0,185,188,1,0,0,0,
+	186,184,1,0,0,0,186,187,1,0,0,0,187,27,1,0,0,0,188,186,1,0,0,0,189,194,
+	3,30,15,0,190,192,5,6,0,0,191,190,1,0,0,0,191,192,1,0,0,0,192,193,1,0,0,
+	0,193,195,3,0,0,0,194,191,1,0,0,0,194,195,1,0,0,0,195,29,1,0,0,0,196,197,
+	3,2,1,0,197,31,1,0,0,0,198,199,5,5,0,0,199,200,3,34,17,0,200,33,1,0,0,0,
+	201,202,3,36,18,0,202,35,1,0,0,0,203,208,3,38,19,0,204,205,5,8,0,0,205,
+	207,3,38,19,0,206,204,1,0,0,0,207,210,1,0,0,0,208,206,1,0,0,0,208,209,1,
+	0,0,0,209,37,1,0,0,0,210,208,1,0,0,0,211,216,3,40,20,0,212,213,5,7,0,0,
+	213,215,3,40,20,0,214,212,1,0,0,0,215,218,1,0,0,0,216,214,1,0,0,0,216,217,
+	1,0,0,0,217,39,1,0,0,0,218,216,1,0,0,0,219,228,3,42,21,0,220,222,5,9,0,
+	0,221,220,1,0,0,0,221,222,1,0,0,0,222,223,1,0,0,0,223,224,5,16,0,0,224,
+	225,3,42,21,0,225,226,5,7,0,0,226,227,3,42,21,0,227,229,1,0,0,0,228,221,
+	1,0,0,0,228,229,1,0,0,0,229,41,1,0,0,0,230,247,3,44,22,0,231,233,5,9,0,
+	0,232,231,1,0,0,0,232,233,1,0,0,0,233,234,1,0,0,0,234,235,5,14,0,0,235,
+	244,5,23,0,0,236,241,3,34,17,0,237,238,5,19,0,0,238,240,3,34,17,0,239,237,
+	1,0,0,0,240,243,1,0,0,0,241,239,1,0,0,0,241,242,1,0,0,0,242,245,1,0,0,0,
+	243,241,1,0,0,0,244,236,1,0,0,0,244,245,1,0,0,0,245,246,1,0,0,0,246,248,
+	5,24,0,0,247,232,1,0,0,0,247,248,1,0,0,0,248,43,1,0,0,0,249,250,5,9,0,0,
+	250,253,3,44,22,0,251,253,3,46,23,0,252,249,1,0,0,0,252,251,1,0,0,0,253,
+	45,1,0,0,0,254,260,3,48,24,0,255,257,5,13,0,0,256,258,5,9,0,0,257,256,1,
+	0,0,0,257,258,1,0,0,0,258,259,1,0,0,0,259,261,5,12,0,0,260,255,1,0,0,0,
+	260,261,1,0,0,0,261,47,1,0,0,0,262,268,3,50,25,0,263,265,5,13,0,0,264,266,
+	5,9,0,0,265,264,1,0,0,0,265,266,1,0,0,0,266,267,1,0,0,0,267,269,7,1,0,0,
+	268,263,1,0,0,0,268,269,1,0,0,0,269,49,1,0,0,0,270,273,3,52,26,0,271,272,
+	7,2,0,0,272,274,3,52,26,0,273,271,1,0,0,0,273,274,1,0,0,0,274,51,1,0,0,
+	0,275,281,3,54,27,0,276,278,5,9,0,0,277,276,1,0,0,0,277,278,1,0,0,0,278,
+	279,1,0,0,0,279,280,5,15,0,0,280,282,3,54,27,0,281,277,1,0,0,0,281,282,
+	1,0,0,0,282,53,1,0,0,0,283,288,3,56,28,0,284,285,7,3,0,0,285,287,3,56,28,
+	0,286,284,1,0,0,0,287,290,1,0,0,0,288,286,1,0,0,0,288,289,1,0,0,0,289,55,
+	1,0,0,0,290,288,1,0,0,0,291,296,3,58,29,0,292,293,7,4,0,0,293,295,3,58,
+	29,0,294,292,1,0,0,0,295,298,1,0,0,0,296,294,1,0,0,0,296,297,1,0,0,0,297,
+	57,1,0,0,0,298,296,1,0,0,0,299,301,7,3,0,0,300,299,1,0,0,0,300,301,1,0,
+	0,0,301,302,1,0,0,0,302,303,3,60,30,0,303,59,1,0,0,0,304,305,5,39,0,0,305,
+	306,3,62,31,0,306,307,5,26,0,0,307,315,1,0,0,0,308,315,3,70,35,0,309,315,
+	3,72,36,0,310,311,5,23,0,0,311,312,3,34,17,0,312,313,5,24,0,0,313,315,1,
+	0,0,0,314,304,1,0,0,0,314,308,1,0,0,0,314,309,1,0,0,0,314,310,1,0,0,0,315,
+	61,1,0,0,0,316,320,3,66,33,0,317,320,3,64,32,0,318,320,3,72,36,0,319,316,
+	1,0,0,0,319,317,1,0,0,0,319,318,1,0,0,0,320,63,1,0,0,0,321,322,3,2,1,0,
+	322,65,1,0,0,0,323,325,3,2,1,0,324,326,3,68,34,0,325,324,1,0,0,0,325,326,
+	1,0,0,0,326,327,1,0,0,0,327,336,5,23,0,0,328,333,3,62,31,0,329,330,5,19,
+	0,0,330,332,3,62,31,0,331,329,1,0,0,0,332,335,1,0,0,0,333,331,1,0,0,0,333,
+	334,1,0,0,0,334,337,1,0,0,0,335,333,1,0,0,0,336,328,1,0,0,0,336,337,1,0,
+	0,0,337,338,1,0,0,0,338,339,5,24,0,0,339,67,1,0,0,0,340,341,5,17,0,0,341,
+	342,5,31,0,0,342,347,3,76,38,0,343,344,5,19,0,0,344,346,3,76,38,0,345,343,
+	1,0,0,0,346,349,1,0,0,0,347,345,1,0,0,0,347,348,1,0,0,0,348,350,1,0,0,0,
+	349,347,1,0,0,0,350,351,5,32,0,0,351,69,1,0,0,0,352,360,3,0,0,0,353,356,
+	5,20,0,0,354,357,3,0,0,0,355,357,5,22,0,0,356,354,1,0,0,0,356,355,1,0,0,
+	0,357,359,1,0,0,0,358,353,1,0,0,0,359,362,1,0,0,0,360,358,1,0,0,0,360,361,
+	1,0,0,0,361,71,1,0,0,0,362,360,1,0,0,0,363,364,7,5,0,0,364,73,1,0,0,0,365,
+	366,5,2,0,0,366,75,1,0,0,0,367,368,3,78,39,0,368,77,1,0,0,0,369,370,3,64,
+	32,0,370,79,1,0,0,0,46,87,93,100,105,118,129,133,135,142,150,155,158,165,
+	170,173,176,186,191,194,208,216,221,228,232,241,244,247,252,257,260,265,
+	268,273,277,281,288,296,300,314,319,325,333,336,347,356,360];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -2414,26 +2446,95 @@ export class Query_bodyContext extends ParserRuleContext {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
-	public simple_select(): Simple_selectContext {
-		return this.getTypedRuleContext(Simple_selectContext, 0) as Simple_selectContext;
-	}
     public get ruleIndex(): number {
     	return PGLParser.RULE_query_body;
 	}
+	public override copyFrom(ctx: Query_bodyContext): void {
+		super.copyFrom(ctx);
+	}
+}
+export class Pgl_dollar_ident_ref_bodyContext extends Query_bodyContext {
+	constructor(parser: PGLParser, ctx: Query_bodyContext) {
+		super(parser, ctx.parentCtx, ctx.invokingState);
+		super.copyFrom(ctx);
+	}
+	public columnref_or_pgl_dollar_ident_ref(): Columnref_or_pgl_dollar_ident_refContext {
+		return this.getTypedRuleContext(Columnref_or_pgl_dollar_ident_refContext, 0) as Columnref_or_pgl_dollar_ident_refContext;
+	}
 	public enterRule(listener: PGLParserListener): void {
-	    if(listener.enterQuery_body) {
-	 		listener.enterQuery_body(this);
+	    if(listener.enterPgl_dollar_ident_ref_body) {
+	 		listener.enterPgl_dollar_ident_ref_body(this);
 		}
 	}
 	public exitRule(listener: PGLParserListener): void {
-	    if(listener.exitQuery_body) {
-	 		listener.exitQuery_body(this);
+	    if(listener.exitPgl_dollar_ident_ref_body) {
+	 		listener.exitPgl_dollar_ident_ref_body(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
-		if (visitor.visitQuery_body) {
-			return visitor.visitQuery_body(this);
+		if (visitor.visitPgl_dollar_ident_ref_body) {
+			return visitor.visitPgl_dollar_ident_ref_body(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+export class Pgl_expr_bodyContext extends Query_bodyContext {
+	constructor(parser: PGLParser, ctx: Query_bodyContext) {
+		super(parser, ctx.parentCtx, ctx.invokingState);
+		super.copyFrom(ctx);
+	}
+	public DOLLAR_LCURLY(): TerminalNode {
+		return this.getToken(PGLParser.DOLLAR_LCURLY, 0);
+	}
+	public pgl_expr(): Pgl_exprContext {
+		return this.getTypedRuleContext(Pgl_exprContext, 0) as Pgl_exprContext;
+	}
+	public R_CURLY(): TerminalNode {
+		return this.getToken(PGLParser.R_CURLY, 0);
+	}
+	public enterRule(listener: PGLParserListener): void {
+	    if(listener.enterPgl_expr_body) {
+	 		listener.enterPgl_expr_body(this);
+		}
+	}
+	public exitRule(listener: PGLParserListener): void {
+	    if(listener.exitPgl_expr_body) {
+	 		listener.exitPgl_expr_body(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitPgl_expr_body) {
+			return visitor.visitPgl_expr_body(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+export class Simple_select_bodyContext extends Query_bodyContext {
+	constructor(parser: PGLParser, ctx: Query_bodyContext) {
+		super(parser, ctx.parentCtx, ctx.invokingState);
+		super.copyFrom(ctx);
+	}
+	public simple_select(): Simple_selectContext {
+		return this.getTypedRuleContext(Simple_selectContext, 0) as Simple_selectContext;
+	}
+	public enterRule(listener: PGLParserListener): void {
+	    if(listener.enterSimple_select_body) {
+	 		listener.enterSimple_select_body(this);
+		}
+	}
+	public exitRule(listener: PGLParserListener): void {
+	    if(listener.exitSimple_select_body) {
+	 		listener.exitSimple_select_body(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: PGLParserVisitor<Result>): Result {
+		if (visitor.visitSimple_select_body) {
+			return visitor.visitSimple_select_body(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

@@ -43,6 +43,9 @@ import {
   type Type_argument_listContext,
   type Type_refContext,
   RuleNode,
+  Simple_select_bodyContext,
+  Pgl_dollar_ident_ref_bodyContext,
+  Pgl_expr_bodyContext,
 } from "@pglambda/antlr";
 import type {
   PrimitiveName,
@@ -336,7 +339,10 @@ export class Checker
       const typeParamList = ctx.type_parameter_list();
       if (typeParamList) {
         const schemeId = this.typeStore.schemes.freshId();
-        schemeBodyTypeVar = this.checkTypeParameterList(typeParamList, schemeId);
+        schemeBodyTypeVar = this.checkTypeParameterList(
+          typeParamList,
+          schemeId,
+        );
         this.ctx.setDefScheme(ctx.contentHash, schemeId);
       }
 
@@ -399,8 +405,22 @@ export class Checker
       return type;
     });
 
-  visitQuery_body = (ctx: Query_bodyContext): Type =>
+  visitQuery_body = (ctx: Query_bodyContext): Type => {
+    for (const s of ctx.children ?? []) {
+      return this.visit(s);
+    }
+    return this.typeStore.error("query_body");
+  };
+
+  visitSimple_select_body = (ctx: Simple_select_bodyContext): Type =>
     this.visit(ctx.simple_select());
+
+  visitPgl_dollar_ident_ref_body = (
+    ctx: Pgl_dollar_ident_ref_bodyContext,
+  ): Type => this.visit(ctx.columnref_or_pgl_dollar_ident_ref());
+
+  visitPgl_expr_body = (ctx: Pgl_expr_bodyContext): Type =>
+    this.visit(ctx.pgl_expr());
 
   // --- Target visitors ---
 
