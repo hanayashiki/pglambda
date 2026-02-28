@@ -18,7 +18,7 @@ describe("Unification", () => {
 
   test("infers type parameter", () => {
     const alpha = store.typevar("alpha");
-    const int = store.primitive("int");
+    const int = store.primitive("integer");
 
     // Constraint: T_$x = T_1 (i.e., alpha = int)
     u.unify(alpha, int);
@@ -29,7 +29,7 @@ describe("Unification", () => {
   });
 
   test("int | null does not unify with int", () => {
-    const int = store.primitive("int");
+    const int = store.primitive("integer");
     const nullableInt = store.nullable(int);
 
     u.unify(nullableInt, int);
@@ -40,7 +40,7 @@ describe("Unification", () => {
   });
 
   test("int | null does not unify with text | null", () => {
-    const int = store.primitive("int");
+    const int = store.primitive("integer");
     const text = store.primitive("text");
     const nullableInt = store.nullable(int);
     const nullableText = store.nullable(text);
@@ -54,7 +54,7 @@ describe("Unification", () => {
 
   test("record with typevar field unifies", () => {
     const alpha = store.typevar("alpha");
-    const int = store.primitive("int");
+    const int = store.primitive("integer");
     const rec1 = store.record({ a: int });
     const rec2 = store.record({ a: alpha });
 
@@ -66,7 +66,7 @@ describe("Unification", () => {
   });
 
   test("records with different fields fail", () => {
-    const int = store.primitive("int");
+    const int = store.primitive("integer");
     const rec1 = store.record({ a: int });
     const rec2 = store.record({ b: int });
 
@@ -79,7 +79,7 @@ describe("Unification", () => {
 
   describe("function type unification", () => {
     test("unifies matching function types", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const fn1 = store.fn(["x"], [int], text);
       const fn2 = store.fn(["y"], [int], text);
@@ -90,7 +90,7 @@ describe("Unification", () => {
 
     test("infers through function parameter types", () => {
       const alpha = store.typevar("alpha");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const fn1 = store.fn(["x"], [alpha], text);
       const fn2 = store.fn(["x"], [int], text);
@@ -102,7 +102,7 @@ describe("Unification", () => {
 
     test("infers through function return type", () => {
       const alpha = store.typevar("alpha");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const fn1 = store.fn(["x"], [int], alpha);
       const fn2 = store.fn(["x"], [int], int);
 
@@ -112,7 +112,7 @@ describe("Unification", () => {
     });
 
     test("arity mismatch is an error", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const fn1 = store.fn(["x"], [int], int);
       const fn2 = store.fn(["x", "y"], [int, int], int);
 
@@ -122,7 +122,7 @@ describe("Unification", () => {
     });
 
     test("parameter type mismatch is an error", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const fn1 = store.fn(["x"], [int], int);
       const fn2 = store.fn(["x"], [text], int);
@@ -168,7 +168,7 @@ describe("Unification", () => {
 
     test("ParamType vs concrete type is an error", () => {
       const p = store.param(s1, 0);
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       u.unify(p, int);
       expect(u.getResult().errors).toHaveLength(1);
       expect(u.getResult().errors[0].errorKind).toBe("kind_mismatch");
@@ -176,7 +176,7 @@ describe("Unification", () => {
 
     test("deepResolve passes through ParamType", () => {
       const p = store.param(s1, 0);
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const fnType = store.fn(["x"], [p], int);
       const resolved = u.deepResolve(fnType);
       expect(resolved).toBe(fnType);
@@ -185,7 +185,7 @@ describe("Unification", () => {
     test("deepResolve resolves typevar bound to ParamType", () => {
       const alpha = store.typevar("alpha");
       const p = store.param(s1, 0);
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       u.unify(alpha, p);
 
       const fnType = store.fn(["x"], [alpha], int);
@@ -213,7 +213,7 @@ describe("Unification", () => {
     });
 
     test("unifies same applied types", () => {
-      const recordType = store.record({ col: store.primitive("int") });
+      const recordType = store.record({ col: store.primitive("integer") });
       const set1 = store.apply(setOfCtorId, [recordType]);
       const set2 = store.apply(setOfCtorId, [recordType]);
 
@@ -224,7 +224,7 @@ describe("Unification", () => {
 
     test("unifies applied types with type variables", () => {
       const alpha = store.typevar("alpha");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const set1 = store.apply(setOfCtorId, [alpha]);
       const set2 = store.apply(setOfCtorId, [int]);
 
@@ -246,7 +246,7 @@ describe("Unification", () => {
 
     test("deepResolve resolves arguments", () => {
       const alpha = store.typevar("alpha");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const setOfAlpha = store.apply(setOfCtorId, [alpha]);
 
       u.unify(alpha, int);
@@ -258,7 +258,7 @@ describe("Unification", () => {
     });
 
     test("deepResolve preserves identity when no changes", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const setOfInt = store.apply(setOfCtorId, [int]);
 
       const resolved = u.deepResolve(setOfInt);
@@ -268,7 +268,7 @@ describe("Unification", () => {
     test("nested applied types with type variables resolve correctly", () => {
       const alpha = store.typevar("alpha");
       const beta = store.typevar("beta");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       const recAlpha = store.record({ col: alpha });

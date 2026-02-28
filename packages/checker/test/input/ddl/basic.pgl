@@ -1,7 +1,7 @@
 database {
   create table users (
     id integer,
-    name varchar,
+    name text,
     active boolean
   );
 }

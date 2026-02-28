@@ -11,12 +11,14 @@ import type {
   HirId,
   Module,
   QueryDef,
+  DatabaseDef,
   HirStore,
   QueryDefinition,
   DefinitionId,
 } from "@pglambda/hir";
 import { runCheckWithContext } from "./ctx.js";
 import { checkQueryDef } from "./query_def.js";
+import { simpleTypeToPrimitive } from "./type-resolve.js";
 
 type EqualityConstraint = { readonly t1: Type; readonly t2: Type };
 
@@ -29,6 +31,8 @@ export type CheckResult = {
   readonly exportedTypes: ReadonlyMap<DefinitionId, Type>;
   /** Resolved type schemes for generic definitions */
   readonly exportedTypeSchemes: readonly TypeScheme[];
+  /** Resolved row types for tables from database blocks */
+  readonly tableTypes: ReadonlyMap<DefinitionId, Type>;
   readonly errors: readonly CheckError[];
 };
 
@@ -38,6 +42,7 @@ export class CheckContext {
   private readonly defToScheme = new Map<HirId, TypeSchemeId>();
   private readonly imports: ReadonlyMap<DefinitionId, Type>;
 
+  private readonly tableTypes = new Map<DefinitionId, Type>();
   private constraints: EqualityConstraint[] = [];
   private unification: Unification;
   private readonly setOfCtorId: TypeConstructorId;
@@ -91,6 +96,10 @@ export class CheckContext {
     return this.store.apply(this.setOfCtorId, [rowType]);
   }
 
+  getTableType(defId: DefinitionId): Type | undefined {
+    return this.tableTypes.get(defId);
+  }
+
   /**
    * Get or lazily create a typevar placeholder for a definition.
    * Checks imports first (pre-solved types from other modules),
@@ -116,7 +125,12 @@ export class CheckContext {
   }
 
   check(): CheckResult {
-    // Partition: generic defs first
+    // Phase 1: Register tables from database blocks
+    for (const def of this.module.data.defs) {
+      if (def.tag === "database") this.registerDatabaseDef(def);
+    }
+
+    // Phase 2: Check queries
     const sortedDefs = this.partitionDefs();
 
     runCheckWithContext(this, () => {
@@ -156,11 +170,35 @@ export class CheckContext {
       nodeTypes,
       exportedTypes,
       exportedTypeSchemes,
+      tableTypes: this.tableTypes,
       errors: [
         ...this.errors,
         ...unificationResult.errors.map((e) => ({ message: e.message })),
       ],
     };
+  }
+
+  private registerDatabaseDef(db: DatabaseDef): void {
+    for (const stmt of db.data.statements) {
+      const fields: Record<string, Type> = {};
+      for (const col of stmt.data.columns) {
+        const primName = simpleTypeToPrimitive(col.data.typeName.data.simpleType);
+        if (!primName) {
+          this.errors.push({ message: `Unsupported column type for "${col.data.name.data.text}"` });
+          continue;
+        }
+        let type: Type = this.store.primitive(primName);
+        for (let i = 0; i < col.data.typeName.data.arrayDimensions; i++) {
+          type = this.store.array(type);
+        }
+        const isNotNull = col.data.constraints.notNull || col.data.constraints.primaryKey;
+        if (!isNotNull) {
+          type = this.store.nullable(type);
+        }
+        fields[col.data.name.data.text] = type;
+      }
+      this.tableTypes.set(stmt.id as DefinitionId, this.store.record(fields));
+    }
   }
 
   private partitionDefs(): QueryDef[] {

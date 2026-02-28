@@ -1,5 +1,5 @@
-import type { HirStore, DefinitionId, ScopeId, Definition, QueryDefinition, TypeParamDefinition, QueryParamDefinition } from "./store.js";
-import type { Module, Def, QueryDef, HirId } from "./types.js";
+import type { HirStore, DefinitionId, ScopeId, Definition, QueryDefinition, TypeParamDefinition, QueryParamDefinition, TableDefinition, TableColumnDef } from "./store.js";
+import type { Module, Def, QueryDef, DatabaseDef, HirId } from "./types.js";
 
 /**
  * Extract definitions and build scopes from a lowered HIR Module.
@@ -23,7 +23,7 @@ function defineDef(def: Def, store: HirStore, scopeStack: ScopeId[]): void {
       defineQueryDef(def, store, scopeStack);
       break;
     case "database":
-      // DDL definitions not yet supported
+      defineDatabaseDef(def, store);
       break;
   }
 }
@@ -74,6 +74,25 @@ function defineQueryDef(q: QueryDef, store: HirStore, scopeStack: ScopeId[]): vo
   }
 
   scopeStack.pop();
+}
+
+function defineDatabaseDef(db: DatabaseDef, store: HirStore): void {
+  for (const stmt of db.data.statements) {
+    const tableName = stmt.data.name.data.parts.map(p => p.data.text).join(".");
+    const columns: TableColumnDef[] = stmt.data.columns.map(col => ({
+      name: col.data.name.data.text,
+      simpleType: col.data.typeName.data.simpleType,
+      notNull: col.data.constraints.notNull || col.data.constraints.primaryKey,
+      arrayDimensions: col.data.typeName.data.arrayDimensions,
+    }));
+    const tableDef: TableDefinition = {
+      id: stmt.id as DefinitionId,
+      tag: "table",
+      name: tableName,
+      columns,
+    };
+    store.addDefinition(tableDef);
+  }
 }
 
 // --- Helpers ---

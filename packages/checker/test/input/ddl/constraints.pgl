@@ -1,0 +1,9 @@
+database {
+  create table products (
+    id integer primary key,
+    name text not null,
+    price numeric,
+    in_stock boolean not null,
+    sku text unique
+  );
+}

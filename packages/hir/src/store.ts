@@ -1,4 +1,4 @@
-import type { HirId } from "./types.js";
+import type { HirId, SimpleTypeName } from "./types.js";
 
 // --- Definitions (adapted from parser/definitions.ts) ---
 
@@ -27,10 +27,25 @@ export type QueryDefinition = {
   readonly returnTypeNode: HirId | null;
 };
 
+export type TableColumnDef = {
+  readonly name: string;
+  readonly simpleType: SimpleTypeName;
+  readonly notNull: boolean;
+  readonly arrayDimensions: number;
+};
+
+export type TableDefinition = {
+  readonly id: DefinitionId;
+  readonly tag: "table";
+  readonly name: string;
+  readonly columns: TableColumnDef[];
+};
+
 export type Definition =
   | TypeParamDefinition
   | QueryParamDefinition
-  | QueryDefinition;
+  | QueryDefinition
+  | TableDefinition;
 
 // --- Scopes ---
 

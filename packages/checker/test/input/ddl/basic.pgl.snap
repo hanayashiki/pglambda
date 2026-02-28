@@ -1,0 +1,1 @@
+users: {active: boolean | null, id: integer | null, name: text | null}

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { checkAndExtractMarkers, checkModule } from "./check-helper.js";
 
 describe("Checker (HIR) Snapshot Tests", () => {
-  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input");
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input/checker");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
     .sort();
@@ -17,7 +17,7 @@ describe("Checker (HIR) Snapshot Tests", () => {
     const snapshot = checkAndExtractMarkers(input, filename);
 
     await expect(snapshot).toMatchFileSnapshot(
-      `input/${filename}.snap`,
+      `input/checker/${filename}.snap`,
     );
   });
 
@@ -32,7 +32,7 @@ describe("Checker imports/exports", () => {
 
     expect(result.exportedTypes.size).toBe(1);
     const [, fnType] = [...result.exportedTypes.entries()][0];
-    expect(store.typeToString(fnType)).toBe("() => SetOf<{col: int}>");
+    expect(store.typeToString(fnType)).toBe("() => SetOf<{col: integer}>");
   });
 
   test("exports multiple query defs", () => {
@@ -44,7 +44,7 @@ describe("Checker imports/exports", () => {
     const types = [...result.exportedTypes.values()].map((t) =>
       store.typeToString(t),
     );
-    expect(types).toContain("() => SetOf<{a: int}>");
+    expect(types).toContain("() => SetOf<{a: integer}>");
     expect(types).toContain("(x: text) => SetOf<{b: text}>");
   });
 

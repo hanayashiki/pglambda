@@ -1,7 +1,7 @@
 database {
   create table t (
-    a integer primary key,
-    b varchar not null,
+    a int4 primary key,
+    b text not null,
     c varchar(255),
     d boolean,
     e numeric(10, 2),

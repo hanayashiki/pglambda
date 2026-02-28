@@ -8,13 +8,13 @@ export function checkExpr(e: Expr): Type {
       return ctx.getOrInsert(e.id, () => {
         switch (e.data.value.kind) {
           case "int":
-            return ctx.typeStore.primitive("int");
+            return ctx.typeStore.primitive("integer");
           case "numeric":
             return ctx.typeStore.primitive("numeric");
           case "text":
             return ctx.typeStore.primitive("text");
           case "bool":
-            return ctx.typeStore.primitive("bool");
+            return ctx.typeStore.primitive("boolean");
           case "null":
             return ctx.typeStore.nullable(ctx.typeStore.typevar());
         }

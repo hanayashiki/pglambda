@@ -12,23 +12,23 @@ describe("TypeStore", () => {
 
   describe("primitive types", () => {
     test("same primitive name returns same instance (===)", () => {
-      const int1 = store.primitive("int");
-      const int2 = store.primitive("int");
+      const int1 = store.primitive("integer");
+      const int2 = store.primitive("integer");
       expect(int1).toBe(int2);
       expect(int1 === int2).toBe(true);
     });
 
     test("different primitive names return different instances", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       expect(int).not.toBe(text);
       expect(int === text).toBe(false);
     });
 
     test("primitives have correct properties", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       expect(int.kind).toBe("primitive");
-      expect(int.name).toBe("int");
+      expect(int.name).toBe("integer");
       expect(typeof int.id).toBe("number");
     });
   });
@@ -67,7 +67,7 @@ describe("TypeStore", () => {
 
   describe("array types", () => {
     test("same element type returns same array instance (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const arr1 = store.array(int);
       const arr2 = store.array(int);
       expect(arr1).toBe(arr2);
@@ -75,7 +75,7 @@ describe("TypeStore", () => {
     });
 
     test("different element types return different array instances", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const arr1 = store.array(int);
       const arr2 = store.array(text);
@@ -84,7 +84,7 @@ describe("TypeStore", () => {
     });
 
     test("nested arrays with same structure are identical (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const arr1 = store.array(store.array(int));
       const arr2 = store.array(store.array(int));
       expect(arr1).toBe(arr2);
@@ -111,7 +111,7 @@ describe("TypeStore", () => {
 
   describe("record types", () => {
     test("same field structure returns same instance (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const rec1 = store.record({ id: int, name: text });
       const rec2 = store.record({ id: int, name: text });
@@ -120,7 +120,7 @@ describe("TypeStore", () => {
     });
 
     test("field order does not matter (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const rec1 = store.record({ id: int, name: text });
       const rec2 = store.record({ name: text, id: int });
@@ -129,7 +129,7 @@ describe("TypeStore", () => {
     });
 
     test("different field names return different instances", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const rec1 = store.record({ id: int });
       const rec2 = store.record({ other: int });
       expect(rec1).not.toBe(rec2);
@@ -137,7 +137,7 @@ describe("TypeStore", () => {
     });
 
     test("different field types return different instances", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const rec1 = store.record({ field: int });
       const rec2 = store.record({ field: text });
@@ -162,7 +162,7 @@ describe("TypeStore", () => {
     });
 
     test("records copy input object to prevent mutation", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const fields = { id: int };
       const rec = store.record(fields);
 
@@ -178,7 +178,7 @@ describe("TypeStore", () => {
 
   describe("nullable types", () => {
     test("same inner type returns same nullable instance (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const null1 = store.nullable(int);
       const null2 = store.nullable(int);
       expect(null1).toBe(null2);
@@ -186,7 +186,7 @@ describe("TypeStore", () => {
     });
 
     test("different inner types return different nullable instances", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const null1 = store.nullable(int);
       const null2 = store.nullable(text);
@@ -195,7 +195,7 @@ describe("TypeStore", () => {
     });
 
     test("nested nullables with same structure are identical (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const null1 = store.nullable(store.nullable(int));
       const null2 = store.nullable(store.nullable(int));
       expect(null1).toBe(null2);
@@ -237,7 +237,7 @@ describe("TypeStore", () => {
 
   describe("complex type combinations", () => {
     test("complex nested structures are identical (===)", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // Create: nullable<array<record<{id: int, name: text}>>>
@@ -271,7 +271,7 @@ describe("TypeStore", () => {
 
     test("reusing same typevar produces identical structures (===)", () => {
       const t = store.typevar();
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
 
       const rec1 = store.record({ a: t, b: int });
       const rec2 = store.record({ a: t, b: int });
@@ -283,14 +283,14 @@ describe("TypeStore", () => {
 
   describe("getAs method", () => {
     test("retrieves primitive by id with correct kind", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const retrieved = store.getAs(int.id, "primitive");
       expect(retrieved).toBe(int);
       expect(retrieved === int).toBe(true);
     });
 
     test("retrieves array by id with correct kind", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const arr = store.array(int);
       const retrieved = store.getAs(arr.id, "array");
       expect(retrieved).toBe(arr);
@@ -298,7 +298,7 @@ describe("TypeStore", () => {
     });
 
     test("retrieves record by id with correct kind", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const rec = store.record({ id: int });
       const retrieved = store.getAs(rec.id, "record");
       expect(retrieved).toBe(rec);
@@ -306,7 +306,7 @@ describe("TypeStore", () => {
     });
 
     test("retrieves nullable by id with correct kind", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const nullable = store.nullable(int);
       const retrieved = store.getAs(nullable.id, "nullable");
       expect(retrieved).toBe(nullable);
@@ -334,7 +334,7 @@ describe("TypeStore", () => {
     });
 
     test("throws error for kind mismatch", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       expect(() => {
         store.getAs(int.id, "array");
       }).toThrow(/Type kind mismatch.*expected 'array'.*got 'primitive'/);
@@ -344,10 +344,10 @@ describe("TypeStore", () => {
   describe("type IDs", () => {
     test("type IDs are unique and sequential", () => {
       const types = [
-        store.primitive("int"),
+        store.primitive("integer"),
         store.primitive("text"),
         store.typevar(),
-        store.array(store.primitive("int")),
+        store.array(store.primitive("integer")),
       ];
 
       const ids = types.map((t) => t.id);
@@ -363,8 +363,8 @@ describe("TypeStore", () => {
     });
 
     test("cached types reuse IDs", () => {
-      const int1 = store.primitive("int");
-      const int2 = store.primitive("int");
+      const int1 = store.primitive("integer");
+      const int2 = store.primitive("integer");
 
       expect(int1.id).toBe(int2.id);
     });
@@ -388,7 +388,7 @@ describe("TypeStore", () => {
     });
 
     test("same constructor + args returns same instance (===)", () => {
-      const recordType = store.record({ col: store.primitive("int") });
+      const recordType = store.record({ col: store.primitive("integer") });
       const applied1 = store.apply(setOfCtorId, [recordType]);
       const applied2 = store.apply(setOfCtorId, [recordType]);
       expect(applied1).toBe(applied2);
@@ -396,7 +396,7 @@ describe("TypeStore", () => {
     });
 
     test("different arguments produce different instances", () => {
-      const rec1 = store.record({ col: store.primitive("int") });
+      const rec1 = store.record({ col: store.primitive("integer") });
       const rec2 = store.record({ col: store.primitive("text") });
       const applied1 = store.apply(setOfCtorId, [rec1]);
       const applied2 = store.apply(setOfCtorId, [rec2]);
@@ -415,7 +415,7 @@ describe("TypeStore", () => {
     });
 
     test("apply() validates arity", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       expect(() => {
         store.apply(setOfCtorId, [int, text]); // SetOf takes 1 arg
@@ -429,14 +429,14 @@ describe("TypeStore", () => {
     });
 
     test("applied types have correct properties", () => {
-      const rec = store.record({ id: store.primitive("int"), name: store.primitive("text") });
+      const rec = store.record({ id: store.primitive("integer"), name: store.primitive("text") });
       const applied = store.apply(setOfCtorId, [rec]);
       expect(applied.kind).toBe("applied");
-      expect(store.typeToString(applied)).toBe("SetOf<{id: int, name: text}>");
+      expect(store.typeToString(applied)).toBe("SetOf<{id: integer, name: text}>");
     });
 
     test("applied types copy arguments array to prevent mutation", () => {
-      const rec1 = store.record({ id: store.primitive("int") });
+      const rec1 = store.record({ id: store.primitive("integer") });
       const rec2 = store.record({ name: store.primitive("text") });
       const args = [rec1];
       const applied = store.apply(setOfCtorId, args);
@@ -445,11 +445,11 @@ describe("TypeStore", () => {
       args[0] = rec2;
 
       // Applied type should not be affected
-      expect(store.typeToString(applied)).toBe("SetOf<{id: int}>");
+      expect(store.typeToString(applied)).toBe("SetOf<{id: integer}>");
     });
 
     test("getAs retrieves applied type by id", () => {
-      const rec = store.record({ id: store.primitive("int") });
+      const rec = store.record({ id: store.primitive("integer") });
       const applied = store.apply(setOfCtorId, [rec]);
       const retrieved = store.getAs(applied.id, "applied");
       expect(retrieved).toBe(applied);
@@ -503,7 +503,7 @@ describe("TypeStore", () => {
     });
 
     test("preserves concrete types", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const p0 = store.param(s1, 0);
       const body = store.fn(["x"], [p0], int);
       const scheme: TypeScheme = {
@@ -541,7 +541,7 @@ describe("TypeStore", () => {
 
     test("instantiated type variables unify with concrete types", () => {
       const u = new Unification(store);
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const p0 = store.param(s1, 0);
       const body = store.fn(["x"], [p0], p0);
       const scheme: TypeScheme = {
@@ -561,7 +561,7 @@ describe("TypeStore", () => {
 
     test("two instantiations get independent type variables", () => {
       const u = new Unification(store);
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
       const p0 = store.param(s1, 0);
       const body = store.fn(["x"], [p0], p0);
@@ -585,7 +585,7 @@ describe("TypeStore", () => {
     });
 
     test("structural sharing when body has no params", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const body = store.fn(["x"], [int], int);
       const scheme: TypeScheme = {
         id: s1,

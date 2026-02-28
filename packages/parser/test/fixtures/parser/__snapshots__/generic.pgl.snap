@@ -2,25 +2,29 @@ prog
   def
     query_def
       "query"
-      identifier
-        "identity"
+      colid
+        identifier
+          "identity"
       type_parameter_list
         "<"
-        identifier
-          "T"
+        colid
+          identifier
+            "T"
         ">"
       query_parameter_list
         "("
         query_parameter
-          identifier
-            "x"
+          colid
+            identifier
+              "x"
           ":"
           type_expression
             type_ref
               pgl_ident_ref
                 qualified_name
-                  identifier
-                    "T"
+                  colid
+                    identifier
+                      "T"
         ")"
       "{"
       query_body
@@ -43,26 +47,30 @@ prog
                                       a_expr_unary
                                         c_expr
                                           columnref_or_pgl_dollar_ident_ref
-                                            identifier
-                                              "$x"
+                                            colid
+                                              identifier
+                                                "$x"
       "}"
   def
     query_def
       "query"
-      identifier
-        "filter_users"
+      colid
+        identifier
+          "filter_users"
       query_parameter_list
         "("
         query_parameter
-          identifier
-            "id"
+          colid
+            identifier
+              "id"
           ":"
           type_expression
             type_ref
               pgl_ident_ref
                 qualified_name
-                  identifier
-                    "text"
+                  colid
+                    identifier
+                      "text"
         ")"
       "{"
       query_body
@@ -77,8 +85,9 @@ prog
               table_ref
                 relation_expr
                   qualified_name
-                    identifier
-                      "users"
+                    colid
+                      identifier
+                        "users"
           where_clause
             "where"
             a_expr
@@ -99,14 +108,16 @@ prog
                                         pgl_expr
                                           pgl_query_call
                                             qualified_name
-                                              identifier
-                                                "identity"
+                                              colid
+                                                identifier
+                                                  "identity"
                                             "("
                                             pgl_expr
                                               pgl_ident_ref
                                                 qualified_name
-                                                  identifier
-                                                    "$id"
+                                                  colid
+                                                    identifier
+                                                      "$id"
                                             ")"
                                         "}"
                               "="
@@ -116,26 +127,30 @@ prog
                                     a_expr_unary
                                       c_expr
                                         columnref_or_pgl_dollar_ident_ref
-                                          identifier
-                                            "$id"
+                                          colid
+                                            identifier
+                                              "$id"
       "}"
   def
     query_def
       "query"
-      identifier
-        "typed_call"
+      colid
+        identifier
+          "typed_call"
       query_parameter_list
         "("
         query_parameter
-          identifier
-            "id"
+          colid
+            identifier
+              "id"
           ":"
           type_expression
             type_ref
               pgl_ident_ref
                 qualified_name
-                  identifier
-                    "text"
+                  colid
+                    identifier
+                      "text"
         ")"
       "{"
       query_body
@@ -150,8 +165,9 @@ prog
               table_ref
                 relation_expr
                   qualified_name
-                    identifier
-                      "users"
+                    colid
+                      identifier
+                        "users"
           where_clause
             "where"
             a_expr
@@ -172,8 +188,9 @@ prog
                                         pgl_expr
                                           pgl_query_call
                                             qualified_name
-                                              identifier
-                                                "identity"
+                                              colid
+                                                identifier
+                                                  "identity"
                                             type_argument_list
                                               "::"
                                               "<"
@@ -181,15 +198,17 @@ prog
                                                 type_ref
                                                   pgl_ident_ref
                                                     qualified_name
-                                                      identifier
-                                                        "text"
+                                                      colid
+                                                        identifier
+                                                          "text"
                                               ">"
                                             "("
                                             pgl_expr
                                               pgl_ident_ref
                                                 qualified_name
-                                                  identifier
-                                                    "$id"
+                                                  colid
+                                                    identifier
+                                                      "$id"
                                             ")"
                                         "}"
                               "="
@@ -199,6 +218,7 @@ prog
                                     a_expr_unary
                                       c_expr
                                         columnref_or_pgl_dollar_ident_ref
-                                          identifier
-                                            "$id"
+                                          colid
+                                            identifier
+                                              "$id"
       "}"

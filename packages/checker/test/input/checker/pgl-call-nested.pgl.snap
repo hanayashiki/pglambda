@@ -1,4 +1,4 @@
-s: SetOf<{col: SetOf<{col: int}>}>
+s: SetOf<{col: SetOf<{col: integer}>}>
 
 schemes:
   for<T> (x: T) => SetOf<{col: T}>

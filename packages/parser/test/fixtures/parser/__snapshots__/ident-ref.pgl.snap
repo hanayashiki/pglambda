@@ -2,20 +2,23 @@ prog
   def
     query_def
       "query"
-      identifier
-        "f"
+      colid
+        identifier
+          "f"
       query_parameter_list
         "("
         query_parameter
-          identifier
-            "x"
+          colid
+            identifier
+              "x"
           ":"
           type_expression
             type_ref
               pgl_ident_ref
                 qualified_name
-                  identifier
-                    "text"
+                  colid
+                    identifier
+                      "text"
         ")"
       "{"
       query_body
@@ -41,10 +44,12 @@ prog
                                           pgl_expr
                                             pgl_ident_ref
                                               qualified_name
-                                                identifier
-                                                  "x"
+                                                colid
+                                                  identifier
+                                                    "x"
                                           "}"
               "as"
-              identifier
-                "col"
+              colLabel
+                identifier
+                  "col"
       "}"

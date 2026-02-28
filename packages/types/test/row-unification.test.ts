@@ -15,7 +15,7 @@ describe("Row Polymorphism Unification", () => {
     test("open with one field unifies with closed superset", () => {
       const rho = store.typevar("rho");
       const beta = store.typevar("beta");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {id: β | ρ} = {id: int, name: text}
@@ -40,9 +40,9 @@ describe("Row Polymorphism Unification", () => {
     test("open with multiple extra fields in closed side", () => {
       const rho = store.typevar("rho");
       const beta = store.typevar("beta");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
-      const bool = store.primitive("bool");
+      const bool = store.primitive("boolean");
 
       // {id: β | ρ} = {id: int, name: text, age: int, active: bool}
       const open = store.record({ id: beta }, rho);
@@ -59,7 +59,7 @@ describe("Row Polymorphism Unification", () => {
       expect(result.errors).toHaveLength(0);
       expect(u.resolve(beta)).toBe(int);
 
-      // ρ should resolve to {name: text, age: int, active: bool}
+      // ρ should resolve to {name: text, age: int, active: boolean}
       const resolvedRho = u.resolve(rho);
       expect(resolvedRho.kind).toBe("record");
       if (resolvedRho.kind === "record") {
@@ -72,7 +72,7 @@ describe("Row Polymorphism Unification", () => {
 
     test("open with same fields binds rest to empty record", () => {
       const rho = store.typevar("rho");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {id: int, name: text | ρ} = {id: int, name: text}
@@ -95,10 +95,10 @@ describe("Row Polymorphism Unification", () => {
 
     test("closed superset unifies with open subset", () => {
       const rho = store.typevar("rho");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
-      // {id: int, name: text} = {id: int | ρ}
+      // {id: int, name: text} = {id: integer | ρ}
       // Should succeed by binding ρ = {name: text}
       const closed = store.record({ id: int, name: text });
       const open = store.record({ id: int }, rho);
@@ -121,7 +121,7 @@ describe("Row Polymorphism Unification", () => {
     test("two open records with same fields unify rest", () => {
       const rho1 = store.typevar("rho1");
       const rho2 = store.typevar("rho2");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
 
       // {a: int | ρ₁} = {a: int | ρ₂}
       const open1 = store.record({ a: int }, rho1);
@@ -139,7 +139,7 @@ describe("Row Polymorphism Unification", () => {
     test("both open with different fields (complex case)", () => {
       const rho1 = store.typevar("rho1");
       const rho2 = store.typevar("rho2");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {a: int | ρ₁} = {b: text | ρ₂}
@@ -179,11 +179,11 @@ describe("Row Polymorphism Unification", () => {
     test("both open with multiple extra fields on each side", () => {
       const rho1 = store.typevar("rho1");
       const rho2 = store.typevar("rho2");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
-      const bool = store.primitive("bool");
+      const bool = store.primitive("boolean");
 
-      // {a: int, b: text | ρ₁} = {c: bool, d: int | ρ₂}
+      // {a: int, b: text | ρ₁} = {c: boolean, d: int | ρ₂}
       const open1 = store.record({ a: int, b: text }, rho1);
       const open2 = store.record({ c: bool, d: int }, rho2);
 
@@ -224,9 +224,9 @@ describe("Row Polymorphism Unification", () => {
     test("both open with partial overlap", () => {
       const rho1 = store.typevar("rho1");
       const rho2 = store.typevar("rho2");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
-      const bool = store.primitive("bool");
+      const bool = store.primitive("boolean");
 
       // {a: int, b: text | ρ₁} = {a: int, c: bool | ρ₂}
       const open1 = store.record({ a: int, b: text }, rho1);
@@ -238,7 +238,7 @@ describe("Row Polymorphism Unification", () => {
       expect(result.errors).toHaveLength(0);
 
       // ρ₁ should contain field c, ρ₂ should contain field b
-      expect(store.typeToString(u.resolve(rho1))).toBe("{c: bool | T7}");
+      expect(store.typeToString(u.resolve(rho1))).toBe("{c: boolean | T7}");
       expect(store.typeToString(u.resolve(rho2))).toBe("{b: text | T7}");
     });
   });
@@ -246,7 +246,7 @@ describe("Row Polymorphism Unification", () => {
   describe("Error cases", () => {
     test("open with required fields vs closed without them fails", () => {
       const rho = store.typevar("rho");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {id: int, name: text | ρ} = {id: int}  (closed)
@@ -263,7 +263,7 @@ describe("Row Polymorphism Unification", () => {
     });
 
     test("both closed with different fields fails", () => {
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {id: int, name: text} = {id: int, email: text}
@@ -279,7 +279,7 @@ describe("Row Polymorphism Unification", () => {
 
     test("one open one closed with different fields on both sides fails", () => {
       const rho = store.typevar("rho");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {a: int, b: text | ρ} = {c: int, d: text} (closed)
@@ -296,7 +296,7 @@ describe("Row Polymorphism Unification", () => {
     test("field type mismatch in common fields", () => {
       const rho1 = store.typevar("rho1");
       const rho2 = store.typevar("rho2");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {a: int | ρ₁} = {a: text | ρ₂}
@@ -312,7 +312,7 @@ describe("Row Polymorphism Unification", () => {
 
     test("occurs check prevents infinite row types", () => {
       const rho = store.typevar("rho");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
 
       // ρ = {a: int | ρ} (infinite!)
       const recursive = store.record({ a: int }, rho);
@@ -359,7 +359,7 @@ describe("Row Polymorphism Unification", () => {
     test("deeply nested row unification", () => {
       const rho = store.typevar("rho");
       const alpha = store.typevar("alpha");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
 
       // {id: α | ρ} = {id: int, user: {name: text}}
@@ -385,9 +385,9 @@ describe("Row Polymorphism Unification", () => {
       const rho = store.typevar("rho");
       const alpha = store.typevar("alpha");
       const beta = store.typevar("beta");
-      const int = store.primitive("int");
+      const int = store.primitive("integer");
       const text = store.primitive("text");
-      const bool = store.primitive("bool");
+      const bool = store.primitive("boolean");
 
       // Start: {id: α | ρ}
       const open = store.record({ id: alpha }, rho);
@@ -410,10 +410,10 @@ describe("Row Polymorphism Unification", () => {
       const result = u.getResult();
       expect(result.errors).toHaveLength(0);
 
-      // Deep resolve preserves row structure: {id: int | {name: text, active: bool | {created_at: int}}}
+      // Deep resolve preserves row structure: {id: integer | {name: text, active: boolean | {created_at: int}}}
       const fullyResolved = u.deepResolve(open);
       expect(store.typeToString(fullyResolved)).toBe(
-        "{id: int | {active: bool, name: text | {created_at: int}}}",
+        "{id: integer | {active: boolean, name: text | {created_at: integer}}}",
       );
 
       // Verify individual bindings

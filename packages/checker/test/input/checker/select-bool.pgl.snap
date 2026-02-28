@@ -1,0 +1,1 @@
+s: SetOf<{flag: boolean}>

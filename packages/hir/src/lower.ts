@@ -85,6 +85,21 @@ import type {
   ColumnConstraints,
 } from "./types.js";
 
+/** Well-known PostgreSQL catalog type aliases → structured SimpleTypeName. */
+const WELL_KNOWN_CATALOG_TYPES: Record<string, SimpleTypeName> = {
+  // integer aliases
+  int2: { kind: "numeric", base: "smallint", precision: null, scale: null },
+  int4: { kind: "numeric", base: "integer", precision: null, scale: null },
+  int8: { kind: "numeric", base: "bigint", precision: null, scale: null },
+  // float aliases
+  float4: { kind: "numeric", base: "real", precision: null, scale: null },
+  float8: { kind: "numeric", base: "double", precision: null, scale: null },
+  // boolean alias
+  bool: { kind: "numeric", base: "boolean", precision: null, scale: null },
+  // text (equivalent to varchar without length)
+  text: { kind: "character", varying: true, length: null },
+};
+
 function spanFrom(ctx: ParserRuleContext, file: FileUri): Span {
   const start = ctx.start!;
   const stop = ctx.stop ?? start;
@@ -277,12 +292,12 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
         : colidCtx
           ? this.lowerColid(colidCtx)
           : // No explicit alias — synthesize from expression text
-            ({
+            {
               id: this.id(),
               tag: "name" as const,
               span: this.span(ctx),
               data: { text: ctx.a_expr().getText() },
-            });
+            };
       return {
         id: this.id(),
         tag: "targetExpr",
@@ -521,7 +536,8 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   // --- PGL expressions ---
 
   private lowerPglExpr(ctx: Pgl_exprContext): Expr {
-    if (ctx.pgl_query_call()) return this.lowerPglQueryCall(ctx.pgl_query_call());
+    if (ctx.pgl_query_call())
+      return this.lowerPglQueryCall(ctx.pgl_query_call());
     if (ctx.pgl_ident_ref()) return this.lowerPglIdentRef(ctx.pgl_ident_ref());
     if (ctx.aexprconst()) return this.lowerAExprConst(ctx.aexprconst());
     throw new Error("Unknown pgl_expr alternative");
@@ -540,7 +556,9 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     const name = this.lowerQualifiedName(ctx.qualified_name());
     const typeArgList = ctx.type_argument_list();
     const typeArgs: TypeExpr[] = typeArgList
-      ? typeArgList.type_expression_list().map((te) => this.lowerTypeExpression(te))
+      ? typeArgList
+          .type_expression_list()
+          .map((te) => this.lowerTypeExpression(te))
       : [];
     const args: Expr[] = ctx
       .pgl_expr_list()
@@ -555,9 +573,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
 
   // --- Column/param references ---
 
-  private lowerColumnref(
-    ctx: Columnref_or_pgl_dollar_ident_refContext,
-  ): Expr {
+  private lowerColumnref(ctx: Columnref_or_pgl_dollar_ident_refContext): Expr {
     const colids = ctx.colid_list();
     if (colids.length === 1 && colids[0].getText().startsWith("$")) {
       return {
@@ -591,9 +607,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerTypeRef(ctx: Type_refContext): TypeExpr {
-    const qname = this.lowerQualifiedName(
-      ctx.pgl_ident_ref().qualified_name(),
-    );
+    const qname = this.lowerQualifiedName(ctx.pgl_ident_ref().qualified_name());
     return {
       id: this.id(),
       tag: "typeExpr",
@@ -701,19 +715,27 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     const literals = ctx.INTEGER_LITERAL_list();
     const precision =
       literals.length > 0 ? parseInt(literals[0].getText()) : null;
-    const scale =
-      literals.length > 1 ? parseInt(literals[1].getText()) : null;
+    const scale = literals.length > 1 ? parseInt(literals[1].getText()) : null;
 
     if (ctx.KW_INT()) base = { kind: "numeric", base: "int", precision, scale };
-    else if (ctx.KW_INTEGER()) base = { kind: "numeric", base: "integer", precision, scale };
-    else if (ctx.KW_SMALLINT()) base = { kind: "numeric", base: "smallint", precision, scale };
-    else if (ctx.KW_BIGINT()) base = { kind: "numeric", base: "bigint", precision, scale };
-    else if (ctx.KW_REAL()) base = { kind: "numeric", base: "real", precision, scale };
-    else if (ctx.KW_FLOAT()) base = { kind: "numeric", base: "float", precision, scale };
-    else if (ctx.KW_DOUBLE()) base = { kind: "numeric", base: "double", precision, scale };
-    else if (ctx.KW_DECIMAL()) base = { kind: "numeric", base: "decimal", precision, scale };
-    else if (ctx.KW_NUMERIC()) base = { kind: "numeric", base: "numeric", precision, scale };
-    else if (ctx.KW_BOOLEAN()) base = { kind: "numeric", base: "boolean", precision, scale };
+    else if (ctx.KW_INTEGER())
+      base = { kind: "numeric", base: "integer", precision, scale };
+    else if (ctx.KW_SMALLINT())
+      base = { kind: "numeric", base: "smallint", precision, scale };
+    else if (ctx.KW_BIGINT())
+      base = { kind: "numeric", base: "bigint", precision, scale };
+    else if (ctx.KW_REAL())
+      base = { kind: "numeric", base: "real", precision, scale };
+    else if (ctx.KW_FLOAT())
+      base = { kind: "numeric", base: "float", precision, scale };
+    else if (ctx.KW_DOUBLE())
+      base = { kind: "numeric", base: "double", precision, scale };
+    else if (ctx.KW_DECIMAL())
+      base = { kind: "numeric", base: "decimal", precision, scale };
+    else if (ctx.KW_NUMERIC())
+      base = { kind: "numeric", base: "numeric", precision, scale };
+    else if (ctx.KW_BOOLEAN())
+      base = { kind: "numeric", base: "boolean", precision, scale };
     else throw new Error("Unknown numeric type");
 
     return base;
@@ -742,7 +764,9 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerGenericType(ctx: GenerictypeContext): SimpleTypeName {
-    const name = ctx.type_function_name().getText();
+    const name = ctx.type_function_name().getText().toLowerCase();
+    const wellKnown = WELL_KNOWN_CATALOG_TYPES[name];
+    if (wellKnown) return wellKnown;
     const params = ctx
       .INTEGER_LITERAL_list()
       .map((lit) => parseInt(lit.getText()));

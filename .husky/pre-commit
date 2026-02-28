@@ -2,3 +2,4 @@ set -e
 pnpm lint
 pnpm check
 pnpm -r build
+pnpm test

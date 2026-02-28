@@ -1,0 +1,1 @@
+products: {id: integer, in_stock: boolean, name: text, price: numeric | null, sku: text | null}

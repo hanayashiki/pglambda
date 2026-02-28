@@ -2,20 +2,23 @@ prog
   def
     query_def
       "query"
-      identifier
-        "get_user_by_id"
+      colid
+        identifier
+          "get_user_by_id"
       query_parameter_list
         "("
         query_parameter
-          identifier
-            "id"
+          colid
+            identifier
+              "id"
           ":"
           type_expression
             type_ref
               pgl_ident_ref
                 qualified_name
-                  identifier
-                    "text"
+                  colid
+                    identifier
+                      "text"
         ")"
       "{"
       query_body
@@ -30,8 +33,9 @@ prog
               table_ref
                 relation_expr
                   qualified_name
-                    identifier
-                      "users"
+                    colid
+                      identifier
+                        "users"
           where_clause
             "where"
             a_expr
@@ -49,8 +53,9 @@ prog
                                     a_expr_unary
                                       c_expr
                                         columnref_or_pgl_dollar_ident_ref
-                                          identifier
-                                            "id"
+                                          colid
+                                            identifier
+                                              "id"
                               "="
                               a_expr_like
                                 a_expr_add
@@ -58,6 +63,7 @@ prog
                                     a_expr_unary
                                       c_expr
                                         columnref_or_pgl_dollar_ident_ref
-                                          identifier
-                                            "$id"
+                                          colid
+                                            identifier
+                                              "$id"
       "}"

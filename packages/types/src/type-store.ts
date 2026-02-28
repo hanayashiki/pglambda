@@ -163,8 +163,8 @@ export class TypeStore {
    * Primitive types are singletons - same name → same instance
    *
    * @example
-   * const int1 = store.primitive('int');
-   * const int2 = store.primitive('int');
+   * const int1 = store.primitive('integer');
+   * const int2 = store.primitive('integer');
    * console.assert(int1 === int2); // true!
    */
   primitive(name: PrimitiveName): PrimitiveType {
@@ -198,7 +198,7 @@ export class TypeStore {
    * Array types are interned - same element type → same instance
    *
    * @example
-   * const int = store.primitive('int');
+   * const int = store.primitive('integer');
    * const arr1 = store.array(int);
    * const arr2 = store.array(int);
    * console.assert(arr1 === arr2); // true!
@@ -219,7 +219,7 @@ export class TypeStore {
    * @param rest Optional rest type for row polymorphism (null = closed record)
    *
    * @example
-   * const int = store.primitive('int');
+   * const int = store.primitive('integer');
    * const text = store.primitive('text');
    * const rec1 = store.record({ id: int, name: text });
    * const rec2 = store.record({ name: text, id: int });
@@ -242,7 +242,7 @@ export class TypeStore {
    * Nullable types are interned - same inner type → same instance
    *
    * @example
-   * const int = store.primitive('int');
+   * const int = store.primitive('integer');
    * const nullable1 = store.nullable(int);
    * const nullable2 = store.nullable(int);
    * console.assert(nullable1 === nullable2); // true!
@@ -262,8 +262,8 @@ export class TypeStore {
    * @param location Optional source location where the error occurred
    *
    * @example
-   * const err1 = store.error('Cannot add int and text');
-   * const err2 = store.error('Cannot add int and text');
+   * const err1 = store.error('Cannot add integer and text');
+   * const err2 = store.error('Cannot add integer and text');
    * console.assert(err1 !== err2); // true - different errors
    */
   error(message: string, location?: SourceLocation): ErrorType {
@@ -278,9 +278,9 @@ export class TypeStore {
    * Convert a type to a human-readable string representation
    *
    * @example
-   * store.typeToString(int) // "int"
-   * store.typeToString(array(int)) // "int[]"
-   * store.typeToString(appliedType) // "SetOf<{col: int}>"
+   * store.typeToString(int) // "integer"
+   * store.typeToString(array(int)) // "integer[]"
+   * store.typeToString(appliedType) // "SetOf<{col: integer}>"
    */
   typeToString(type: Type): string {
     switch (type.kind) {
@@ -365,7 +365,7 @@ export class TypeStore {
    *
    * @example
    * const setOfCtor = store.ctors.lookup("SetOf");
-   * const recordType = store.record({ col: store.primitive("int") });
+   * const recordType = store.record({ col: store.primitive("integer") });
    * const setType = store.apply(setOfCtor.id, [recordType]);
    */
   apply(ctorId: TypeConstructorId, args: Type[]): AppliedType {

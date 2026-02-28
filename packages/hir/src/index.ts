@@ -31,6 +31,8 @@ export {
   type QueryParamDefinition,
   type QueryDefinition,
   type Definition,
+  type TableDefinition,
+  type TableColumnDef,
   type ScopeId,
   type Scope,
 } from "./store.js";

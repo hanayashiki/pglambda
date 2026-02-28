@@ -1,26 +1,22 @@
-// PostgreSQL primitive type names
+// PostgreSQL primitive type names (SQL-standard display names)
 // Maps PostgreSQL types to pglambda's type system
 
 export type PrimitiveName =
   // Integer types
-  | 'int2' // smallint (-32768 to +32767)
-  | 'int4' // integer (-2147483648 to +2147483647)
-  | 'int8' // bigint
-  | 'int' // Alias for int4
+  | 'smallint' // 2 bytes (-32768 to +32767)
+  | 'integer' // 4 bytes (-2147483648 to +2147483647)
+  | 'bigint' // 8 bytes
 
   // Floating point types
-  | 'float4' // real (6 decimal digits precision)
-  | 'float8' // double precision (15 decimal digits precision)
+  | 'real' // 4 bytes (6 decimal digits precision)
+  | 'double' // 8 bytes (15 decimal digits precision)
   | 'numeric' // arbitrary precision decimal
 
   // Character types
   | 'text' // variable-length string
-  | 'varchar' // variable-length with limit
-  | 'char' // fixed-length string
-  | 'bpchar' // blank-padded char
 
   // Boolean
-  | 'bool' // boolean (true/false)
+  | 'boolean'
 
   // Date/Time types
   | 'timestamp' // timestamp without time zone
@@ -63,17 +59,14 @@ export type PrimitiveName =
  * Common primitive type constants for convenience
  */
 export const PRIMITIVE = {
-  INT: 'int' as const,
-  INT2: 'int2' as const,
-  INT4: 'int4' as const,
-  INT8: 'int8' as const,
-  FLOAT4: 'float4' as const,
-  FLOAT8: 'float8' as const,
+  SMALLINT: 'smallint' as const,
+  INTEGER: 'integer' as const,
+  BIGINT: 'bigint' as const,
+  REAL: 'real' as const,
+  DOUBLE: 'double' as const,
   NUMERIC: 'numeric' as const,
   TEXT: 'text' as const,
-  VARCHAR: 'varchar' as const,
-  CHAR: 'char' as const,
-  BOOL: 'bool' as const,
+  BOOLEAN: 'boolean' as const,
   TIMESTAMP: 'timestamp' as const,
   TIMESTAMPTZ: 'timestamptz' as const,
   DATE: 'date' as const,

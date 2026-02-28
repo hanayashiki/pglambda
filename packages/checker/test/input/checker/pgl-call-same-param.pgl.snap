@@ -1,4 +1,4 @@
-s: SetOf<{a: int, b: int}>
+s: SetOf<{a: integer, b: integer}>
 
 schemes:
   for<T> (x: T, y: T) => SetOf<{a: T, b: T}>

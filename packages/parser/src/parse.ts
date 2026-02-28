@@ -13,8 +13,6 @@ import type { ContentHash } from "@pglambda/antlr/antlr4";
 import type { AstStore } from "#ast-store.js";
 import { extractMarkersFromToken } from "./query-markers.js";
 import { resolveNodeAtPosition } from "./ast-lookup.js";
-import { DefinitionVisitor } from "./definition-visitor.js";
-import { ResolutionVisitor } from "./resolution-visitor.js";
 
 let nextId = 0;
 
@@ -75,14 +73,6 @@ export function parseContent(
         }
       }
     }
-
-    // Extract definitions and build scopes
-    const defVisitor = new DefinitionVisitor(context.astStore);
-    defVisitor.visit(parseTree);
-
-    // Resolve name references in query bodies
-    const resolver = new ResolutionVisitor(context.astStore);
-    resolver.visit(parseTree);
 
     return { uri, parseTree, errors, markers, success: errors.length === 0 };
   } catch (error) {
