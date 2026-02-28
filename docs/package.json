@@ -5,16 +5,23 @@
   "type": "module",
   "scripts": {
     "check-pgl": "tsx preprocessor-pgl-check.ts",
-    "build": "mdbook build",
-    "deploy-cf": "mdbook build && wrangler deploy"
+    "build:playground": "node build-playground.mjs",
+    "build": "node build-playground.mjs && mdbook build",
+    "deploy-cf": "node build-playground.mjs && mdbook build && wrangler deploy"
   },
   "dependencies": {
     "@pglambda/antlr": "workspace:*",
+    "@pglambda/checker": "workspace:*",
+    "@pglambda/emitter": "workspace:*",
+    "@pglambda/emitter-ts": "workspace:*",
+    "@pglambda/hir": "workspace:*",
     "@pglambda/parser": "workspace:*",
+    "@pglambda/types": "workspace:*",
     "@pglambda/utils": "workspace:*",
     "mdast-util-from-markdown": "^2.0.2"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "tsx": "^4.21.0",
     "wrangler": "^4.14.4"
   }

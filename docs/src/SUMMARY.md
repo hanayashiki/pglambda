@@ -1,5 +1,6 @@
 # Pglambda
 
+- [Playground](./playground.md)
 - [Roadmap - DEV](./roadmap.md)
 - [Overview](./overview.md)
 - [Syntax](./syntax.md)
