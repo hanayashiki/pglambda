@@ -7,7 +7,7 @@ export interface UsersRow {
   name: string;
 }
 
-export function search($name: string, $min_age: number): Query<{
+export function search(name: string, min_age: number): Query<{
   age: number;
   id: number;
   name: string
@@ -15,6 +15,6 @@ export function search($name: string, $min_age: number): Query<{
   return sql`
     SELECT id, name, age
     FROM users
-    WHERE name = ${param($name)} AND age > ${param($min_age)}
+    WHERE name = ${param(name)} AND age > ${param(min_age)}
   `.build();
 }

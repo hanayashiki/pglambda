@@ -6,7 +6,7 @@ database {
   );
 }
 
-query search($name: text, $min_age: integer) {
+query search(name: text, min_age: integer) {
   select id, name, age
   from users
   where name = $name AND age > $min_age

@@ -66,7 +66,7 @@ function printNode(node: HirNode, indent: number): string {
       return printQualifiedName(node.data.name);
 
     case "paramRef":
-      return printName(node.data.name);
+      return "$" + printName(node.data.name);
 
     case "pglRef":
       return printQualifiedName(node.data.name);
@@ -157,7 +157,7 @@ function printBody(body: QueryBody, indent: number): string {
     case "pglExprBody":
       return printExpr(body.data.expr);
     case "paramRefBody":
-      return printName(body.data.name);
+      return "$" + printName(body.data.name);
   }
 }
 
@@ -186,7 +186,7 @@ function printExpr(e: Expr): string {
     case "columnRef":
       return printQualifiedName(e.data.name);
     case "paramRef":
-      return printName(e.data.name);
+      return "$" + printName(e.data.name);
     case "pglRef":
       return printQualifiedName(e.data.name);
     case "pglCall":

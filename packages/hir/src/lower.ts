@@ -611,11 +611,14 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   private lowerColumnref(ctx: Columnref_or_pgl_dollar_ident_refContext): Expr {
     const colids = ctx.colid_list();
     if (colids.length === 1 && colids[0].getText().startsWith("$")) {
+      const raw = this.lowerColid(colids[0]);
+      // Strip the `$` prefix — `$name` in SQL context references param `name`
+      const name: Name = { ...raw, data: { text: raw.data.text.slice(1) } };
       return {
         id: this.id(),
         tag: "paramRef",
         span: this.span(ctx),
-        data: { name: this.lowerColid(colids[0]) },
+        data: { name },
       };
     }
     // Regular column reference — preserve all parts as QualifiedName
@@ -637,12 +640,14 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     };
   }
 
-  /** For pgl_dollar_ident_ref_body — extract the name from a columnref */
+  /** For pgl_dollar_ident_ref_body — extract the name from a columnref, stripping `$` */
   private lowerColumnrefAsName(
     ctx: Columnref_or_pgl_dollar_ident_refContext,
   ): Name {
     const colids = ctx.colid_list();
-    return this.lowerColid(colids[0]);
+    const raw = this.lowerColid(colids[0]);
+    const text = raw.data.text.startsWith("$") ? raw.data.text.slice(1) : raw.data.text;
+    return { ...raw, data: { text } };
   }
 
   // --- Type expressions ---

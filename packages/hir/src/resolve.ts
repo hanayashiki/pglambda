@@ -1,5 +1,19 @@
-import type { HirStore, DefinitionId, ScopeId, TableDefinition } from "./store.js";
-import type { Module, Def, QueryDef, QueryBody, Expr, SelectTarget, FromClause, TypeExpr } from "./types.js";
+import type {
+  HirStore,
+  DefinitionId,
+  ScopeId,
+  TableDefinition,
+} from "./store.js";
+import type {
+  Module,
+  Def,
+  QueryDef,
+  QueryBody,
+  Expr,
+  SelectTarget,
+  FromClause,
+  TypeExpr,
+} from "./types.js";
 
 // --- Column scope for resolving column references within SELECT ---
 
@@ -68,7 +82,7 @@ function resolveBody(body: QueryBody, store: HirStore, scopeId: ScopeId): void {
       resolveExpr(body.data.expr, store, scopeId);
       break;
     case "paramRefBody": {
-      const name = stripDollar(body.data.name.data.text);
+      const name = body.data.name.data.text;
       const defId = lookupValue(store, scopeId, name);
       if (defId !== undefined) {
         store.addResolution(body.data.name.id, defId);
@@ -78,9 +92,13 @@ function resolveBody(body: QueryBody, store: HirStore, scopeId: ScopeId): void {
   }
 }
 
-function resolveFromClause(from: FromClause, store: HirStore, scopeId: ScopeId): void {
+function resolveFromClause(
+  from: FromClause,
+  store: HirStore,
+  scopeId: ScopeId,
+): void {
   for (const ref of from.data.refs) {
-    const name = ref.data.name.data.parts.map(p => p.data.text).join(".");
+    const name = ref.data.name.data.parts.map((p) => p.data.text).join(".");
     const defId = lookupValue(store, scopeId, name);
     if (defId !== undefined) {
       store.addResolution(ref.data.name.id, defId);
@@ -100,8 +118,8 @@ function buildColumnScope(from: FromClause, store: HirStore): ColumnScope {
     if (!def || def.tag !== "table") continue;
 
     const tableDef = def as TableDefinition;
-    const alias = ref.data.alias?.data.text
-      ?? ref.data.name.data.parts.at(-1)!.data.text;
+    const alias =
+      ref.data.alias?.data.text ?? ref.data.name.data.parts.at(-1)!.data.text;
     tables.set(alias, defId);
 
     for (const col of tableDef.columns) {
@@ -114,7 +132,11 @@ function buildColumnScope(from: FromClause, store: HirStore): ColumnScope {
   return { columns, tables };
 }
 
-function resolveColumnRef(expr: Expr & { tag: "columnRef" }, store: HirStore, scope: ColumnScope): void {
+function resolveColumnRef(
+  expr: Expr & { tag: "columnRef" },
+  store: HirStore,
+  scope: ColumnScope,
+): void {
   const parts = expr.data.name.data.parts;
 
   if (parts.length === 1) {
@@ -135,7 +157,12 @@ function resolveColumnRef(expr: Expr & { tag: "columnRef" }, store: HirStore, sc
   // 3+ parts: schema.table.column is valid PostgreSQL but deferred
 }
 
-function resolveTarget(t: SelectTarget, store: HirStore, scopeId: ScopeId, columnScope: ColumnScope | null = null): void {
+function resolveTarget(
+  t: SelectTarget,
+  store: HirStore,
+  scopeId: ScopeId,
+  columnScope: ColumnScope | null = null,
+): void {
   switch (t.tag) {
     case "targetExpr":
       resolveExpr(t.data.expr, store, scopeId, columnScope);
@@ -145,10 +172,15 @@ function resolveTarget(t: SelectTarget, store: HirStore, scopeId: ScopeId, colum
   }
 }
 
-function resolveExpr(expr: Expr, store: HirStore, scopeId: ScopeId, columnScope: ColumnScope | null = null): void {
+function resolveExpr(
+  expr: Expr,
+  store: HirStore,
+  scopeId: ScopeId,
+  columnScope: ColumnScope | null = null,
+): void {
   switch (expr.tag) {
     case "paramRef": {
-      const name = stripDollar(expr.data.name.data.text);
+      const name = expr.data.name.data.text;
       const defId = lookupValue(store, scopeId, name);
       if (defId !== undefined) {
         store.addResolution(expr.data.name.id, defId);
@@ -201,7 +233,11 @@ function resolveExpr(expr: Expr, store: HirStore, scopeId: ScopeId, columnScope:
   }
 }
 
-function resolveTypeExpr(te: TypeExpr, store: HirStore, scopeId: ScopeId): void {
+function resolveTypeExpr(
+  te: TypeExpr,
+  store: HirStore,
+  scopeId: ScopeId,
+): void {
   const parts = te.data.name.data.parts;
   if (parts.length === 1) {
     const defId = lookupType(store, scopeId, parts[0].data.text);
@@ -213,7 +249,11 @@ function resolveTypeExpr(te: TypeExpr, store: HirStore, scopeId: ScopeId): void 
 
 // --- Scope chain lookup ---
 
-function lookupValue(store: HirStore, scopeId: ScopeId, name: string): DefinitionId | undefined {
+function lookupValue(
+  store: HirStore,
+  scopeId: ScopeId,
+  name: string,
+): DefinitionId | undefined {
   let current: ScopeId | null = scopeId;
   while (current !== null) {
     const scope = store.getScope(current);
@@ -225,7 +265,11 @@ function lookupValue(store: HirStore, scopeId: ScopeId, name: string): Definitio
   return undefined;
 }
 
-function lookupType(store: HirStore, scopeId: ScopeId, name: string): DefinitionId | undefined {
+function lookupType(
+  store: HirStore,
+  scopeId: ScopeId,
+  name: string,
+): DefinitionId | undefined {
   let current: ScopeId | null = scopeId;
   while (current !== null) {
     const scope = store.getScope(current);
@@ -235,8 +279,4 @@ function lookupType(store: HirStore, scopeId: ScopeId, name: string): Definition
     current = scope.parent;
   }
   return undefined;
-}
-
-function stripDollar(name: string): string {
-  return name.startsWith("$") ? name.slice(1) : name;
 }

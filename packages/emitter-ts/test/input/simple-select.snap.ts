@@ -6,6 +6,6 @@ export interface UsersRow {
   name: string;
 }
 
-export function getUser($id: number): Query<{ id: number; name: string }> {
-  return sql`SELECT id, name FROM users WHERE id = ${param($id)}`.build();
+export function getUser(id: number): Query<{ id: number; name: string }> {
+  return sql`SELECT id, name FROM users WHERE id = ${param(id)}`.build();
 }

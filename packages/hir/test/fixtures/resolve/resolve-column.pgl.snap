@@ -5,7 +5,7 @@ query(where_col)
   queryParam(id)
 
 === resolutions ===
-$id -> queryParam(id)
+id -> queryParam(id)
 id -> table(users)
 id -> table(users)
 name -> table(users)

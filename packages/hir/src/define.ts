@@ -65,7 +65,7 @@ function defineQueryDef(q: QueryDef, store: HirStore, scopeStack: ScopeId[]): vo
     const def: QueryParamDefinition = {
       id: p.id as DefinitionId,
       tag: "queryParam",
-      name: stripDollar(p.data.name.data.text),
+      name: p.data.name.data.text,
       annotationNode: (p.data.typeAnnotation?.id ?? null) as HirId | null,
     };
     params.push(def);
@@ -115,6 +115,3 @@ function addToScope(store: HirStore, scopeStack: ScopeId[], def: Definition): vo
   ns.set(def.name, def.id);
 }
 
-function stripDollar(name: string): string {
-  return name.startsWith("$") ? name.slice(1) : name;
-}

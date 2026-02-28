@@ -1,1 +1,1 @@
-query identity<T>($x: T) { select $x as col }
+query identity<T>(x: T) { select $x as col }

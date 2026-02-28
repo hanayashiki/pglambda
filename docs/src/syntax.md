@@ -42,11 +42,11 @@ Each `.pgl` file is a module. Use `export` to make queries available to other mo
 
 ```pgl-unchecked
 -- users.pgl
-export query get_user_by_id($id: text) {
+export query get_user_by_id(id: text) {
     select * from users where id = $id
 }
 
-export query get_user_by_email($email: text) {
+export query get_user_by_email(email: text) {
     select * from users where email = $email
 }
 ```
@@ -55,12 +55,12 @@ export query get_user_by_email($email: text) {
 -- admin.pgl
 import "./users.pgl"
 
-query check_admin($id: text) {
+query check_admin(id: text) {
     select * from admins
     where user_id in ${users.get_user_by_id($id)}.id
 }
 
-query admin_by_email($email: text) {
+query admin_by_email(email: text) {
     select a.*
     from admins a
     join ${users.get_user_by_email($email)} u on a.user_id = u.id

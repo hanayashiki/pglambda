@@ -3,4 +3,4 @@ query(find)
   queryParam(id)
 
 === resolutions ===
-$id -> queryParam(id)
+id -> queryParam(id)

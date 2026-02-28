@@ -5,7 +5,7 @@ database {
   );
 }
 
-query get_user($id: integer) {
+query get_user(id: integer) {
   --  ^ get_user
   select id as user_id, name as user_name
   --     ^ uid          ^ uname
