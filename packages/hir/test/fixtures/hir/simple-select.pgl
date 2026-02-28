@@ -1,0 +1,3 @@
+query get_all() { select * }
+
+query get_one() { select 1 as x, 'hello' as y }

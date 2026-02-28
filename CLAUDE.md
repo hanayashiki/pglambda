@@ -104,18 +104,40 @@ catalog:
 - VFS implementation with better-result
 - Compiler folder structure with query-based architecture
 - `loadTextContent` input query (reads .pgl files)
+- ANTLR grammar with DDL support (CREATE TABLE, PostgreSQL trailing attributes)
+- Checker refactored: hand-recursion with domain-split files, module-level context
 
-### 🚧 Current Phase: Compiler Query Pipeline
-**Building incremental compilation infrastructure**
+### 🚧 Current Phase: HIR + DDL Type Checking
+**Introducing HIR to decouple checker from CST grammar details**
 
 Next tasks:
-- Implement parsing query (AST generation)
-- Implement import extraction and module resolution queries
-- Define constraint types (field access, assignable, overload)
-- Implement Solver (orchestrates constraint solving)
-- Test solver with row polymorphism
+- Design HIR node types (CST → HIR lowering)
+- Migrate checker to operate on HIR instead of CST
+- Implement DDL processing (CREATE TABLE → table registry)
+- FROM clause resolution, column scope, SELECT * expansion
 
 ## Coding Guidelines
+
+### Checker Architecture
+
+The type checker uses **hand-recursion** with domain-split files (not the ANTLR visitor pattern):
+
+```
+checker/src/domains/
+├── ctx.ts           # module-level `ctx` (CheckContext), set via runCheckWithContext()
+├── prog.ts          # checkNode() — top-level dispatch by instanceof
+├── query_def.ts     # checkQueryDef, checkQueryParameter, checkQueryBody
+├── a_expr.ts        # full SQL expression precedence chain
+├── select.ts        # checkSimpleSelect
+├── pgl.ts           # checkPglExpr, checkPglIdentRef, checkPglQueryCall
+├── columnref.ts     # checkColumnref
+└── type_syntax.ts   # resolveTypeExpression, resolveTypeRef, checkTypeParameterList
+```
+
+- All check functions import `ctx` from `ctx.ts` — a module-level variable, zero-overhead access
+- `runCheckWithContext(cx, fn)` sets `ctx` for the duration of `fn`
+- Domain files call each other directly (no visitor dispatch)
+- Next step: checker will operate on HIR instead of CST
 
 ### TypeScript Conventions
 - **verbatimModuleSyntax**: Use `export type` for type-only exports

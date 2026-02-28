@@ -76,7 +76,7 @@ export class DefinitionVisitor extends PGLParserVisitor<void> {
     const typeParams: TypeParamDefinition[] = [];
     const params: QueryParamDefinition[] = [];
 
-    const name = ctx.identifier().getText();
+    const name = ctx.colid().getText();
 
     // Build query definition
     const queryDef: QueryDefinition = {
@@ -97,11 +97,11 @@ export class DefinitionVisitor extends PGLParserVisitor<void> {
     // Extract type params
     const typeParamList = ctx.type_parameter_list();
     if (typeParamList) {
-      for (const ident of typeParamList.identifier_list()) {
+      for (const colid of typeParamList.colid_list()) {
         const def: TypeParamDefinition = {
-          id: ident.contentHash as DefinitionId,
+          id: colid.contentHash as DefinitionId,
           tag: "typeParam",
-          name: ident.getText(),
+          name: colid.getText(),
           data: undefined,
         };
         typeParams.push(def);
@@ -111,7 +111,7 @@ export class DefinitionVisitor extends PGLParserVisitor<void> {
 
     // Extract value params
     for (const param of ctx.query_parameter_list().query_parameter_list()) {
-      const paramIdent = param.identifier();
+      const paramIdent = param.colid();
       const typeExpr = param.type_expression();
       const def: QueryParamDefinition = {
         id: param.contentHash as DefinitionId,

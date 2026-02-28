@@ -1,0 +1,3 @@
+query find($id: int, $name) {
+  select $id as id, $name as name
+}

@@ -44,13 +44,13 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
 
   visitType_ref = (ctx: Type_refContext): void => {
     const qname = ctx.pgl_ident_ref().qualified_name();
-    const identifiers = qname.identifier_list();
-    if (identifiers.length !== 1) return;
+    if (qname.indirection()) return;
 
-    const name = identifiers[0].getText();
+    const colid = qname.colid();
+    const name = colid.getText();
     const defId = this.lookupTypeName(name);
     if (defId !== undefined) {
-      this.store.addResolution(identifiers[0].contentHash, defId);
+      this.store.addResolution(colid.contentHash, defId);
     }
     // Don't call visitChildren — type_ref resolution uses typeDefinitions,
     // not valueDefinitions like visitPgl_ident_ref would.
@@ -61,28 +61,27 @@ export class ResolutionVisitor extends PGLParserVisitor<void> {
   };
 
   visitColumnref_or_pgl_dollar_ident_ref = (ctx: Columnref_or_pgl_dollar_ident_refContext): void => {
-    const identifiers = ctx.identifier_list();
-    if (identifiers.length !== 1) return;
+    const colids = ctx.colid_list();
+    if (colids.length !== 1) return;
 
-    const text = identifiers[0].getText();
+    const text = colids[0].getText();
     if (!text.startsWith("$")) return;
 
     const name = text.slice(1);
     const defId = this.lookupName(name);
     if (defId !== undefined) {
-      this.store.addResolution(identifiers[0].contentHash, defId);
+      this.store.addResolution(colids[0].contentHash, defId);
     }
   };
 
   private resolveQualifiedName(qname: Qualified_nameContext): void {
-    const identifiers = qname.identifier_list();
+    if (qname.indirection()) return;
 
-    if (identifiers.length !== 1) return;
-
-    const name = identifiers[0].getText();
+    const colid = qname.colid();
+    const name = colid.getText();
     const defId = this.lookupName(name);
     if (defId !== undefined) {
-      this.store.addResolution(identifiers[0].contentHash, defId);
+      this.store.addResolution(colid.contentHash, defId);
     }
   }
 

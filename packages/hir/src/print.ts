@@ -1,0 +1,221 @@
+import type {
+  HirNode,
+  Expr,
+  SelectTarget,
+  QueryBody,
+  QueryParam,
+  LiteralValue,
+  TypeExpr,
+  TypeName,
+  QualifiedName,
+  Name,
+  ColumnDef,
+} from "./types.js";
+
+export function printHir(node: HirNode): string {
+  return printNode(node, 0);
+}
+
+function ind(depth: number): string {
+  return "  ".repeat(depth);
+}
+
+function printNode(node: HirNode, indent: number): string {
+  switch (node.tag) {
+    case "module":
+      return node.data.defs.map((d) => printNode(d, indent)).join("\n\n");
+
+    case "query":
+      return printQuery(node.data, indent);
+
+    case "queryParam":
+      return printQueryParam(node.data);
+
+    case "selectBody":
+    case "pglExprBody":
+    case "paramRefBody":
+      return printBody(node as QueryBody, indent);
+
+    case "select":
+      return `select ${node.data.targets.map((t) => printTarget(t)).join(", ")}`;
+
+    case "targetExpr":
+      return `${printExpr(node.data.expr)} as ${printName(node.data.alias)}`;
+
+    case "targetStar":
+      return "*";
+
+    case "literal":
+      return printLiteral(node.data.value);
+
+    case "columnRef":
+      return printName(node.data.name);
+
+    case "paramRef":
+      return printName(node.data.name);
+
+    case "pglRef":
+      return printQualifiedName(node.data.name);
+
+    case "pglCall":
+      return printPglCall(node.data);
+
+    case "binOp":
+      return `(${printExpr(node.data.left)} ${node.data.op} ${printExpr(node.data.right)})`;
+
+    case "unaryOp":
+      return node.data.op === "NOT"
+        ? `(NOT ${printExpr(node.data.operand)})`
+        : `(${node.data.op}${printExpr(node.data.operand)})`;
+
+    case "paren":
+      return `(${printExpr(node.data.inner)})`;
+
+    case "typeExpr":
+      return printQualifiedName(node.data.name);
+
+    case "database": {
+      const stmts = node.data.statements
+        .map((s) => `${printNode(s, indent + 1)};`)
+        .join("\n\n");
+      return `${ind(indent)}database {\n${stmts}\n${ind(indent)}}`;
+    }
+
+    case "createTable":
+      return printCreateTable(node.data, indent);
+
+    case "columnDef":
+      return `${printName(node.data.name)} ${printTypeName(node.data.typeName)}`;
+
+    case "typeName":
+      return printTypeName(node as TypeName);
+
+    case "name":
+      return printName(node as Name);
+
+    case "qualifiedName":
+      return printQualifiedName(node as QualifiedName);
+  }
+}
+
+function printName(n: Name): string {
+  return n.data.text;
+}
+
+function printQualifiedName(qn: QualifiedName): string {
+  return qn.data.parts.map((p) => p.data.text).join(".");
+}
+
+function printQuery(
+  data: { name: Name; typeParams: Name[]; params: QueryParam[]; body: QueryBody },
+  indent: number,
+): string {
+  const name = printName(data.name);
+  const typeParams =
+    data.typeParams.length > 0
+      ? `<${data.typeParams.map((t) => t.data.text).join(", ")}>`
+      : "";
+  const params = `(${data.params.map((p) => printQueryParam(p.data)).join(", ")})`;
+  const body = printBody(data.body, indent + 1);
+  return `${ind(indent)}query ${name}${typeParams}${params} {\n${ind(indent + 1)}${body}\n${ind(indent)}}`;
+}
+
+function printQueryParam(data: { name: Name; typeAnnotation: TypeExpr | null }): string {
+  const name = printName(data.name);
+  if (data.typeAnnotation) {
+    return `${name}: ${printQualifiedName(data.typeAnnotation.data.name)}`;
+  }
+  return name;
+}
+
+function printBody(body: QueryBody, indent: number): string {
+  switch (body.tag) {
+    case "selectBody":
+      return printNode(body.data.stmt, indent);
+    case "pglExprBody":
+      return printExpr(body.data.expr);
+    case "paramRefBody":
+      return printName(body.data.name);
+  }
+}
+
+function printTarget(t: SelectTarget): string {
+  switch (t.tag) {
+    case "targetExpr":
+      return `${printExpr(t.data.expr)} as ${printName(t.data.alias)}`;
+    case "targetStar":
+      return "*";
+  }
+}
+
+function printExpr(e: Expr): string {
+  switch (e.tag) {
+    case "literal":
+      return printLiteral(e.data.value);
+    case "columnRef":
+      return printName(e.data.name);
+    case "paramRef":
+      return printName(e.data.name);
+    case "pglRef":
+      return printQualifiedName(e.data.name);
+    case "pglCall":
+      return printPglCall(e.data);
+    case "binOp":
+      return `(${printExpr(e.data.left)} ${e.data.op} ${printExpr(e.data.right)})`;
+    case "unaryOp":
+      return e.data.op === "NOT"
+        ? `(NOT ${printExpr(e.data.operand)})`
+        : `(${e.data.op}${printExpr(e.data.operand)})`;
+    case "paren":
+      return `(${printExpr(e.data.inner)})`;
+  }
+}
+
+function printLiteral(v: LiteralValue): string {
+  switch (v.kind) {
+    case "int":
+    case "numeric":
+      return v.text;
+    case "text":
+      return v.text;
+    case "bool":
+      return v.value ? "true" : "false";
+    case "null":
+      return "null";
+  }
+}
+
+function printPglCall(data: {
+  name: QualifiedName;
+  typeArgs: TypeExpr[];
+  args: Expr[];
+}): string {
+  const name = printQualifiedName(data.name);
+  const typeArgs =
+    data.typeArgs.length > 0
+      ? `::<${data.typeArgs.map((t) => printQualifiedName(t.data.name)).join(", ")}>`
+      : "";
+  const args = data.args.map((a) => printExpr(a)).join(", ");
+  return `${name}${typeArgs}(${args})`;
+}
+
+function printTypeName(tn: TypeName): string {
+  const prefix = tn.data.isSetOf ? "setof " : "";
+  const name = printQualifiedName(tn.data.name);
+  const arrays = "[]".repeat(tn.data.arrayDimensions);
+  return `${prefix}${name}${arrays}`;
+}
+
+function printCreateTable(
+  data: { name: QualifiedName; ifNotExists: boolean; columns: ColumnDef[] },
+  indent: number,
+): string {
+  const name = printQualifiedName(data.name);
+  const cols = data.columns
+    .map(
+      (c) =>
+        `${ind(indent + 1)}${printName(c.data.name)} ${printTypeName(c.data.typeName)}`,
+    )
+    .join(",\n");
+  return `${ind(indent)}create table ${name} (\n${cols}\n${ind(indent)})`;
+}

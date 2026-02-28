@@ -1,0 +1,6 @@
+=== definitions ===
+query(f)
+query(g)
+
+=== resolutions ===
+f -> query(f)

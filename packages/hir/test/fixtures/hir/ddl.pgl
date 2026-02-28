@@ -1,0 +1,7 @@
+database {
+  create table users (
+    id integer,
+    name text,
+    active boolean
+  );
+}

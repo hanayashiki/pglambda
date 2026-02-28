@@ -1,0 +1,8 @@
+=== definitions ===
+query(identity)
+  typeParam(T)
+  queryParam(x)
+
+=== resolutions ===
+$x -> queryParam(x)
+T -> typeParam(T)

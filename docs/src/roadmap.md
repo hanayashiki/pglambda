@@ -18,6 +18,11 @@ This requires the full pipeline: parsing → DDL extraction → table-to-row-typ
 
 ### In Progress
 
+- [x] HIR (High-level Intermediate Representation)
+  - Lower CST → HIR: normalize grammar artifacts (colid/colLabel/identifier → name string)
+  - One canonical node per semantic entity (no wrapper chains)
+  - Spans for error reporting and LSP hover
+  - Checker operates on HIR, not CST — grammar changes only affect lowering
 - [ ] `database` block: parse PostgreSQL DDL, extract table → row type mappings
   - Grammar support for `database { }` wrapper
   - DDL parser for `CREATE TABLE` (columns, types, constraints)

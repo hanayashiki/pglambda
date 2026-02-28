@@ -10,8 +10,9 @@ import {
 import type { EqualityConstraint } from "./constraint.js";
 import type { AstStore } from "@pglambda/parser";
 import type { ContentHash, SCC, SCCIn } from "./scc.js";
-import { Checker } from "./checker.js";
 import { ParserRuleContext } from "@pglambda/antlr";
+import { runCheckWithContext } from "./domains/ctx.js";
+import { checkNode } from "./domains/prog.js";
 
 export type CheckError = { message: string };
 
@@ -104,10 +105,11 @@ export class CheckContext {
     const sortedNodes = this.partitionNodes();
 
     // 1. Visit generic defs first to resolve the type scheme, then other nodes
-    const checker = new Checker(this);
-    for (const node of sortedNodes) {
-      checker.visit(this.ast.getAs(node));
-    }
+    runCheckWithContext(this, () => {
+      for (const node of sortedNodes) {
+        checkNode(this.ast.getAs(node));
+      }
+    });
 
     // 2. Constraints already unified during visitor via addEquality
     const unificationResult = this.unification.getResult();
