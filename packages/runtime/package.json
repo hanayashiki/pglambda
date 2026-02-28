@@ -1,0 +1,20 @@
+{
+  "name": "@pglambda/runtime",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "SQL fragment builder runtime for pglambda generated code",
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "public": true,
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}

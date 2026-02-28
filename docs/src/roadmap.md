@@ -29,10 +29,10 @@ This requires the full pipeline: parsing → DDL extraction → table-to-row-typ
   - Table registry: qualified name → row type
   - ~~`use` syntax for cross-file DDL dependencies~~ (deferred)
   - ~~Global uniqueness check (no conflicting table definitions)~~
-- [ ] FROM clause: resolve table references to row types, introduce columns into scope
-- [ ] Column reference resolution: `id` → look up in FROM scope
-- [ ] SELECT * expansion from FROM row type
-- [ ] WHERE clause: validate expression type is `bool`
+- [x] FROM clause: resolve table references to row types, introduce columns into scope
+- [x] Column reference resolution: `id` → look up in FROM scope
+- [x] SELECT * expansion from FROM row type
+- [x] WHERE clause: validate expression type is `bool`
 
 ### Not Yet Designed
 

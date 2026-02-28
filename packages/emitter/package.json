@@ -1,0 +1,24 @@
+{
+  "name": "@pglambda/emitter",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Shared emitter interface and Doc pretty printer for pglambda code generation",
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@pglambda/types": "workspace:*",
+    "@pglambda/hir": "workspace:*",
+    "@pglambda/checker": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}

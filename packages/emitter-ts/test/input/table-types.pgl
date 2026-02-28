@@ -1,0 +1,12 @@
+database {
+  create table users (
+    id integer not null,
+    name text not null,
+    email text,
+    is_active boolean not null
+  );
+}
+
+query get_all_users() {
+  select id, name, email, is_active from users
+}
