@@ -231,7 +231,9 @@ function emitLiteral(v: LiteralValue): Doc {
     case "numeric":
       return text(v.text);
     case "text":
-      return text(`'${v.text}'`);
+      // FIXME: does not handle text with newline or other special chars correctly
+      // Should use E'' instead
+      return text(`'${v.text.replaceAll("'", "''")}'`);
     case "bool":
       return text(v.value ? "TRUE" : "FALSE");
     case "null":

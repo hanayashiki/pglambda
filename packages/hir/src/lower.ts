@@ -550,7 +550,9 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     } else if (ctx.NUMERIC_LITERAL()) {
       value = { kind: "numeric", text: ctx.NUMERIC_LITERAL().getText() };
     } else if (ctx.STRING_LITERAL()) {
-      value = { kind: "text", text: ctx.STRING_LITERAL().getText() };
+      const raw = ctx.STRING_LITERAL().getText();
+      // Strip outer quotes and unescape '' → '
+      value = { kind: "text", text: raw.slice(1, -1).replaceAll("''", "'") };
     } else if (ctx.KW_TRUE()) {
       value = { kind: "bool", value: true };
     } else if (ctx.KW_FALSE()) {

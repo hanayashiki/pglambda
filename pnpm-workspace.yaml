@@ -2,7 +2,9 @@ packages:
   - packages/*
   - docs
 
-approveBuildsForAll: true
+allowBuilds:
+  oxfmt: true
+  oxlint: true
 
 catalog:
   better-result: 2.7.0

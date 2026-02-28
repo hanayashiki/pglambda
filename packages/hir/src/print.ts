@@ -43,7 +43,9 @@ function printNode(node: HirNode, indent: number): string {
     case "select": {
       const targets = node.data.targets.map((t) => printTarget(t)).join(", ");
       const from = node.data.from ? ` ${printFrom(node.data.from)}` : "";
-      const where = node.data.where ? ` where ${printExpr(node.data.where)}` : "";
+      const where = node.data.where
+        ? ` where ${printExpr(node.data.where)}`
+        : "";
       return `select ${targets}${from}${where}`;
     }
 
@@ -208,7 +210,9 @@ function printLiteral(v: LiteralValue): string {
     case "numeric":
       return v.text;
     case "text":
-      return v.text;
+      // FIXME: does not handle text with newline or other special chars correctly
+      // Should use E'' instead
+      return `'${v.text.replaceAll("'", "''")}'`;
     case "bool":
       return v.value ? "true" : "false";
     case "null":

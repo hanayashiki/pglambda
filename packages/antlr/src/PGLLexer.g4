@@ -130,6 +130,9 @@ DOLLAR_LCURLY: '${';
 // Literals
 INTEGER_LITERAL: [0-9]+;
 NUMERIC_LITERAL: [0-9]+ '.' [0-9]* | '.' [0-9]+;
+// Standard SQL string literal: '...' with '' as the only escape ('' → ').
+// Unhandled PG string forms: E'...' (C-style backslash escapes),
+// $$...$$ (dollar-quoted), U&'...' (unicode escapes).
 STRING_LITERAL options {
 	caseInsensitive = false;
 }: '\'' ('\'\'' | ~['\r\n])* '\'';
