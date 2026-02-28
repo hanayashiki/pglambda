@@ -16,3 +16,15 @@ export interface SourceLocation {
   readonly line: number;
   readonly column: number;
 }
+
+export function spanContains(
+  span: Span,
+  line: number,
+  column: number,
+): boolean {
+  const { start, end } = span;
+  if (line < start.line || line > end.line) return false;
+  if (line === start.line && column < start.column) return false;
+  if (line === end.line && column >= end.column) return false;
+  return true;
+}

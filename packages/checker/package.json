@@ -16,6 +16,7 @@
   "public": true,
   "dependencies": {
     "@pglambda/antlr": "workspace:*",
+    "@pglambda/hir": "workspace:*",
     "@pglambda/types": "workspace:*",
     "@pglambda/utils": "workspace:*",
     "@pglambda/parser": "workspace:*"

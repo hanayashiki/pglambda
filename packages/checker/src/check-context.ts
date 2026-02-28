@@ -7,46 +7,50 @@ import {
   type TypeSchemeId,
   type AppliedType,
 } from "@pglambda/types";
-import type { EqualityConstraint } from "./constraint.js";
-import type { AstStore } from "@pglambda/parser";
-import type { ContentHash, SCC, SCCIn } from "./scc.js";
-import { ParserRuleContext } from "@pglambda/antlr";
-import { runCheckWithContext } from "./domains/ctx.js";
-import { checkNode } from "./domains/prog.js";
+import type {
+  HirId,
+  Module,
+  QueryDef,
+  HirStore,
+  QueryDefinition,
+  DefinitionId,
+} from "@pglambda/hir";
+import { runCheckWithContext } from "./ctx.js";
+import { checkQueryDef } from "./query_def.js";
+
+type EqualityConstraint = { readonly t1: Type; readonly t2: Type };
 
 export type CheckError = { message: string };
 
 export type CheckResult = {
-  readonly scc: SCC;
+  /** Resolved types for all checked nodes (internal + exported) */
+  readonly nodeTypes: ReadonlyMap<HirId, Type>;
+  /** Exported types for top-level definitions, usable as imports by other modules */
+  readonly exportedTypes: ReadonlyMap<DefinitionId, Type>;
+  /** Resolved type schemes for generic definitions */
+  readonly exportedTypeSchemes: readonly TypeScheme[];
   readonly errors: readonly CheckError[];
 };
 
-/**
- * Checker — per-SCC type checking orchestrator.
- *
- * Owns the Solver and TypeStore for a single SCC.
- * Constraint generators call addEquality/addError but never solve.
- * The SCC-level caller creates the Checker, drives constraint generation,
- * then calls solve() and resolve().
- */
 export class CheckContext {
   private readonly errors: CheckError[] = [];
-  private readonly astToType: Map<ContentHash, Type>;
-  private readonly defToScheme = new Map<ContentHash, TypeSchemeId>();
+  private readonly nodeToType = new Map<HirId, Type>();
+  private readonly defToScheme = new Map<HirId, TypeSchemeId>();
+  private readonly imports: ReadonlyMap<DefinitionId, Type>;
 
   private constraints: EqualityConstraint[] = [];
   private unification: Unification;
   private readonly setOfCtorId: TypeConstructorId;
 
   constructor(
-    private sccIn: SCCIn,
+    private readonly module: Module,
+    private readonly hir: HirStore,
     private readonly store: TypeStore,
-    private readonly ast: AstStore,
+    imports?: ReadonlyMap<DefinitionId, Type>,
   ) {
+    this.imports = imports ?? new Map();
     this.unification = new Unification(store);
-    this.astToType = new Map();
 
-    // Look up SetOf constructor
     const setOfCtor = store.ctors.lookup("SetOf");
     if (!setOfCtor) {
       throw new Error("SetOf type constructor not registered");
@@ -58,12 +62,8 @@ export class CheckContext {
     return this.store;
   }
 
-  get astStore(): AstStore {
-    return this.ast;
-  }
-
-  getType(hash: ContentHash): Type | undefined {
-    return this.sccIn.imports.get(hash) ?? this.astToType.get(hash);
+  get hirStore(): HirStore {
+    return this.hir;
   }
 
   addEquality(constraint: EqualityConstraint): void {
@@ -75,71 +75,87 @@ export class CheckContext {
     this.errors.push({ message });
   }
 
-  setDefScheme(defHash: ContentHash, schemeId: TypeSchemeId): void {
-    this.defToScheme.set(defHash, schemeId);
+  setDefScheme(defId: HirId, schemeId: TypeSchemeId): void {
+    this.defToScheme.set(defId, schemeId);
   }
 
-  getDefScheme(defHash: ContentHash): TypeSchemeId | undefined {
-    return this.defToScheme.get(defHash);
+  getDefScheme(defId: HirId): TypeSchemeId | undefined {
+    return this.defToScheme.get(defId);
   }
 
-  /**
-   * Instantiate a type scheme, resolving typevars through unification
-   * bindings so that ParamType nodes inside bound types get replaced.
-   */
   instantiate(scheme: TypeScheme): Type {
     return this.store.instantiate(scheme, (t) => this.unification.resolve(t));
   }
 
-  /**
-   * Helper method for creating SetOf types
-   * TODO: create a type safe version.
-   */
   setOf(rowType: Type): AppliedType {
     return this.store.apply(this.setOfCtorId, [rowType]);
   }
 
-  /** Collect all constraints from AST and solve the types. */
-  check(): CheckResult {
-    // 0. Partition nodes: generic defs first, then the rest
-    const sortedNodes = this.partitionNodes();
+  /**
+   * Get or lazily create a typevar placeholder for a definition.
+   * Checks imports first (pre-solved types from other modules),
+   * then local types, then creates a fresh typevar for forward references.
+   */
+  getOrCreateTypeVar(id: HirId): Type {
+    const imported = this.imports.get(id as DefinitionId);
+    if (imported) return imported;
+    const existing = this.nodeToType.get(id);
+    if (existing) return existing;
+    const tv = this.store.typevar();
+    this.nodeToType.set(id, tv);
+    return tv;
+  }
 
-    // 1. Visit generic defs first to resolve the type scheme, then other nodes
+  getOrInsert(id: HirId, check: () => Type): Type {
+    if (this.nodeToType.has(id)) {
+      return this.nodeToType.get(id)!;
+    }
+    const t = check();
+    this.nodeToType.set(id, t);
+    return t;
+  }
+
+  check(): CheckResult {
+    // Partition: generic defs first
+    const sortedDefs = this.partitionDefs();
+
     runCheckWithContext(this, () => {
-      for (const node of sortedNodes) {
-        checkNode(this.ast.getAs(node));
+      for (const def of sortedDefs) {
+        checkQueryDef(def);
       }
     });
 
-    // 2. Constraints already unified during visitor via addEquality
     const unificationResult = this.unification.getResult();
 
-    // 3. Resolve exported node types through substitution
-    const exportedTypes = new Map<ContentHash, Type>();
-    for (const hash of this.sccIn.exportedNodes) {
-      const type = this.resolveExport(hash);
-      if (type) {
-        exportedTypes.set(hash, this.unification.deepResolve(type));
+    // Resolve all internal types through substitution
+    const nodeTypes = new Map<HirId, Type>();
+    for (const [id, type] of this.nodeToType) {
+      nodeTypes.set(id, this.unification.deepResolve(type));
+    }
+
+    // Build exported types for top-level definitions
+    const exportedTypes = new Map<DefinitionId, Type>();
+    for (const def of this.module.data.defs) {
+      if (def.tag !== "query") continue;
+      const resolved = nodeTypes.get(def.id);
+      if (resolved) {
+        exportedTypes.set(def.id as DefinitionId, resolved);
       }
     }
 
-    // 4. Resolve type scheme bodies through substitution
+    // Resolve type scheme bodies
     const exportedTypeSchemes: TypeScheme[] = [];
     for (const scheme of this.store.schemes.values()) {
-      const resolvedBody = this.unification.deepResolve(scheme.body);
       exportedTypeSchemes.push({
         ...scheme,
-        body: resolvedBody,
+        body: this.unification.deepResolve(scheme.body),
       });
     }
 
     return {
-      scc: {
-        nodes: this.sccIn.nodes,
-        imports: this.sccIn.imports,
-        exportedTypes,
-        exportedTypeSchemes,
-      },
+      nodeTypes,
+      exportedTypes,
+      exportedTypeSchemes,
       errors: [
         ...this.errors,
         ...unificationResult.errors.map((e) => ({ message: e.message })),
@@ -147,72 +163,20 @@ export class CheckContext {
     };
   }
 
-  /**
-   * Resolve the type for an exported node hash.
-   * If the hash has a direct entry in astToType, return it.
-   * Otherwise, chase single-child pass-through nodes in the AST.
-   */
-  private resolveExport(hash: ContentHash): Type | undefined {
-    if (this.astToType.has(hash)) {
-      return this.astToType.get(hash)!;
-    }
+  private partitionDefs(): QueryDef[] {
+    const genericDefs: QueryDef[] = [];
+    const otherDefs: QueryDef[] = [];
 
-    // Pass-through: walk down to the single rule-node child
-    const node = this.ast.getAs<ParserRuleContext>(hash);
-    const childCount = node.getChildCount();
-    for (let i = 0; i < childCount; i++) {
-      const child = node.getChild(i);
-      if (child instanceof ParserRuleContext) {
-        return this.resolveExport(child.contentHash);
-      }
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Partition SCC nodes: generic defs first, then the rest.
-   * Errors if multiple generic defs are found (non-trivial SCC not supported yet).
-   */
-  private partitionNodes(): ContentHash[] {
-    const genericDefNodes: ContentHash[] = [];
-    const otherNodes: ContentHash[] = [];
-    for (const node of this.sccIn.nodes) {
-      const def = this.ast.getDefinition(node);
-      if (def && def.tag === "query" && def.data.typeParams.length > 0) {
-        genericDefNodes.push(node);
+    for (const def of this.module.data.defs) {
+      if (def.tag !== "query") continue;
+      const hirDef = this.hir.getDefinition(def.id as DefinitionId);
+      if (hirDef && hirDef.tag === "query" && (hirDef as QueryDefinition).typeParams.length > 0) {
+        genericDefs.push(def);
       } else {
-        otherNodes.push(node);
+        otherDefs.push(def);
       }
     }
 
-    return [...genericDefNodes, ...otherNodes];
-  }
-
-  /**
-   * Get or lazily create a typevar placeholder for a node hash.
-   * Safe for forward references — callers constrain the typevar later.
-   */
-  getOrCreateTypeVar(hash: ContentHash): Type {
-    if (this.sccIn.imports.has(hash)) {
-      return this.sccIn.imports.get(hash)!;
-    }
-    const existing = this.astToType.get(hash);
-    if (existing) return existing;
-    const tv = this.store.typevar();
-    this.astToType.set(hash, tv);
-    return tv;
-  }
-
-  getOrInsert(hash: ContentHash, check: () => Type): Type {
-    if (this.sccIn.imports.has(hash)) {
-      return this.sccIn.imports.get(hash)!;
-    } else if (this.astToType.has(hash)) {
-      return this.astToType.get(hash)!;
-    } else {
-      const t = check();
-      this.astToType.set(hash, t);
-      return t;
-    }
+    return [...genericDefs, ...otherDefs];
   }
 }

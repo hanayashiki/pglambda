@@ -1,3 +1,1 @@
-export * from "./scc.js";
-export * from "./constraint.js";
-export * from "./check-context.js";
+export { CheckContext, type CheckResult, type CheckError } from "./check-context.js";

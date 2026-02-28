@@ -460,7 +460,12 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerCExpr(ctx: C_exprContext): Expr {
-    if (ctx.pgl_expr()) return this.lowerPglExpr(ctx.pgl_expr());
+    if (ctx.pgl_expr()) {
+      // Use c_expr's span (includes ${} delimiters) since pgl_expr rule
+      // does not include the DOLLAR_LCURLY / R_CURLY tokens
+      const result = this.lowerPglExpr(ctx.pgl_expr());
+      return { ...result, span: this.span(ctx) };
+    }
     if (ctx.columnref_or_pgl_dollar_ident_ref())
       return this.lowerColumnref(ctx.columnref_or_pgl_dollar_ident_ref());
     if (ctx.aexprconst()) return this.lowerAExprConst(ctx.aexprconst());

@@ -81,6 +81,9 @@ importers:
       '@pglambda/antlr':
         specifier: workspace:*
         version: link:../antlr
+      '@pglambda/hir':
+        specifier: workspace:*
+        version: link:../hir
       '@pglambda/parser':
         specifier: workspace:*
         version: link:../parser

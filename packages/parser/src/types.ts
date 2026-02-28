@@ -14,6 +14,10 @@ export type SyntaxError = {
 
 export type ResolvedMarker = {
   label: string;
+  /** 1-based target line */
+  line: number;
+  /** 0-based target column */
+  column: number;
   node: ParserRuleContext | null;
 };
 

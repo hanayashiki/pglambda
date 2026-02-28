@@ -68,6 +68,8 @@ export function parseContent(
         for (const qm of extractMarkersFromToken(token)) {
           markers.push({
             label: qm.label,
+            line: qm.line,
+            column: qm.column,
             node: resolveNodeAtPosition(parseTree, qm.line, qm.column),
           });
         }
