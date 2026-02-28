@@ -9,7 +9,16 @@ import type {
   QualifiedName,
   HirStore,
 } from "@pglambda/hir";
-import { type Doc, text, concat, group, nest, join, line, softline } from "@pglambda/emitter";
+import {
+  type Doc,
+  text,
+  concat,
+  group,
+  nest,
+  join,
+  line,
+  softline,
+} from "@pglambda/utils/doc";
 import type { ImportTracker } from "./imports.js";
 import { snakeToCamel } from "./names.js";
 
@@ -31,13 +40,20 @@ export function emitSqlBody(
 
   switch (body.tag) {
     case "selectBody": {
-      const sqlContent = emitSelect(body.data.stmt, hirStore, rowParams, tracker);
-      return group(concat(
-        text("sql`"),
-        nest(2, concat(softline, sqlContent)),
-        softline,
-        text("`.build()"),
-      ));
+      const sqlContent = emitSelect(
+        body.data.stmt,
+        hirStore,
+        rowParams,
+        tracker,
+      );
+      return group(
+        concat(
+          text("sql`"),
+          nest(2, concat(softline, sqlContent)),
+          softline,
+          text("`.build()"),
+        ),
+      );
     }
 
     case "pglExprBody":
@@ -69,15 +85,17 @@ function emitSelect(
   const targetDocs = stmt.data.targets.map((t) =>
     emitTarget(t, hirStore, rowParams, tracker),
   );
-  const selectClause = concat(
-    text("SELECT "),
-    join(text(", "), targetDocs),
-  );
+  const selectClause = concat(text("SELECT "), join(text(", "), targetDocs));
 
   const clauses: Doc[] = [selectClause];
   if (stmt.data.from) clauses.push(emitFrom(stmt.data.from));
   if (stmt.data.where)
-    clauses.push(concat(text("WHERE "), emitExpr(stmt.data.where, hirStore, rowParams, tracker)));
+    clauses.push(
+      concat(
+        text("WHERE "),
+        emitExpr(stmt.data.where, hirStore, rowParams, tracker),
+      ),
+    );
 
   return join(line, clauses);
 }
@@ -141,7 +159,10 @@ function emitExpr(
         if (rowParams.has(tablePart)) {
           // Row param: ${raw(user)}.column
           tracker.useValue("raw");
-          const col = parts.slice(1).map((p) => p.data.text).join(".");
+          const col = parts
+            .slice(1)
+            .map((p) => p.data.text)
+            .join(".");
           return concat(
             text("${raw("),
             text(tablePart),
@@ -188,9 +209,15 @@ function emitExpr(
 
     case "unaryOp":
       if (expr.data.op === "NOT") {
-        return concat(text("NOT "), emitExpr(expr.data.operand, hirStore, rowParams, tracker));
+        return concat(
+          text("NOT "),
+          emitExpr(expr.data.operand, hirStore, rowParams, tracker),
+        );
       }
-      return concat(text(expr.data.op), emitExpr(expr.data.operand, hirStore, rowParams, tracker));
+      return concat(
+        text(expr.data.op),
+        emitExpr(expr.data.operand, hirStore, rowParams, tracker),
+      );
 
     case "paren":
       return concat(

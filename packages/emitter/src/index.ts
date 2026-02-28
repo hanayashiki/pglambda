@@ -1,17 +1,3 @@
-export {
-  type Doc,
-  nil,
-  text,
-  line,
-  softline,
-  hardline,
-  nest,
-  group,
-  concat,
-  join,
-  render,
-} from "./doc.js";
-
 import type { Module, HirStore } from "@pglambda/hir";
 import type { CheckResult } from "@pglambda/checker";
 import type { TypeStore } from "@pglambda/types";

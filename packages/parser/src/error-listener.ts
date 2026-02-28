@@ -1,4 +1,8 @@
-import { ErrorListener, type Recognizer, type RecognitionException } from "@pglambda/antlr";
+import {
+  ErrorListener,
+  type Recognizer,
+  type RecognitionException,
+} from "@pglambda/antlr";
 import type { FileUri } from "@pglambda/utils";
 import type { SyntaxError } from "./types.js";
 
@@ -18,11 +22,15 @@ export class CollectingErrorListener<TSymbol> extends ErrorListener<TSymbol> {
     offendingSymbol: TSymbol,
     line: number,
     column: number,
-    msg: string,
+    message: string,
     e: RecognitionException | undefined,
   ): void {
     let symbolText: string | undefined;
-    if (offendingSymbol && typeof offendingSymbol === "object" && "text" in offendingSymbol) {
+    if (
+      offendingSymbol &&
+      typeof offendingSymbol === "object" &&
+      "text" in offendingSymbol
+    ) {
       symbolText = String(offendingSymbol.text);
     }
 
@@ -30,7 +38,7 @@ export class CollectingErrorListener<TSymbol> extends ErrorListener<TSymbol> {
 
     this.errors.push({
       severity: "error",
-      message: msg,
+      message,
       location: { file: this.uri, line, column },
       offendingSymbol: symbolText,
       recovered,

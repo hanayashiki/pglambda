@@ -1,5 +1,12 @@
 import type { Type, TypeStore } from "@pglambda/types";
-import { type Doc, text, concat, nest, join, hardline } from "@pglambda/emitter";
+import {
+  type Doc,
+  text,
+  concat,
+  nest,
+  join,
+  hardline,
+} from "@pglambda/utils/doc";
 import { emitType } from "./type-map.js";
 import { snakeToPascal } from "./names.js";
 
@@ -18,9 +25,7 @@ export function emitTableInterface(
 
   if (rowType.kind !== "record") {
     // Shouldn't happen, but handle gracefully
-    return concat(
-      text(`export interface ${interfaceName} {}`),
-    );
+    return concat(text(`export interface ${interfaceName} {}`));
   }
 
   const fields = Object.entries(rowType.fields)

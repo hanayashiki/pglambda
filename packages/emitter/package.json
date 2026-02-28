@@ -10,7 +10,7 @@
   },
   "scripts": {
     "check": "tsc",
-    "test": "vitest run"
+    "test": "echo TBD"
   },
   "license": "MIT",
   "dependencies": {

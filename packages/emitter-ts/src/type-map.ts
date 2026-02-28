@@ -1,6 +1,14 @@
 import type { Type, TypeStore } from "@pglambda/types";
 import type { PrimitiveName } from "@pglambda/types";
-import { type Doc, text, concat, group, nest, join, line } from "@pglambda/emitter";
+import {
+  type Doc,
+  text,
+  concat,
+  group,
+  nest,
+  join,
+  line,
+} from "@pglambda/utils/doc";
 
 const PRIMITIVE_TO_TS: Record<PrimitiveName, string> = {
   // string types
@@ -71,12 +79,14 @@ export function emitType(type: Type, store: TypeStore): Doc {
           concat(text(name), text(": "), emitType(fieldType, store)),
         );
       if (entries.length === 0) return text("Record<string, never>");
-      return group(concat(
-        text("{"),
-        nest(2, concat(line, join(concat(text(";"), line), entries))),
-        line,
-        text("}"),
-      ));
+      return group(
+        concat(
+          text("{"),
+          nest(2, concat(line, join(concat(text(";"), line), entries))),
+          line,
+          text("}"),
+        ),
+      );
     }
 
     case "array":
@@ -93,7 +103,12 @@ export function emitType(type: Type, store: TypeStore): Doc {
       }
       // Generic fallback
       const args = type.arguments.map((a) => emitType(a, store));
-      return concat(text(ctor.name), text("<"), join(text(", "), args), text(">"));
+      return concat(
+        text(ctor.name),
+        text("<"),
+        join(text(", "), args),
+        text(">"),
+      );
     }
 
     case "function":

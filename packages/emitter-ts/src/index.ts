@@ -1,5 +1,5 @@
 import type { Emitter, EmitInput, EmitOutput } from "@pglambda/emitter";
-import { concat, join, hardline, render } from "@pglambda/emitter";
+import { type Doc, concat, join, hardline, render } from "@pglambda/utils/doc";
 import type { FunctionType, Type } from "@pglambda/types";
 import type { QueryDef, HirStore, DefinitionId } from "@pglambda/hir";
 import { emitQueryDecl } from "./query.js";
@@ -7,7 +7,6 @@ import { emitTableInterface } from "./table.js";
 import { ImportTracker } from "./imports.js";
 import { checkConflicts } from "./conflicts.js";
 import { snakeToCamel, snakeToPascal } from "./names.js";
-import type { Doc } from "@pglambda/emitter";
 
 export { snakeToCamel, snakeToPascal } from "./names.js";
 export { emitType } from "./type-map.js";
@@ -21,7 +20,11 @@ export class TsEmitter implements Emitter {
     const { module, hirStore, checkResult, typeStore } = input;
 
     // Collect all names that will appear in the generated file
-    const nameEntries: { pglName: string; tsName: string; kind: "function" | "type" }[] = [];
+    const nameEntries: {
+      pglName: string;
+      tsName: string;
+      kind: "function" | "type";
+    }[] = [];
 
     // Collect query defs and their types
     const queries: { def: QueryDef; fnType: FunctionType }[] = [];
@@ -30,10 +33,18 @@ export class TsEmitter implements Emitter {
       const queryDef = def;
       // Look up the function type from exported types
       // We need the definition ID — find it via the query name resolution
-      const fnType = findQueryFnType(queryDef, hirStore, checkResult.exportedTypes);
+      const fnType = findQueryFnType(
+        queryDef,
+        hirStore,
+        checkResult.exportedTypes,
+      );
       if (!fnType) continue;
       const tsName = snakeToCamel(queryDef.data.name.data.text);
-      nameEntries.push({ pglName: queryDef.data.name.data.text, tsName, kind: "function" });
+      nameEntries.push({
+        pglName: queryDef.data.name.data.text,
+        tsName,
+        kind: "function",
+      });
       queries.push({ def: queryDef, fnType });
     }
 
@@ -70,9 +81,8 @@ export class TsEmitter implements Emitter {
     // Assemble: imports first, then body
     const body = join(concat(hardline, hardline), parts);
     const imports = tracker.emitImports();
-    const file = imports.tag === "nil"
-      ? body
-      : concat(imports, hardline, hardline, body);
+    const file =
+      imports.tag === "nil" ? body : concat(imports, hardline, hardline, body);
 
     return { ok: true, result: { code: render(file) } };
   }
@@ -88,7 +98,11 @@ function findQueryFnType(
   for (const [defId, type] of exportedTypes) {
     if (type.kind !== "function") continue;
     const def = hirStore.getDefinition(defId);
-    if (def && def.tag === "query" && def.name === queryDef.data.name.data.text) {
+    if (
+      def &&
+      def.tag === "query" &&
+      def.name === queryDef.data.name.data.text
+    ) {
       return type;
     }
   }

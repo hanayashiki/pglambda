@@ -1,6 +1,16 @@
 import type { QueryDef, HirStore } from "@pglambda/hir";
 import type { FunctionType, TypeStore, Type } from "@pglambda/types";
-import { type Doc, text, concat, group, nest, join, line, softline, hardline } from "@pglambda/emitter";
+import {
+  type Doc,
+  text,
+  concat,
+  group,
+  nest,
+  join,
+  line,
+  softline,
+  hardline,
+} from "@pglambda/utils/doc";
 import { emitType } from "./type-map.js";
 import { emitSqlBody } from "./sql-body.js";
 import { snakeToCamel } from "./names.js";
@@ -69,14 +79,17 @@ export function emitQueryDecl(
   const body = emitSqlBody(def.data.body, hirStore, rowParams, tracker);
 
   // Assemble function
-  const paramList = params.length > 0
-    ? group(concat(
-        text("("),
-        nest(2, concat(softline, join(concat(text(","), line), params))),
-        softline,
-        text(")"),
-      ))
-    : text("()");
+  const paramList =
+    params.length > 0
+      ? group(
+          concat(
+            text("("),
+            nest(2, concat(softline, join(concat(text(","), line), params))),
+            softline,
+            text(")"),
+          ),
+        )
+      : text("()");
 
   return concat(
     text("export function "),

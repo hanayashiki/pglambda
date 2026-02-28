@@ -1,4 +1,4 @@
-import { type Doc, text, join, hardline, nil } from "@pglambda/emitter";
+import { type Doc, text, join, hardline, nil } from "@pglambda/utils/doc";
 
 /** Tracks which @pglambda/runtime symbols are used during emission. */
 export class ImportTracker {
