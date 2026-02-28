@@ -3,8 +3,18 @@
 import {ParseTreeVisitor} from 'antlr4';
 
 
+import { Unreserved_keywordContext } from "./PGLParser.js";
+import { Col_name_keywordContext } from "./PGLParser.js";
+import { Type_func_name_keywordContext } from "./PGLParser.js";
+import { Reserved_keywordContext } from "./PGLParser.js";
 import { IdentifierContext } from "./PGLParser.js";
+import { ColidContext } from "./PGLParser.js";
+import { Type_function_nameContext } from "./PGLParser.js";
+import { ColLabelContext } from "./PGLParser.js";
 import { Qualified_nameContext } from "./PGLParser.js";
+import { IndirectionContext } from "./PGLParser.js";
+import { Indirection_elContext } from "./PGLParser.js";
+import { Attr_nameContext } from "./PGLParser.js";
 import { ProgContext } from "./PGLParser.js";
 import { DefContext } from "./PGLParser.js";
 import { Query_defContext } from "./PGLParser.js";
@@ -46,6 +56,54 @@ import { AexprconstContext } from "./PGLParser.js";
 import { Type_defContext } from "./PGLParser.js";
 import { Type_expressionContext } from "./PGLParser.js";
 import { Type_refContext } from "./PGLParser.js";
+import { Database_defContext } from "./PGLParser.js";
+import { Ddl_statementContext } from "./PGLParser.js";
+import { CreatestmtContext } from "./PGLParser.js";
+import { OpttempContext } from "./PGLParser.js";
+import { OptinheritContext } from "./PGLParser.js";
+import { Qualified_name_listContext } from "./PGLParser.js";
+import { OptpartitionspecContext } from "./PGLParser.js";
+import { Part_paramsContext } from "./PGLParser.js";
+import { Part_elemContext } from "./PGLParser.js";
+import { Table_access_method_clauseContext } from "./PGLParser.js";
+import { OptwithContext } from "./PGLParser.js";
+import { ReloptionsContext } from "./PGLParser.js";
+import { Reloption_elemContext } from "./PGLParser.js";
+import { OncommitoptionContext } from "./PGLParser.js";
+import { OpttablespaceContext } from "./PGLParser.js";
+import { TableelementlistContext } from "./PGLParser.js";
+import { TableelementContext } from "./PGLParser.js";
+import { ColumnDefContext } from "./PGLParser.js";
+import { ColquallistContext } from "./PGLParser.js";
+import { ColconstraintContext } from "./PGLParser.js";
+import { Col_not_nullContext } from "./PGLParser.js";
+import { Col_nullContext } from "./PGLParser.js";
+import { Col_primary_keyContext } from "./PGLParser.js";
+import { Col_uniqueContext } from "./PGLParser.js";
+import { Col_checkContext } from "./PGLParser.js";
+import { Col_defaultContext } from "./PGLParser.js";
+import { Col_referencesContext } from "./PGLParser.js";
+import { TableconstraintContext } from "./PGLParser.js";
+import { Tbl_checkContext } from "./PGLParser.js";
+import { Tbl_uniqueContext } from "./PGLParser.js";
+import { Tbl_primary_keyContext } from "./PGLParser.js";
+import { Tbl_foreign_keyContext } from "./PGLParser.js";
+import { ColumnlistContext } from "./PGLParser.js";
+import { ColumnElemContext } from "./PGLParser.js";
+import { Key_matchContext } from "./PGLParser.js";
+import { Key_actionsContext } from "./PGLParser.js";
+import { Key_updateContext } from "./PGLParser.js";
+import { Key_deleteContext } from "./PGLParser.js";
+import { Key_actionContext } from "./PGLParser.js";
+import { TypenameContext } from "./PGLParser.js";
+import { Opt_array_boundsContext } from "./PGLParser.js";
+import { SimpletypenameContext } from "./PGLParser.js";
+import { NumericContext } from "./PGLParser.js";
+import { CharacterContext } from "./PGLParser.js";
+import { ConstdatetimeContext } from "./PGLParser.js";
+import { Timezone_Context } from "./PGLParser.js";
+import { ConstintervalContext } from "./PGLParser.js";
+import { GenerictypeContext } from "./PGLParser.js";
 
 
 /**
@@ -57,17 +115,77 @@ import { Type_refContext } from "./PGLParser.js";
  */
 export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	/**
+	 * Visit a parse tree produced by `PGLParser.unreserved_keyword`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitUnreserved_keyword?: (ctx: Unreserved_keywordContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.col_name_keyword`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_name_keyword?: (ctx: Col_name_keywordContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.type_func_name_keyword`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitType_func_name_keyword?: (ctx: Type_func_name_keywordContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.reserved_keyword`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitReserved_keyword?: (ctx: Reserved_keywordContext) => Result;
+	/**
 	 * Visit a parse tree produced by `PGLParser.identifier`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitIdentifier?: (ctx: IdentifierContext) => Result;
 	/**
+	 * Visit a parse tree produced by `PGLParser.colid`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColid?: (ctx: ColidContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.type_function_name`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitType_function_name?: (ctx: Type_function_nameContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.colLabel`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColLabel?: (ctx: ColLabelContext) => Result;
+	/**
 	 * Visit a parse tree produced by `PGLParser.qualified_name`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitQualified_name?: (ctx: Qualified_nameContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.indirection`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIndirection?: (ctx: IndirectionContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.indirection_el`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIndirection_el?: (ctx: Indirection_elContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.attr_name`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitAttr_name?: (ctx: Attr_nameContext) => Result;
 	/**
 	 * Visit a parse tree produced by `PGLParser.prog`.
 	 * @param ctx the parse tree
@@ -319,5 +437,304 @@ export default class PGLParserVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitType_ref?: (ctx: Type_refContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.database_def`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDatabase_def?: (ctx: Database_defContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.ddl_statement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitDdl_statement?: (ctx: Ddl_statementContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.createstmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCreatestmt?: (ctx: CreatestmtContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.opttemp`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOpttemp?: (ctx: OpttempContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.optinherit`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOptinherit?: (ctx: OptinheritContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.qualified_name_list`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitQualified_name_list?: (ctx: Qualified_name_listContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.optpartitionspec`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOptpartitionspec?: (ctx: OptpartitionspecContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.part_params`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPart_params?: (ctx: Part_paramsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.part_elem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitPart_elem?: (ctx: Part_elemContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.table_access_method_clause`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTable_access_method_clause?: (ctx: Table_access_method_clauseContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.optwith`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOptwith?: (ctx: OptwithContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.reloptions`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitReloptions?: (ctx: ReloptionsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.reloption_elem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitReloption_elem?: (ctx: Reloption_elemContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.oncommitoption`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOncommitoption?: (ctx: OncommitoptionContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.opttablespace`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOpttablespace?: (ctx: OpttablespaceContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.tableelementlist`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTableelementlist?: (ctx: TableelementlistContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.tableelement`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTableelement?: (ctx: TableelementContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.columnDef`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColumnDef?: (ctx: ColumnDefContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.colquallist`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColquallist?: (ctx: ColquallistContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.colconstraint`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColconstraint?: (ctx: ColconstraintContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_not_null`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_not_null?: (ctx: Col_not_nullContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_null`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_null?: (ctx: Col_nullContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_primary_key`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_primary_key?: (ctx: Col_primary_keyContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_unique`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_unique?: (ctx: Col_uniqueContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_check`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_check?: (ctx: Col_checkContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_default`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_default?: (ctx: Col_defaultContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `col_references`
+	 * labeled alternative in `PGLParser.colconstraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCol_references?: (ctx: Col_referencesContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.tableconstraint`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTableconstraint?: (ctx: TableconstraintContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `tbl_check`
+	 * labeled alternative in `PGLParser.constraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTbl_check?: (ctx: Tbl_checkContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `tbl_unique`
+	 * labeled alternative in `PGLParser.constraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTbl_unique?: (ctx: Tbl_uniqueContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `tbl_primary_key`
+	 * labeled alternative in `PGLParser.constraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTbl_primary_key?: (ctx: Tbl_primary_keyContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `tbl_foreign_key`
+	 * labeled alternative in `PGLParser.constraintelem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTbl_foreign_key?: (ctx: Tbl_foreign_keyContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.columnlist`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColumnlist?: (ctx: ColumnlistContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.columnElem`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitColumnElem?: (ctx: ColumnElemContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.key_match`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKey_match?: (ctx: Key_matchContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.key_actions`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKey_actions?: (ctx: Key_actionsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.key_update`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKey_update?: (ctx: Key_updateContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.key_delete`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKey_delete?: (ctx: Key_deleteContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.key_action`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitKey_action?: (ctx: Key_actionContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.typename`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTypename?: (ctx: TypenameContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.opt_array_bounds`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitOpt_array_bounds?: (ctx: Opt_array_boundsContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.simpletypename`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitSimpletypename?: (ctx: SimpletypenameContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.numeric`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitNumeric?: (ctx: NumericContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.character`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitCharacter?: (ctx: CharacterContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.constdatetime`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitConstdatetime?: (ctx: ConstdatetimeContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.timezone_`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTimezone_?: (ctx: Timezone_Context) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.constinterval`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitConstinterval?: (ctx: ConstintervalContext) => Result;
+	/**
+	 * Visit a parse tree produced by `PGLParser.generictype`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitGenerictype?: (ctx: GenerictypeContext) => Result;
 }
 
