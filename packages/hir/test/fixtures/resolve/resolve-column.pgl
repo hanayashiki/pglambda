@@ -1,0 +1,12 @@
+database {
+  create table users (
+    id integer,
+    name text
+  );
+}
+
+query bare_col() { select id as x from users }
+
+query qualified_col() { select users.id as x from users }
+
+query where_col($id: integer) { select name as n from users where id = $id }

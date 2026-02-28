@@ -1,0 +1,12 @@
+database {
+  create table users (
+    id integer not null,
+    name text
+  );
+}
+
+query bare_col() { select id as x from users where id = 1 }
+--                        ^ col_id
+
+query qualified_col() { select users.name as n from users where users.id = 1 }
+--                                   ^ qual_name

@@ -8,7 +8,13 @@ export function checkSelect(s: SelectStmt): Type {
     // Phase 1: Resolve FROM clause — validates table refs, builds scope for future column resolution
     if (s.data.from) resolveFromScope(s.data.from);
 
-    // Phase 2: Process SELECT targets
+    // Phase 2: Check WHERE clause (must be boolean)
+    if (s.data.where) {
+      const whereType = checkExpr(s.data.where);
+      ctx.addEquality({ t1: whereType, t2: ctx.typeStore.primitive("boolean") });
+    }
+
+    // Phase 3: Process SELECT targets
     const fields: Record<string, Type> = {};
 
     for (const target of s.data.targets) {

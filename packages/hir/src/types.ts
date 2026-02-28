@@ -61,7 +61,7 @@ export type QueryBody =
 
 // --- SELECT ---
 
-export type SelectStmt = Hir<"select", { targets: SelectTarget[]; from: FromClause | null }>;
+export type SelectStmt = Hir<"select", { targets: SelectTarget[]; from: FromClause | null; where: Expr | null }>;
 
 export type SelectTarget =
   | Hir<"targetExpr", { expr: Expr; alias: Name }>
@@ -77,7 +77,7 @@ export type TableRef = Hir<"tableRef", { name: QualifiedName; alias: Name | null
 
 export type Expr =
   | Hir<"literal", { value: LiteralValue }>
-  | Hir<"columnRef", { name: Name }>
+  | Hir<"columnRef", { name: QualifiedName }>
   | Hir<"paramRef", { name: Name }>
   | Hir<"pglRef", { name: QualifiedName }>
   | Hir<"pglCall", { name: QualifiedName; typeArgs: TypeExpr[]; args: Expr[] }>

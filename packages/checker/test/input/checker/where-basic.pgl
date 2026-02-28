@@ -1,0 +1,13 @@
+database {
+  create table users (
+    id integer not null,
+    name text not null
+  );
+}
+
+query get_user($id: integer) {
+  --  ^ get_user
+  select id as user_id, name as user_name
+  --     ^ uid          ^ uname
+  from users where id = $id
+}

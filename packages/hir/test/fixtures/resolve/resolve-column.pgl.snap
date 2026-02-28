@@ -1,0 +1,15 @@
+=== definitions ===
+query(bare_col)
+query(qualified_col)
+query(where_col)
+  queryParam(id)
+
+=== resolutions ===
+$id -> queryParam(id)
+id -> table(users)
+id -> table(users)
+name -> table(users)
+users -> table(users)
+users -> table(users)
+users -> table(users)
+users.id -> table(users)

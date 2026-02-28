@@ -97,6 +97,9 @@ function collectBodyResolutions(body: QueryBody, store: HirStore, out: string[])
       for (const t of body.data.stmt.data.targets) {
         collectTargetResolutions(t, store, out);
       }
+      if (body.data.stmt.data.where) {
+        collectExprResolutions(body.data.stmt.data.where, store, out);
+      }
       break;
     case "pglExprBody":
       collectExprResolutions(body.data.expr, store, out);
@@ -140,6 +143,14 @@ function collectExprResolutions(expr: Expr, store: HirStore, out: string[]): voi
       for (const arg of expr.data.args) {
         collectExprResolutions(arg, store, out);
       }
+      break;
+    case "columnRef":
+      checkResolution(
+        expr.data.name.data.parts.map(p => p.data.text).join("."),
+        expr.data.name.id,
+        store,
+        out,
+      );
       break;
     case "binOp":
       collectExprResolutions(expr.data.left, store, out);

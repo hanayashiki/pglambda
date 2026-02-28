@@ -32,10 +32,12 @@ export function hirChildren(node: HirNode): HirNode[] {
       return [node.data.name];
 
     // --- SELECT ---
-    case "select":
-      return node.data.from
-        ? [...node.data.targets, node.data.from]
-        : node.data.targets;
+    case "select": {
+      const children: HirNode[] = [...node.data.targets];
+      if (node.data.from) children.push(node.data.from);
+      if (node.data.where) children.push(node.data.where);
+      return children;
+    }
     case "targetExpr":
       return [node.data.expr, node.data.alias];
     case "targetStar":

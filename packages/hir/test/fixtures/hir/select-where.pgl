@@ -1,0 +1,12 @@
+database {
+  create table users (
+    id integer,
+    name text
+  );
+}
+
+query basic_where() { select 1 as x from users where id = 1 }
+
+query param_where($id: integer) { select name as n from users where id = $id }
+
+query qualified_where() { select 1 as x from users where users.id = 1 }

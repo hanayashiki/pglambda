@@ -23,7 +23,8 @@ export function checkExpr(e: Expr): Type {
     case "paramRef": {
       return ctx.getOrInsert(e.id, () => {
         const defId = ctx.hirStore.getResolution(e.data.name.id);
-        if (!defId) return ctx.typeStore.error("Unresolved parameter reference");
+        if (!defId)
+          return ctx.typeStore.error("Unresolved parameter reference");
         const defType = ctx.getOrCreateTypeVar(defId as HirId);
         ctx.getOrInsert(e.data.name.id, () => defType);
         return defType;
@@ -34,7 +35,9 @@ export function checkExpr(e: Expr): Type {
       return ctx.getOrInsert(e.id, () => {
         const parts = e.data.name.data.parts;
         if (parts.length !== 1) {
-          return ctx.typeStore.error("Module-qualified references not implemented");
+          return ctx.typeStore.error(
+            "Module-qualified references not implemented",
+          );
         }
         const defId = ctx.hirStore.getResolution(parts[0].id);
         if (!defId) return ctx.typeStore.error("Unresolved reference");
@@ -48,7 +51,9 @@ export function checkExpr(e: Expr): Type {
       return ctx.getOrInsert(e.id, () => {
         const parts = e.data.name.data.parts;
         if (parts.length !== 1) {
-          return ctx.typeStore.error("Module-qualified calls not supported yet");
+          return ctx.typeStore.error(
+            "Module-qualified calls not supported yet",
+          );
         }
         const defId = ctx.hirStore.getResolution(parts[0].id);
         if (!defId) return ctx.typeStore.error("Unresolved function call");
@@ -79,12 +84,48 @@ export function checkExpr(e: Expr): Type {
 
     case "binOp":
       return ctx.getOrInsert(e.id, () => {
-        return ctx.typeStore.error("Binary expressions not supported yet");
+        // Recurse into sub-expressions (needed for nested refs/calls)
+        checkExpr(e.data.left);
+        checkExpr(e.data.right);
+
+        // Return result type only — operand coercion constraints deferred
+        // (PG has complex coercion rules that need careful design)
+        switch (e.data.op) {
+          case "=":
+          case "<>":
+          case "<":
+          case ">":
+          case "<=":
+          case ">=":
+          case "AND":
+          case "OR":
+          case "LIKE":
+          case "ILIKE":
+            return ctx.typeStore.primitive("boolean");
+
+          case "+":
+          case "-":
+          case "*":
+          case "/":
+          case "%":
+            return ctx.typeStore.typevar();
+
+          case "||":
+            return ctx.typeStore.primitive("text");
+        }
       });
 
     case "unaryOp":
       return ctx.getOrInsert(e.id, () => {
-        return ctx.typeStore.error("Unary expressions not supported yet");
+        // Recurse into operand — no operand constraints for now
+        checkExpr(e.data.operand);
+        switch (e.data.op) {
+          case "NOT":
+            return ctx.typeStore.primitive("boolean");
+          case "+":
+          case "-":
+            return ctx.typeStore.typevar();
+        }
       });
 
     case "paren":
@@ -92,7 +133,29 @@ export function checkExpr(e: Expr): Type {
 
     case "columnRef":
       return ctx.getOrInsert(e.id, () => {
-        return ctx.typeStore.error("Column references not supported yet");
+        const defId = ctx.hirStore.getResolution(e.data.name.id);
+        if (!defId) return ctx.typeStore.error("Unresolved column reference");
+
+        const tableType = ctx.getTableType(defId);
+        if (!tableType)
+          return ctx.typeStore.error(
+            "Column reference does not resolve to a table",
+          );
+        if (tableType.kind !== "record")
+          return ctx.typeStore.error(
+            "Expected record type for column reference",
+          );
+
+        const colName = e.data.name.data.parts.at(-1)!.data.text;
+        const fieldType = tableType.fields[colName];
+        if (!fieldType)
+          return ctx.typeStore.error(`Column "${colName}" not found in table`);
+        // Store type on inner nodes so markers can find them
+        ctx.getOrInsert(e.data.name.id, () => fieldType);
+        for (const part of e.data.name.data.parts) {
+          ctx.getOrInsert(part.id, () => fieldType);
+        }
+        return fieldType;
       });
   }
 }

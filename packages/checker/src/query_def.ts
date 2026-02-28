@@ -34,6 +34,7 @@ export function checkQueryDef(q: QueryDef): Type {
     const bodyType = checkBody(q);
 
     const fnType = ctx.typeStore.fn(paramNames, paramTypes, bodyType);
+    ctx.getOrInsert(q.data.name.id, () => fnType);
 
     if (schemeBodyTypeVar) {
       ctx.addEquality({ t1: schemeBodyTypeVar, t2: fnType });

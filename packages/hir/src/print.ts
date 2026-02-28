@@ -43,7 +43,8 @@ function printNode(node: HirNode, indent: number): string {
     case "select": {
       const targets = node.data.targets.map((t) => printTarget(t)).join(", ");
       const from = node.data.from ? ` ${printFrom(node.data.from)}` : "";
-      return `select ${targets}${from}`;
+      const where = node.data.where ? ` where ${printExpr(node.data.where)}` : "";
+      return `select ${targets}${from}${where}`;
     }
 
     case "fromClause":
@@ -62,7 +63,7 @@ function printNode(node: HirNode, indent: number): string {
       return printLiteral(node.data.value);
 
     case "columnRef":
-      return printName(node.data.name);
+      return printQualifiedName(node.data.name);
 
     case "paramRef":
       return printName(node.data.name);
@@ -183,7 +184,7 @@ function printExpr(e: Expr): string {
     case "literal":
       return printLiteral(e.data.value);
     case "columnRef":
-      return printName(e.data.name);
+      return printQualifiedName(e.data.name);
     case "paramRef":
       return printName(e.data.name);
     case "pglRef":

@@ -280,11 +280,13 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     }
     const fromCtx = ctx.from_clause();
     const from = fromCtx ? this.lowerFromClause(fromCtx) : null;
+    const whereCtx = ctx.where_clause();
+    const where = whereCtx ? this.lowerAExpr(whereCtx.a_expr()) : null;
     return {
       id: this.id(),
       tag: "select",
       span: this.span(ctx),
-      data: { targets, from },
+      data: { targets, from, where },
     };
   }
 
@@ -616,12 +618,22 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
         data: { name: this.lowerColid(colids[0]) },
       };
     }
-    // Regular column reference (single or dotted)
+    // Regular column reference — preserve all parts as QualifiedName
+    // Supports: bare `id` (1 part) and qualified `users.id` (2 parts)
+    // TODO: 3-part schema.table.column is valid PostgreSQL but deferred
+    const parts = colids.map((c) => this.lowerColid(c));
     return {
       id: this.id(),
       tag: "columnRef",
       span: this.span(ctx),
-      data: { name: this.lowerColid(colids[0]) },
+      data: {
+        name: {
+          id: this.id(),
+          tag: "qualifiedName" as const,
+          span: this.span(ctx),
+          data: { parts },
+        },
+      },
     };
   }
 
