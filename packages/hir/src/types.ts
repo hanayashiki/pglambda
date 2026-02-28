@@ -129,18 +129,55 @@ export type CreateTableStmt = Hir<
   }
 >;
 
+export type ColumnConstraints = {
+  notNull: boolean;
+  primaryKey: boolean;
+  unique: boolean;
+  defaultExpr: Expr | null;
+};
+
 export type ColumnDef = Hir<
   "columnDef",
   {
     name: Name;
     typeName: TypeName;
+    constraints: ColumnConstraints;
   }
 >;
+
+// --- SQL type names (structured config from grammar) ---
+
+export type SimpleTypeName =
+  | {
+      kind: "numeric";
+      base:
+        | "int"
+        | "integer"
+        | "smallint"
+        | "bigint"
+        | "real"
+        | "float"
+        | "double"
+        | "decimal"
+        | "numeric"
+        | "boolean";
+      precision: number | null;
+      scale: number | null;
+    }
+  | { kind: "character"; varying: boolean; length: number | null }
+  | {
+      kind: "datetime";
+      base: "timestamp" | "time";
+      precision: number | null;
+      timezone: "with" | "without" | null;
+    }
+  | { kind: "interval" }
+  | { kind: "named"; name: string; params: number[] };
 
 export type TypeName = Hir<
   "typeName",
   {
-    name: QualifiedName;
+    simpleType: SimpleTypeName;
     isSetOf: boolean;
     arrayDimensions: number;
   }

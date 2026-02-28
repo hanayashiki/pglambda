@@ -33,10 +33,10 @@ function findHirNodeAtPosition(
 }
 
 /**
- * Parse a .pgl source, lower to HIR, type-check with v2, and return a snapshot string
+ * Parse a .pgl source, lower to HIR, type-check, and return a snapshot string
  * mapping each marker label to its resolved type.
  */
-export function checkAndExtractMarkersV2(
+export function checkAndExtractMarkers(
   source: string,
   filename = "test.pgl",
 ): string {
@@ -63,7 +63,7 @@ export function checkAndExtractMarkersV2(
     uri,
   );
 
-  // 3. Type-check with v2
+  // 3. Type-check
   const ctx = new CheckContext(module, hirStore, store);
   const result = ctx.check();
 

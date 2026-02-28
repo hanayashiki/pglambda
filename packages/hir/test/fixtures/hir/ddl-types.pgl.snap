@@ -1,0 +1,18 @@
+database {
+  create table t (
+    a int4 primary key,
+    b text not null,
+    c varchar(255),
+    d boolean,
+    e numeric(10, 2),
+    f timestamp with time zone,
+    g double precision,
+    h bigint unique,
+    i real,
+    j char(10),
+    k interval,
+    l smallint default 0,
+    m timestamp(3) without time zone,
+    n integer[]
+  );
+}

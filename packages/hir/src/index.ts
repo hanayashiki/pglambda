@@ -18,7 +18,9 @@ export type {
   DatabaseDef,
   CreateTableStmt,
   ColumnDef,
+  ColumnConstraints,
   TypeName,
+  SimpleTypeName,
   HirNode,
 } from "./types.js";
 

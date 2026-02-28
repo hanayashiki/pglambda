@@ -2,9 +2,9 @@ import { describe, test, expect } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkAndExtractMarkersV2, checkModule } from "./check-v2-helper.js";
+import { checkAndExtractMarkers, checkModule } from "./check-helper.js";
 
-describe("Checker v2 (HIR) Snapshot Tests", () => {
+describe("Checker (HIR) Snapshot Tests", () => {
   const inputDir = join(dirname(fileURLToPath(import.meta.url)), "input");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
@@ -14,7 +14,7 @@ describe("Checker v2 (HIR) Snapshot Tests", () => {
     const filepath = join(inputDir, filename);
     const input = readFileSync(filepath, "utf-8");
 
-    const snapshot = checkAndExtractMarkersV2(input, filename);
+    const snapshot = checkAndExtractMarkers(input, filename);
 
     await expect(snapshot).toMatchFileSnapshot(
       `input/${filename}.snap`,
@@ -26,7 +26,7 @@ describe("Checker v2 (HIR) Snapshot Tests", () => {
   });
 });
 
-describe("Checker v2 imports/exports", () => {
+describe("Checker imports/exports", () => {
   test("exports top-level query def types", () => {
     const { result, store } = checkModule(`query f() { select 1 as col }`);
 

@@ -1,0 +1,22 @@
+{
+  "name": "@pglambda/pg-behavior",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "description": "PostgreSQL type behavior tests using PGlite",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}

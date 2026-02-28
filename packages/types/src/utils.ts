@@ -19,8 +19,8 @@
 //  *
 //  * @example
 //  * visitType(type, {
-//  *   visitPrimitive: (t) => console.log('Found primitive:', t.name),
-//  *   visitArray: (t) => console.log('Found array'),
+//  *   visitPrimitive: (t) => console.info('Found primitive:', t.name),
+//  *   visitArray: (t) => console.info('Found array'),
 //  * });
 //  */
 // export function visitType<R>(type: Type, visitor: TypeVisitor<R>): R | undefined {

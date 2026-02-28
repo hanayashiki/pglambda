@@ -66,10 +66,14 @@ export function hirChildren(node: HirNode): HirNode[] {
       return node.data.statements;
     case "createTable":
       return [node.data.name, ...node.data.columns];
-    case "columnDef":
-      return [node.data.name, node.data.typeName];
+    case "columnDef": {
+      const children: HirNode[] = [node.data.name, node.data.typeName];
+      if (node.data.constraints.defaultExpr)
+        children.push(node.data.constraints.defaultExpr);
+      return children;
+    }
     case "typeName":
-      return [node.data.name];
+      return [];
   }
 }
 

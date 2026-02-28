@@ -7,9 +7,11 @@ import type {
   LiteralValue,
   TypeExpr,
   TypeName,
+  SimpleTypeName,
   QualifiedName,
   Name,
   ColumnDef,
+  CreateTableStmt,
 } from "./types.js";
 
 export function printHir(node: HirNode): string {
@@ -34,7 +36,7 @@ function printNode(node: HirNode, indent: number): string {
     case "selectBody":
     case "pglExprBody":
     case "paramRefBody":
-      return printBody(node as QueryBody, indent);
+      return printBody(node, indent);
 
     case "select":
       return `select ${node.data.targets.map((t) => printTarget(t)).join(", ")}`;
@@ -82,10 +84,10 @@ function printNode(node: HirNode, indent: number): string {
     }
 
     case "createTable":
-      return printCreateTable(node.data, indent);
+      return printCreateTable(node, indent);
 
     case "columnDef":
-      return `${printName(node.data.name)} ${printTypeName(node.data.typeName)}`;
+      return printColumnDef(node as ColumnDef);
 
     case "typeName":
       return printTypeName(node as TypeName);
@@ -107,7 +109,12 @@ function printQualifiedName(qn: QualifiedName): string {
 }
 
 function printQuery(
-  data: { name: Name; typeParams: Name[]; params: QueryParam[]; body: QueryBody },
+  data: {
+    name: Name;
+    typeParams: Name[];
+    params: QueryParam[];
+    body: QueryBody;
+  },
   indent: number,
 ): string {
   const name = printName(data.name);
@@ -120,7 +127,10 @@ function printQuery(
   return `${ind(indent)}query ${name}${typeParams}${params} {\n${ind(indent + 1)}${body}\n${ind(indent)}}`;
 }
 
-function printQueryParam(data: { name: Name; typeAnnotation: TypeExpr | null }): string {
+function printQueryParam(data: {
+  name: Name;
+  typeAnnotation: TypeExpr | null;
+}): string {
   const name = printName(data.name);
   if (data.typeAnnotation) {
     return `${name}: ${printQualifiedName(data.typeAnnotation.data.name)}`;
@@ -201,21 +211,60 @@ function printPglCall(data: {
 
 function printTypeName(tn: TypeName): string {
   const prefix = tn.data.isSetOf ? "setof " : "";
-  const name = printQualifiedName(tn.data.name);
+  const name = printSimpleTypeName(tn.data.simpleType);
   const arrays = "[]".repeat(tn.data.arrayDimensions);
   return `${prefix}${name}${arrays}`;
 }
 
-function printCreateTable(
-  data: { name: QualifiedName; ifNotExists: boolean; columns: ColumnDef[] },
-  indent: number,
-): string {
+function printSimpleTypeName(st: SimpleTypeName): string {
+  switch (st.kind) {
+    case "numeric": {
+      const base = st.base === "double" ? "double precision" : st.base;
+      const params =
+        st.precision !== null
+          ? st.scale !== null
+            ? `(${st.precision}, ${st.scale})`
+            : `(${st.precision})`
+          : "";
+      return `${base}${params}`;
+    }
+    case "character": {
+      const base = st.varying ? "varchar" : "char";
+      return st.length !== null ? `${base}(${st.length})` : base;
+    }
+    case "datetime": {
+      const prec = st.precision !== null ? `(${st.precision})` : "";
+      const tz =
+        st.timezone === "with"
+          ? " with time zone"
+          : st.timezone === "without"
+            ? " without time zone"
+            : "";
+      return `${st.base}${prec}${tz}`;
+    }
+    case "interval":
+      return "interval";
+    case "named":
+      return st.params.length > 0
+        ? `${st.name}(${st.params.join(", ")})`
+        : st.name;
+  }
+}
+
+function printColumnDef(col: ColumnDef): string {
+  const parts = [printName(col.data.name), printTypeName(col.data.typeName)];
+  const c = col.data.constraints;
+  if (c.primaryKey) parts.push("primary key");
+  else if (c.notNull) parts.push("not null");
+  if (c.unique && !c.primaryKey) parts.push("unique");
+  if (c.defaultExpr) parts.push(`default ${printExpr(c.defaultExpr)}`);
+  return parts.join(" ");
+}
+
+function printCreateTable({ data }: CreateTableStmt, indent: number): string {
   const name = printQualifiedName(data.name);
   const cols = data.columns
-    .map(
-      (c) =>
-        `${ind(indent + 1)}${printName(c.data.name)} ${printTypeName(c.data.typeName)}`,
-    )
+    .map((c) => `${ind(indent + 1)}${printColumnDef(c)}`)
     .join(",\n");
   return `${ind(indent)}create table ${name} (\n${cols}\n${ind(indent)})`;
 }

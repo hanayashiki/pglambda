@@ -44,6 +44,15 @@ import {
   type ColumnDefContext,
   type TypenameContext,
   type SimpletypenameContext,
+  type NumericContext,
+  type CharacterContext,
+  type ConstdatetimeContext,
+  type GenerictypeContext,
+  type ColquallistContext,
+  Col_not_nullContext,
+  Col_primary_keyContext,
+  Col_uniqueContext,
+  Col_defaultContext,
   type ParserRuleContext,
   type TerminalNode,
   type RuleNode,
@@ -72,6 +81,8 @@ import type {
   TypeName,
   Name,
   QualifiedName,
+  SimpleTypeName,
+  ColumnConstraints,
 } from "./types.js";
 
 function spanFrom(ctx: ParserRuleContext, file: FileUri): Span {
@@ -636,47 +647,106 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
       data: {
         name: this.lowerColid(ctx.colid()),
         typeName: this.lowerTypename(ctx.typename()),
+        constraints: this.extractColumnConstraints(ctx.colquallist()),
       },
     };
+  }
+
+  private extractColumnConstraints(ctx: ColquallistContext): ColumnConstraints {
+    const result: ColumnConstraints = {
+      notNull: false,
+      primaryKey: false,
+      unique: false,
+      defaultExpr: null,
+    };
+    for (const c of ctx.colconstraint_list()) {
+      const elem = c.colconstraintelem();
+      if (elem instanceof Col_not_nullContext) result.notNull = true;
+      if (elem instanceof Col_primary_keyContext) {
+        result.primaryKey = true;
+        result.notNull = true;
+      }
+      if (elem instanceof Col_uniqueContext) result.unique = true;
+      if (elem instanceof Col_defaultContext)
+        result.defaultExpr = this.lowerAExpr(elem.a_expr());
+    }
+    return result;
   }
 
   private lowerTypename(ctx: TypenameContext): TypeName {
     const isSetOf = !!ctx.KW_SETOF();
     const arrayBounds = ctx.opt_array_bounds();
-    const arrayDimensions = arrayBounds ? arrayBounds.L_BRACKET_list().length : 0;
-    const simpleType = ctx.simpletypename();
-    const typeText = this.extractSimpleTypeName(simpleType);
-    const typeName: Name = {
-      id: this.id(),
-      tag: "name",
-      span: this.span(simpleType),
-      data: { text: typeText },
-    };
+    const arrayDimensions = arrayBounds
+      ? arrayBounds.L_BRACKET_list().length
+      : 0;
+    const simpleType = this.lowerSimpleTypeName(ctx.simpletypename());
     return {
       id: this.id(),
       tag: "typeName",
       span: this.span(ctx),
-      data: {
-        name: {
-          id: this.id(),
-          tag: "qualifiedName",
-          span: this.span(simpleType),
-          data: { parts: [typeName] },
-        },
-        isSetOf,
-        arrayDimensions,
-      },
+      data: { simpleType, isSetOf, arrayDimensions },
     };
   }
 
-  private extractSimpleTypeName(ctx: SimpletypenameContext): string {
-    if (ctx.numeric()) return ctx.numeric().getText().toLowerCase();
-    if (ctx.character()) return ctx.character().getText().toLowerCase();
-    if (ctx.constdatetime()) return ctx.constdatetime().getText().toLowerCase();
-    if (ctx.constinterval()) return "interval";
-    if (ctx.generictype())
-      return ctx.generictype().type_function_name().getText();
-    throw new Error("Unknown simpletypename alternative");
+  private lowerSimpleTypeName(ctx: SimpletypenameContext): SimpleTypeName {
+    if (ctx.numeric()) return this.lowerNumericType(ctx.numeric());
+    if (ctx.character()) return this.lowerCharacterType(ctx.character());
+    if (ctx.constdatetime()) return this.lowerDatetimeType(ctx.constdatetime());
+    if (ctx.constinterval()) return { kind: "interval" };
+    return this.lowerGenericType(ctx.generictype()!);
+  }
+
+  private lowerNumericType(ctx: NumericContext): SimpleTypeName {
+    let base: SimpleTypeName & { kind: "numeric" };
+    const literals = ctx.INTEGER_LITERAL_list();
+    const precision =
+      literals.length > 0 ? parseInt(literals[0].getText()) : null;
+    const scale =
+      literals.length > 1 ? parseInt(literals[1].getText()) : null;
+
+    if (ctx.KW_INT()) base = { kind: "numeric", base: "int", precision, scale };
+    else if (ctx.KW_INTEGER()) base = { kind: "numeric", base: "integer", precision, scale };
+    else if (ctx.KW_SMALLINT()) base = { kind: "numeric", base: "smallint", precision, scale };
+    else if (ctx.KW_BIGINT()) base = { kind: "numeric", base: "bigint", precision, scale };
+    else if (ctx.KW_REAL()) base = { kind: "numeric", base: "real", precision, scale };
+    else if (ctx.KW_FLOAT()) base = { kind: "numeric", base: "float", precision, scale };
+    else if (ctx.KW_DOUBLE()) base = { kind: "numeric", base: "double", precision, scale };
+    else if (ctx.KW_DECIMAL()) base = { kind: "numeric", base: "decimal", precision, scale };
+    else if (ctx.KW_NUMERIC()) base = { kind: "numeric", base: "numeric", precision, scale };
+    else if (ctx.KW_BOOLEAN()) base = { kind: "numeric", base: "boolean", precision, scale };
+    else throw new Error("Unknown numeric type");
+
+    return base;
+  }
+
+  private lowerCharacterType(ctx: CharacterContext): SimpleTypeName {
+    const varying = !!ctx.KW_VARYING() || !!ctx.KW_VARCHAR();
+    const lit = ctx.INTEGER_LITERAL();
+    const length = lit ? parseInt(lit.getText()) : null;
+    return { kind: "character", varying, length };
+  }
+
+  private lowerDatetimeType(ctx: ConstdatetimeContext): SimpleTypeName {
+    const base: "timestamp" | "time" = ctx.KW_TIMESTAMP()
+      ? "timestamp"
+      : "time";
+    const lit = ctx.INTEGER_LITERAL();
+    const precision = lit ? parseInt(lit.getText()) : null;
+    const tz = ctx.timezone_();
+    const timezone: "with" | "without" | null = tz
+      ? tz.KW_WITH()
+        ? "with"
+        : "without"
+      : null;
+    return { kind: "datetime", base, precision, timezone };
+  }
+
+  private lowerGenericType(ctx: GenerictypeContext): SimpleTypeName {
+    const name = ctx.type_function_name().getText();
+    const params = ctx
+      .INTEGER_LITERAL_list()
+      .map((lit) => parseInt(lit.getText()));
+    return { kind: "named", name, params };
   }
 
   // --- Helpers ---
