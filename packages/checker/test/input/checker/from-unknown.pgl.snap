@@ -1,0 +1,3 @@
+s: integer
+
+error: Unknown table "nonexistent"

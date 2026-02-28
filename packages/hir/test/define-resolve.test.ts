@@ -11,6 +11,7 @@ import {
   type QueryBody,
   type SelectTarget,
   type TypeExpr,
+  type FromClause,
   type HirId,
   type HirStore,
   type QueryDefinition,
@@ -90,6 +91,9 @@ function collectResolutions(q: QueryDef, store: HirStore, out: string[]): void {
 function collectBodyResolutions(body: QueryBody, store: HirStore, out: string[]): void {
   switch (body.tag) {
     case "selectBody":
+      if (body.data.stmt.data.from) {
+        collectFromResolutions(body.data.stmt.data.from, store, out);
+      }
       for (const t of body.data.stmt.data.targets) {
         collectTargetResolutions(t, store, out);
       }
@@ -100,6 +104,13 @@ function collectBodyResolutions(body: QueryBody, store: HirStore, out: string[])
     case "paramRefBody":
       checkResolution(body.data.name.data.text, body.data.name.id, store, out);
       break;
+  }
+}
+
+function collectFromResolutions(from: FromClause, store: HirStore, out: string[]): void {
+  for (const ref of from.data.refs) {
+    const name = ref.data.name.data.parts.map(p => p.data.text).join(".");
+    checkResolution(name, ref.data.name.id, store, out);
   }
 }
 

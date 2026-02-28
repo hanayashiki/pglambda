@@ -10,6 +10,8 @@ export type {
   QueryBody,
   SelectStmt,
   SelectTarget,
+  FromClause,
+  TableRef,
   Expr,
   LiteralValue,
   BinOp,

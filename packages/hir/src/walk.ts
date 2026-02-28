@@ -33,11 +33,21 @@ export function hirChildren(node: HirNode): HirNode[] {
 
     // --- SELECT ---
     case "select":
-      return node.data.targets;
+      return node.data.from
+        ? [...node.data.targets, node.data.from]
+        : node.data.targets;
     case "targetExpr":
       return [node.data.expr, node.data.alias];
     case "targetStar":
       return [];
+
+    // --- FROM ---
+    case "fromClause":
+      return node.data.refs;
+    case "tableRef":
+      return node.data.alias
+        ? [node.data.name, node.data.alias]
+        : [node.data.name];
 
     // --- Expressions ---
     case "literal":

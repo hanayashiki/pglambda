@@ -208,7 +208,11 @@ target_el:
 	a_expr (KW_AS colLabel | colid)?	# target_label
 	| STAR								# target_star;
 
-/* from_clause */
+/* from_clause
+ *
+ * Currently supports: simple table references with optional aliases.
+ * Not supported: JOINs, subqueries, function calls in FROM, LATERAL, CTEs.
+ */
 
 from_clause: KW_FROM from_list;
 

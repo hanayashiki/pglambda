@@ -2,6 +2,8 @@ import type {
   HirNode,
   Expr,
   SelectTarget,
+  FromClause,
+  TableRef,
   QueryBody,
   QueryParam,
   LiteralValue,
@@ -38,8 +40,17 @@ function printNode(node: HirNode, indent: number): string {
     case "paramRefBody":
       return printBody(node, indent);
 
-    case "select":
-      return `select ${node.data.targets.map((t) => printTarget(t)).join(", ")}`;
+    case "select": {
+      const targets = node.data.targets.map((t) => printTarget(t)).join(", ");
+      const from = node.data.from ? ` ${printFrom(node.data.from)}` : "";
+      return `select ${targets}${from}`;
+    }
+
+    case "fromClause":
+      return printFrom(node);
+
+    case "tableRef":
+      return printTableRef(node);
 
     case "targetExpr":
       return `${printExpr(node.data.expr)} as ${printName(node.data.alias)}`;
@@ -147,6 +158,15 @@ function printBody(body: QueryBody, indent: number): string {
     case "paramRefBody":
       return printName(body.data.name);
   }
+}
+
+function printFrom(from: FromClause): string {
+  return `from ${from.data.refs.map((r) => printTableRef(r)).join(", ")}`;
+}
+
+function printTableRef(ref: TableRef): string {
+  const name = printQualifiedName(ref.data.name);
+  return ref.data.alias ? `${name} as ${printName(ref.data.alias)}` : name;
 }
 
 function printTarget(t: SelectTarget): string {

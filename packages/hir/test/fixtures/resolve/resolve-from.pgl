@@ -1,0 +1,8 @@
+database {
+  create table users (
+    id integer,
+    name text
+  );
+}
+
+query get_users() { select 1 as x from users }

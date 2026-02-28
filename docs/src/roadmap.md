@@ -23,12 +23,12 @@ This requires the full pipeline: parsing → DDL extraction → table-to-row-typ
   - One canonical node per semantic entity (no wrapper chains)
   - Spans for error reporting and LSP hover
   - Checker operates on HIR, not CST — grammar changes only affect lowering
-- [ ] `database` block: parse PostgreSQL DDL, extract table → row type mappings
+- [x] `database` block: parse PostgreSQL DDL, extract table → row type mappings
   - Grammar support for `database { }` wrapper
   - DDL parser for `CREATE TABLE` (columns, types, constraints)
   - Table registry: qualified name → row type
-  - `use` syntax for cross-file DDL dependencies
-  - Global uniqueness check (no conflicting table definitions)
+  - ~~`use` syntax for cross-file DDL dependencies~~ (deferred)
+  - ~~Global uniqueness check (no conflicting table definitions)~~
 - [ ] FROM clause: resolve table references to row types, introduce columns into scope
 - [ ] Column reference resolution: `id` → look up in FROM scope
 - [ ] SELECT * expansion from FROM row type

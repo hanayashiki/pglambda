@@ -1,0 +1,5 @@
+=== definitions ===
+query(get_users)
+
+=== resolutions ===
+users -> table(users)

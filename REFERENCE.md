@@ -74,5 +74,3 @@ SELECT * FROM unnest(array[1,2]) AS x(id), unnest(array[3,4]) AS y(id)
 -- x.id and y.id work inside the FROM clause
 -- but through a subquery, only positional access can distinguish them
 ```
-
-**Implication for pglambda:** The two-level row type `{u: {id: int}, o: {id: int}}` is valid within a single FROM clause. To preserve this structure across boundaries, the compiler rewrites columns with prefixed aliases (e.g., `u.id AS "u.id"`). For stable cross-boundary naming, use views — they are persistent named entities like tables.

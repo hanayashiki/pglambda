@@ -1,5 +1,5 @@
 import type { HirStore, DefinitionId, ScopeId } from "./store.js";
-import type { Module, Def, QueryDef, QueryBody, Expr, SelectTarget, TypeExpr } from "./types.js";
+import type { Module, Def, QueryDef, QueryBody, Expr, SelectTarget, FromClause, TypeExpr } from "./types.js";
 
 /**
  * Resolve name references in the HIR tree to their definitions.
@@ -37,6 +37,9 @@ function resolveQueryDef(q: QueryDef, store: HirStore): void {
 function resolveBody(body: QueryBody, store: HirStore, scopeId: ScopeId): void {
   switch (body.tag) {
     case "selectBody":
+      if (body.data.stmt.data.from) {
+        resolveFromClause(body.data.stmt.data.from, store, scopeId);
+      }
       for (const t of body.data.stmt.data.targets) {
         resolveTarget(t, store, scopeId);
       }
@@ -51,6 +54,16 @@ function resolveBody(body: QueryBody, store: HirStore, scopeId: ScopeId): void {
         store.addResolution(body.data.name.id, defId);
       }
       break;
+    }
+  }
+}
+
+function resolveFromClause(from: FromClause, store: HirStore, scopeId: ScopeId): void {
+  for (const ref of from.data.refs) {
+    const name = ref.data.name.data.parts.map(p => p.data.text).join(".");
+    const defId = lookupValue(store, scopeId, name);
+    if (defId !== undefined) {
+      store.addResolution(ref.data.name.id, defId);
     }
   }
 }

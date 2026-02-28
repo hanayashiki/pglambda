@@ -39,6 +39,8 @@ import {
   type ColidContext,
   type ColLabelContext,
   type Qualified_nameContext,
+  type From_clauseContext,
+  type Table_refContext,
   type Database_defContext,
   type CreatestmtContext,
   type ColumnDefContext,
@@ -70,6 +72,8 @@ import type {
   QueryBody,
   SelectStmt,
   SelectTarget,
+  FromClause,
+  TableRef,
   Expr,
   LiteralValue,
   BinOp,
@@ -274,11 +278,40 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     for (const targetEl of ctx.target_list().target_el_list()) {
       targets.push(this.lowerTargetEl(targetEl));
     }
+    const fromCtx = ctx.from_clause();
+    const from = fromCtx ? this.lowerFromClause(fromCtx) : null;
     return {
       id: this.id(),
       tag: "select",
       span: this.span(ctx),
-      data: { targets },
+      data: { targets, from },
+    };
+  }
+
+  private lowerFromClause(ctx: From_clauseContext): FromClause {
+    const refs = ctx.from_list().table_ref_list().map((r) => this.lowerTableRef(r));
+    return {
+      id: this.id(),
+      tag: "fromClause",
+      span: this.span(ctx),
+      data: { refs },
+    };
+  }
+
+  private lowerTableRef(ctx: Table_refContext): TableRef {
+    const name = this.lowerQualifiedName(ctx.relation_expr().qualified_name());
+    const colLabelCtx = ctx.colLabel();
+    const colidCtx = ctx.colid();
+    const alias = colLabelCtx
+      ? this.lowerColLabel(colLabelCtx)
+      : colidCtx
+        ? this.lowerColid(colidCtx)
+        : null;
+    return {
+      id: this.id(),
+      tag: "tableRef",
+      span: this.span(ctx),
+      data: { name, alias },
     };
   }
 

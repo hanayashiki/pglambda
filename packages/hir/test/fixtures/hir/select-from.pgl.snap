@@ -1,0 +1,27 @@
+database {
+  create table users (
+    id integer,
+    name varchar
+  );
+
+  create table orders (
+    id integer,
+    user_id integer
+  );
+}
+
+query basic() {
+  select 1 as x from users
+}
+
+query aliased() {
+  select 1 as x from users as u
+}
+
+query multi() {
+  select 1 as x from users, orders
+}
+
+query multi_alias() {
+  select 1 as x from users as u, orders as o
+}

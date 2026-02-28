@@ -23,7 +23,7 @@ function defineDef(def: Def, store: HirStore, scopeStack: ScopeId[]): void {
       defineQueryDef(def, store, scopeStack);
       break;
     case "database":
-      defineDatabaseDef(def, store);
+      defineDatabaseDef(def, store, scopeStack);
       break;
   }
 }
@@ -76,7 +76,7 @@ function defineQueryDef(q: QueryDef, store: HirStore, scopeStack: ScopeId[]): vo
   scopeStack.pop();
 }
 
-function defineDatabaseDef(db: DatabaseDef, store: HirStore): void {
+function defineDatabaseDef(db: DatabaseDef, store: HirStore, scopeStack: ScopeId[]): void {
   for (const stmt of db.data.statements) {
     const tableName = stmt.data.name.data.parts.map(p => p.data.text).join(".");
     const columns: TableColumnDef[] = stmt.data.columns.map(col => ({
@@ -92,6 +92,7 @@ function defineDatabaseDef(db: DatabaseDef, store: HirStore): void {
       columns,
     };
     store.addDefinition(tableDef);
+    addToScope(store, scopeStack, tableDef);
   }
 }
 

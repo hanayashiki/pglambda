@@ -61,11 +61,17 @@ export type QueryBody =
 
 // --- SELECT ---
 
-export type SelectStmt = Hir<"select", { targets: SelectTarget[] }>;
+export type SelectStmt = Hir<"select", { targets: SelectTarget[]; from: FromClause | null }>;
 
 export type SelectTarget =
   | Hir<"targetExpr", { expr: Expr; alias: Name }>
   | Hir<"targetStar", Record<string, never>>;
+
+// --- FROM ---
+
+export type FromClause = Hir<"fromClause", { refs: TableRef[] }>;
+
+export type TableRef = Hir<"tableRef", { name: QualifiedName; alias: Name | null }>;
 
 // --- Expressions (flattened from 12-level CST precedence chain) ---
 
@@ -194,6 +200,8 @@ export type HirNode =
   | QueryBody
   | SelectStmt
   | SelectTarget
+  | FromClause
+  | TableRef
   | Expr
   | TypeExpr
   | DatabaseDef
