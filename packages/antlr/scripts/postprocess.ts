@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(__dirname, "../src");
@@ -46,4 +47,11 @@ const output = [
 ].join("\n");
 
 writeFileSync(resolve(srcDir, "rule-names.ts"), output, "utf-8");
-console.log(`postprocess: rewrote imports, generated ${ruleNames.length} rule names`);
+console.info(`postprocess: rewrote imports, generated ${ruleNames.length} rule names`);
+
+// 3. Format generated files with oxfmt
+const rootDir = resolve(__dirname, "../../..");
+const configPath = resolve(rootDir, ".oxfmtrc.json");
+const filesToFormat = [...GENERATED_FILES, "rule-names.ts"].map((f) => resolve(srcDir, f));
+execSync(`npx oxfmt -c ${configPath} ${filesToFormat.join(" ")}`, { stdio: "inherit" });
+console.info("postprocess: formatted generated files with oxfmt");

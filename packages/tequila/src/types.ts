@@ -8,13 +8,13 @@ export interface CachedValue<V> {
 
 export interface DependencyRecord {
   schema: AnyKeySchema;
-  key: any;
-  value: any; // Stored for === comparison
+  key: unknown;
+  value: unknown; // Stored for === comparison
 }
 
 export interface ExecutionContext {
   schema: AnyKeySchema;
-  key: any;
+  key: unknown;
   dependencies: DependencyRecord[];
   parent?: ExecutionContext;
 }

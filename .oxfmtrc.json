@@ -6,5 +6,5 @@
   "singleQuote": false,
   "trailingComma": "es5",
   "bracketSpacing": true,
-  "ignorePatterns": ["**/*.snap.ts"]
+  "ignorePatterns": ["**/*.snap.ts", "**/dist/**"]
 }

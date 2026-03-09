@@ -9,8 +9,8 @@
   },
   "scripts": {
     "check": "pnpm -r check",
-    "lint": "oxlint packages --ignore-pattern '*.d.ts'",
-    "lint:fix": "oxlint packages --fix --ignore-pattern '*.d.ts'",
+    "lint": "oxlint packages --ignore-pattern '*.d.ts' --ignore-pattern 'packages/antlr-next/**' --ignore-pattern 'packages/antlr/src/PGL*'",
+    "lint:fix": "oxlint packages --fix --ignore-pattern '*.d.ts' --ignore-pattern 'packages/antlr-next/**' --ignore-pattern 'packages/antlr/src/PGL*'",
     "format": "oxfmt packages",
     "format:check": "oxfmt packages --check",
     "test": "pnpm -r run test",

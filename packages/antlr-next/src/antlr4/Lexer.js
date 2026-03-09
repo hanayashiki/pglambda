@@ -121,7 +121,7 @@ export default class Lexer extends Recognizer {
               this.notifyListeners(e); // report error
               this.recover(e);
             } else {
-              console.log(e.stack);
+              console.debug(e.stack);
               throw e;
             }
           }
@@ -191,7 +191,7 @@ export default class Lexer extends Recognizer {
 
   pushMode(m) {
     if (this._interp.debug) {
-      console.log("pushMode " + m);
+      console.debug("pushMode " + m);
     }
     this._modeStack.push(this._mode);
     this.setMode(m);
@@ -202,7 +202,7 @@ export default class Lexer extends Recognizer {
       throw "Empty Stack";
     }
     if (this._interp.debug) {
-      console.log("popMode back to " + this._modeStack.slice(0, -1));
+      console.debug("popMode back to " + this._modeStack.slice(0, -1));
     }
     this.setMode(this._modeStack.pop());
     return this._mode;

@@ -26,16 +26,19 @@ export class KeySchema<K, V> {
 /**
  * Type representing any key schema, regardless of its K and V type parameters.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyKeySchema = KeySchema<any, any>;
 
 /**
  * Extract the key type from a KeySchema
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type KeyType<S extends AnyKeySchema> = S extends KeySchema<infer K, any> ? K : never;
 
 /**
  * Extract the value type from a KeySchema
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValueType<S extends AnyKeySchema> = S extends KeySchema<any, infer V> ? V : never;
 
 /**

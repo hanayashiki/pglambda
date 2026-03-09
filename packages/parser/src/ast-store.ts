@@ -32,7 +32,7 @@ export class AstStore {
       throw new Error("hash for ast does not exist");
     }
 
-    return cached as any;
+    return cached as T;
   }
 
   addDefinition(def: Definition): void {

@@ -11,19 +11,19 @@ export default class TraceListener extends ParseTreeListener {
   }
 
   enterEveryRule(ctx) {
-    console.log(
+    console.debug(
       "enter   " + this.parser.ruleNames[ctx.ruleIndex] + ", LT(1)=" + this.parser._input.LT(1).text
     );
   }
 
   visitTerminal(node) {
-    console.log(
+    console.debug(
       "consume " + node.symbol + " rule " + this.parser.ruleNames[this.parser._ctx.ruleIndex]
     );
   }
 
   exitEveryRule(ctx) {
-    console.log(
+    console.debug(
       "exit    " + this.parser.ruleNames[ctx.ruleIndex] + ", LT(1)=" + this.parser._input.LT(1).text
     );
   }

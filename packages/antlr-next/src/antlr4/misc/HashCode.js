@@ -30,7 +30,7 @@ export default class HashCode {
             break;
           default:
             if (value.updateHashCode) value.updateHashCode(this);
-            else console.log("No updateHashCode for " + value.toString());
+            else console.debug("No updateHashCode for " + value.toString());
             continue;
         }
         k = k * 0xcc9e2d51;

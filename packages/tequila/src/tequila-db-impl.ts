@@ -34,18 +34,13 @@ class TequilaDBWithContext implements TequilaDB {
 }
 
 export class TequilaDBImpl implements TequilaDB {
-  // Registry: Map from KeySchema to its registered node (input or tracked function)
+  /* eslint-disable @typescript-eslint/no-explicit-any -- type-erased heterogeneous maps */
   private nodes: Map<AnyKeySchema, TequilaNode<any, any>> = new Map();
-
-  // Cache: Map from KeySchema to Map from key to cached result
   private cache: Map<AnyKeySchema, Map<any, CachedValue<any>>> = new Map();
-
-  // Reverse dependencies: For each (schema, key), track which other (schema, key) pairs depend on it
   private reverseDeps: Map<AnyKeySchema, Map<any, Set<{ schema: AnyKeySchema; key: any }>>> =
     new Map();
-
-  // In-flight computations: Deduplicate concurrent gets for the same key
   private inFlight: Map<AnyKeySchema, Map<any, Promise<any>>> = new Map();
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   // Track schema names used in this DB instance to ensure uniqueness
   private schemaNames: Set<string> = new Set();

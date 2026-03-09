@@ -114,8 +114,8 @@ export default class DefaultErrorStrategy extends ErrorStrategy {
     } else if (e instanceof FailedPredicateException) {
       this.reportFailedPredicate(recognizer, e);
     } else {
-      console.log("unknown recognition error type: " + e.constructor.name);
-      console.log(e.stack);
+      console.debug("unknown recognition error type: " + e.constructor.name);
+      console.debug(e.stack);
       recognizer.notifyErrorListeners(e.getOffendingToken(), e.getMessage(), e);
     }
   }
