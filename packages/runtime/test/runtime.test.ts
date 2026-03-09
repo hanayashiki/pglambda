@@ -1,5 +1,14 @@
 import { describe, test, expect } from "vitest";
-import { sql, param, raw, join, insert, update, type Query, type SqlFragment } from "../src/index.js";
+import {
+  sql,
+  param,
+  raw,
+  join,
+  insert,
+  update,
+  type Query,
+  type SqlFragment,
+} from "../src/index.js";
 
 describe("sql tagged template", () => {
   // Test 1: Simple SELECT with param

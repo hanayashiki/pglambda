@@ -23,8 +23,7 @@ export function checkExpr(e: Expr): Type {
     case "paramRef": {
       return ctx.getOrInsert(e.id, () => {
         const defId = ctx.hirStore.getResolution(e.data.name.id);
-        if (!defId)
-          return ctx.typeStore.error("Unresolved parameter reference");
+        if (!defId) return ctx.typeStore.error("Unresolved parameter reference");
         const defType = ctx.getOrCreateTypeVar(defId as HirId);
         ctx.getOrInsert(e.data.name.id, () => defType);
         return defType;
@@ -35,9 +34,7 @@ export function checkExpr(e: Expr): Type {
       return ctx.getOrInsert(e.id, () => {
         const parts = e.data.name.data.parts;
         if (parts.length !== 1) {
-          return ctx.typeStore.error(
-            "Module-qualified references not implemented",
-          );
+          return ctx.typeStore.error("Module-qualified references not implemented");
         }
         const defId = ctx.hirStore.getResolution(parts[0].id);
         if (!defId) return ctx.typeStore.error("Unresolved reference");
@@ -51,9 +48,7 @@ export function checkExpr(e: Expr): Type {
       return ctx.getOrInsert(e.id, () => {
         const parts = e.data.name.data.parts;
         if (parts.length !== 1) {
-          return ctx.typeStore.error(
-            "Module-qualified calls not supported yet",
-          );
+          return ctx.typeStore.error("Module-qualified calls not supported yet");
         }
         const defId = ctx.hirStore.getResolution(parts[0].id);
         if (!defId) return ctx.typeStore.error("Unresolved function call");
@@ -71,11 +66,7 @@ export function checkExpr(e: Expr): Type {
 
         const resultTypeVar = ctx.typeStore.typevar();
         const paramNames = argTypes.map((_, i) => `$${i}`);
-        const expectedFnType = ctx.typeStore.fn(
-          paramNames,
-          argTypes,
-          resultTypeVar,
-        );
+        const expectedFnType = ctx.typeStore.fn(paramNames, argTypes, resultTypeVar);
 
         ctx.addEquality({ t1: calledType, t2: expectedFnType });
         return resultTypeVar;
@@ -137,19 +128,13 @@ export function checkExpr(e: Expr): Type {
         if (!defId) return ctx.typeStore.error("Unresolved column reference");
 
         const tableType = ctx.getTableType(defId);
-        if (!tableType)
-          return ctx.typeStore.error(
-            "Column reference does not resolve to a table",
-          );
+        if (!tableType) return ctx.typeStore.error("Column reference does not resolve to a table");
         if (tableType.kind !== "record")
-          return ctx.typeStore.error(
-            "Expected record type for column reference",
-          );
+          return ctx.typeStore.error("Expected record type for column reference");
 
         const colName = e.data.name.data.parts.at(-1)!.data.text;
         const fieldType = tableType.fields[colName];
-        if (!fieldType)
-          return ctx.typeStore.error(`Column "${colName}" not found in table`);
+        if (!fieldType) return ctx.typeStore.error(`Column "${colName}" not found in table`);
         // Store type on inner nodes so markers can find them
         ctx.getOrInsert(e.data.name.id, () => fieldType);
         for (const part of e.data.name.data.parts) {

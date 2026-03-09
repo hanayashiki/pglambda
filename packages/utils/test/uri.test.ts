@@ -7,15 +7,11 @@ describe("pathToUri", () => {
   });
 
   it("normalizes Windows backslashes to forward slashes", () => {
-    expect(pathToUri("C:\\Users\\user\\file.pgl")).toBe(
-      "file:///C:/Users/user/file.pgl",
-    );
+    expect(pathToUri("C:\\Users\\user\\file.pgl")).toBe("file:///C:/Users/user/file.pgl");
   });
 
   it("escapes spaces in the path", () => {
-    expect(pathToUri("/home/user/my file.pgl")).toBe(
-      "file:///home/user/my%20file.pgl",
-    );
+    expect(pathToUri("/home/user/my file.pgl")).toBe("file:///home/user/my%20file.pgl");
   });
 });
 

@@ -32,34 +32,22 @@ describe("integer size safety", () => {
   });
 
   test("assign int8 value to int4 column (fits)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO int_test(regular_col) VALUES (1::int8)",
-    );
+    const r = await tryExec(db, "INSERT INTO int_test(regular_col) VALUES (1::int8)");
     console.info("INSERT 1::int8 into int4:", r);
   });
 
   test("assign int8 value to int4 column (overflows)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO int_test(regular_col) VALUES (2147483648::int8)",
-    );
+    const r = await tryExec(db, "INSERT INTO int_test(regular_col) VALUES (2147483648::int8)");
     console.info("INSERT 2147483648::int8 into int4:", r);
   });
 
   test("assign int4 to int2 column (fits)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO int_test(small_col) VALUES (100::int4)",
-    );
+    const r = await tryExec(db, "INSERT INTO int_test(small_col) VALUES (100::int4)");
     console.info("INSERT 100::int4 into int2:", r);
   });
 
   test("assign int4 to int2 column (overflows)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO int_test(small_col) VALUES (40000::int4)",
-    );
+    const r = await tryExec(db, "INSERT INTO int_test(small_col) VALUES (40000::int4)");
     console.info("INSERT 40000::int4 into int2:", r);
   });
 

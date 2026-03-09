@@ -31,14 +31,12 @@ export type AnyKeySchema = KeySchema<any, any>;
 /**
  * Extract the key type from a KeySchema
  */
-export type KeyType<S extends AnyKeySchema> =
-  S extends KeySchema<infer K, any> ? K : never;
+export type KeyType<S extends AnyKeySchema> = S extends KeySchema<infer K, any> ? K : never;
 
 /**
  * Extract the value type from a KeySchema
  */
-export type ValueType<S extends AnyKeySchema> =
-  S extends KeySchema<any, infer V> ? V : never;
+export type ValueType<S extends AnyKeySchema> = S extends KeySchema<any, infer V> ? V : never;
 
 /**
  * Define a new key schema with the specified key and value types.
@@ -59,5 +57,5 @@ export function defineKeySchema<K, V>(name: string): KeySchema<K, V> {
  */
 export type QueryFunction<S extends AnyKeySchema> = (
   db: TequilaDB,
-  key: KeyType<S>,
+  key: KeyType<S>
 ) => Promise<ValueType<S>>;

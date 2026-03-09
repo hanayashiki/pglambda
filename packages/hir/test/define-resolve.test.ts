@@ -25,16 +25,10 @@ function defineAndFormat(source: string, filename = "test.pgl"): string {
   const astStore = new AstStore();
   const uri = `file:///${filename}` as FileUri;
 
-  const parseResult = parseContent(
-    { content: source, uri, success: true },
-    { astStore },
-  );
+  const parseResult = parseContent({ content: source, uri, success: true }, { astStore });
 
   if (!parseResult.success) {
-    return (
-      parseResult.errors.map((e) => `parse error: ${e.message}`).join("\n") +
-      "\n"
-    );
+    return parseResult.diagnostics.map((e) => `parse error: ${e.message}`).join("\n") + "\n";
   }
 
   const { module, store } = lowerAndResolve(parseResult.parseTree!, uri);
@@ -112,7 +106,7 @@ function collectBodyResolutions(body: QueryBody, store: HirStore, out: string[])
 
 function collectFromResolutions(from: FromClause, store: HirStore, out: string[]): void {
   for (const ref of from.data.refs) {
-    const name = ref.data.name.data.parts.map(p => p.data.text).join(".");
+    const name = ref.data.name.data.parts.map((p) => p.data.text).join(".");
     checkResolution(name, ref.data.name.id, store, out);
   }
 }
@@ -130,12 +124,22 @@ function collectExprResolutions(expr: Expr, store: HirStore, out: string[]): voi
       break;
     case "pglRef":
       if (expr.data.name.data.parts.length === 1) {
-        checkResolution(expr.data.name.data.parts[0].data.text, expr.data.name.data.parts[0].id, store, out);
+        checkResolution(
+          expr.data.name.data.parts[0].data.text,
+          expr.data.name.data.parts[0].id,
+          store,
+          out
+        );
       }
       break;
     case "pglCall":
       if (expr.data.name.data.parts.length === 1) {
-        checkResolution(expr.data.name.data.parts[0].data.text, expr.data.name.data.parts[0].id, store, out);
+        checkResolution(
+          expr.data.name.data.parts[0].data.text,
+          expr.data.name.data.parts[0].id,
+          store,
+          out
+        );
       }
       for (const ta of expr.data.typeArgs) {
         collectTypeExprResolutions(ta, store, out);
@@ -146,10 +150,10 @@ function collectExprResolutions(expr: Expr, store: HirStore, out: string[]): voi
       break;
     case "columnRef":
       checkResolution(
-        expr.data.name.data.parts.map(p => p.data.text).join("."),
+        expr.data.name.data.parts.map((p) => p.data.text).join("."),
         expr.data.name.id,
         store,
-        out,
+        out
       );
       break;
     case "binOp":
@@ -167,7 +171,12 @@ function collectExprResolutions(expr: Expr, store: HirStore, out: string[]): voi
 
 function collectTypeExprResolutions(te: TypeExpr, store: HirStore, out: string[]): void {
   if (te.data.name.data.parts.length === 1) {
-    checkResolution(te.data.name.data.parts[0].data.text, te.data.name.data.parts[0].id, store, out);
+    checkResolution(
+      te.data.name.data.parts[0].data.text,
+      te.data.name.data.parts[0].id,
+      store,
+      out
+    );
   }
 }
 
@@ -184,11 +193,7 @@ function checkResolution(label: string, nameId: HirId, store: HirStore, out: str
 // --- Tests ---
 
 describe("Define + Resolve Snapshot Tests", () => {
-  const inputDir = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "fixtures",
-    "resolve",
-  );
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "resolve");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
     .sort();
@@ -199,9 +204,7 @@ describe("Define + Resolve Snapshot Tests", () => {
 
     const snapshot = defineAndFormat(input, filename);
 
-    await expect(snapshot).toMatchFileSnapshot(
-      `fixtures/resolve/${filename}.snap`,
-    );
+    await expect(snapshot).toMatchFileSnapshot(`fixtures/resolve/${filename}.snap`);
   });
 
   test("has fixture files", () => {

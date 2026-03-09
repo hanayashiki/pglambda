@@ -49,24 +49,19 @@ function resolveFromScope(from: FromClause): Map<string, Type> {
   for (const ref of from.data.refs) {
     const defId = ctx.hirStore.getResolution(ref.data.name.id);
     if (!defId) {
-      const tableName = ref.data.name.data.parts
-        .map((p) => p.data.text)
-        .join(".");
+      const tableName = ref.data.name.data.parts.map((p) => p.data.text).join(".");
       ctx.addError(`Unknown table "${tableName}"`);
       continue;
     }
 
     const tableType = ctx.getTableType(defId);
     if (!tableType) {
-      const tableName = ref.data.name.data.parts
-        .map((p) => p.data.text)
-        .join(".");
+      const tableName = ref.data.name.data.parts.map((p) => p.data.text).join(".");
       ctx.addError(`"${tableName}" is not a table`);
       continue;
     }
 
-    const tableName =
-      ref.data.alias?.data.text ?? ref.data.name.data.parts.at(-1)!.data.text;
+    const tableName = ref.data.alias?.data.text ?? ref.data.name.data.parts.at(-1)!.data.text;
 
     if (fromScope.has(tableName)) {
       ctx.addError(`Duplicate table alias "${tableName}" in FROM clause`);

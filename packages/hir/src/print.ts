@@ -43,9 +43,7 @@ function printNode(node: HirNode, indent: number): string {
     case "select": {
       const targets = node.data.targets.map((t) => printTarget(t)).join(", ");
       const from = node.data.from ? ` ${printFrom(node.data.from)}` : "";
-      const where = node.data.where
-        ? ` where ${printExpr(node.data.where)}`
-        : "";
+      const where = node.data.where ? ` where ${printExpr(node.data.where)}` : "";
       return `select ${targets}${from}${where}`;
     }
 
@@ -91,9 +89,7 @@ function printNode(node: HirNode, indent: number): string {
       return printQualifiedName(node.data.name);
 
     case "database": {
-      const stmts = node.data.statements
-        .map((s) => `${printNode(s, indent + 1)};`)
-        .join("\n\n");
+      const stmts = node.data.statements.map((s) => `${printNode(s, indent + 1)};`).join("\n\n");
       return `${ind(indent)}database {\n${stmts}\n${ind(indent)}}`;
     }
 
@@ -129,22 +125,17 @@ function printQuery(
     params: QueryParam[];
     body: QueryBody;
   },
-  indent: number,
+  indent: number
 ): string {
   const name = printName(data.name);
   const typeParams =
-    data.typeParams.length > 0
-      ? `<${data.typeParams.map((t) => t.data.text).join(", ")}>`
-      : "";
+    data.typeParams.length > 0 ? `<${data.typeParams.map((t) => t.data.text).join(", ")}>` : "";
   const params = `(${data.params.map((p) => printQueryParam(p.data)).join(", ")})`;
   const body = printBody(data.body, indent + 1);
   return `${ind(indent)}query ${name}${typeParams}${params} {\n${ind(indent + 1)}${body}\n${ind(indent)}}`;
 }
 
-function printQueryParam(data: {
-  name: Name;
-  typeAnnotation: TypeExpr | null;
-}): string {
+function printQueryParam(data: { name: Name; typeAnnotation: TypeExpr | null }): string {
   const name = printName(data.name);
   if (data.typeAnnotation) {
     return `${name}: ${printQualifiedName(data.typeAnnotation.data.name)}`;
@@ -220,11 +211,7 @@ function printLiteral(v: LiteralValue): string {
   }
 }
 
-function printPglCall(data: {
-  name: QualifiedName;
-  typeArgs: TypeExpr[];
-  args: Expr[];
-}): string {
+function printPglCall(data: { name: QualifiedName; typeArgs: TypeExpr[]; args: Expr[] }): string {
   const name = printQualifiedName(data.name);
   const typeArgs =
     data.typeArgs.length > 0
@@ -270,9 +257,7 @@ function printSimpleTypeName(st: SimpleTypeName): string {
     case "interval":
       return "interval";
     case "named":
-      return st.params.length > 0
-        ? `${st.name}(${st.params.join(", ")})`
-        : st.name;
+      return st.params.length > 0 ? `${st.name}(${st.params.join(", ")})` : st.name;
   }
 }
 
@@ -288,8 +273,6 @@ function printColumnDef(col: ColumnDef): string {
 
 function printCreateTable({ data }: CreateTableStmt, indent: number): string {
   const name = printQualifiedName(data.name);
-  const cols = data.columns
-    .map((c) => `${ind(indent + 1)}${printColumnDef(c)}`)
-    .join(",\n");
+  const cols = data.columns.map((c) => `${ind(indent + 1)}${printColumnDef(c)}`).join(",\n");
   return `${ind(indent)}create table ${name} (\n${cols}\n${ind(indent)})`;
 }

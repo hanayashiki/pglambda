@@ -51,7 +51,7 @@ export class CheckContext {
     private readonly module: Module,
     private readonly hir: HirStore,
     private readonly store: TypeStore,
-    imports?: ReadonlyMap<DefinitionId, Type>,
+    imports?: ReadonlyMap<DefinitionId, Type>
   ) {
     this.imports = imports ?? new Map();
     this.unification = new Unification(store);
@@ -171,10 +171,7 @@ export class CheckContext {
       exportedTypes,
       exportedTypeSchemes,
       tableTypes: this.tableTypes,
-      errors: [
-        ...this.errors,
-        ...unificationResult.errors.map((e) => ({ message: e.message })),
-      ],
+      errors: [...this.errors, ...unificationResult.errors.map((e) => ({ message: e.message }))],
     };
   }
 

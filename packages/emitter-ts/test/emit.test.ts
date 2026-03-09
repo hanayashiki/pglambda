@@ -16,9 +16,7 @@ describe("Emitter (PGL → TypeScript) Snapshot Tests", () => {
 
     const snapshot = emitTs(input, filename);
 
-    await expect(snapshot).toMatchFileSnapshot(
-      `input/${filename.replace(/\..+$/, ".snap.ts")}`,
-    );
+    await expect(snapshot).toMatchFileSnapshot(`input/${filename.replace(/\..+$/, ".snap.ts")}`);
   });
 
   test("has fixture files", () => {

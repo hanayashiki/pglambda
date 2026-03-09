@@ -73,9 +73,7 @@ export class TypeStore {
     }
 
     if (type.kind !== kind) {
-      throw new Error(
-        `Type kind mismatch: expected '${kind}' but got '${type.kind}' for ID ${id}`,
-      );
+      throw new Error(`Type kind mismatch: expected '${kind}' but got '${type.kind}' for ID ${id}`);
     }
 
     return type as Extract<Type, { kind: K }>;
@@ -99,7 +97,7 @@ export class TypeStore {
     if (cached) {
       if (cached.kind !== type.kind) {
         throw new Error(
-          `Type kind mismatch in cache: expected '${type.kind}' but got '${cached.kind}' for key '${key}'`,
+          `Type kind mismatch in cache: expected '${type.kind}' but got '${cached.kind}' for key '${key}'`
         );
       }
       return cached as T;
@@ -125,12 +123,8 @@ export class TypeStore {
         return `array:${type.elementType.id}` as CacheKey;
 
       case "record": {
-        const fieldEntries = Object.entries(type.fields).sort(([a], [b]) =>
-          a.localeCompare(b),
-        );
-        const fieldsKey = fieldEntries
-          .map(([k, v]) => `${k}:${v.id}`)
-          .join(",");
+        const fieldEntries = Object.entries(type.fields).sort(([a], [b]) => a.localeCompare(b));
+        const fieldsKey = fieldEntries.map(([k, v]) => `${k}:${v.id}`).join(",");
         const restKey = type.rest ? `:rest:${type.rest.id}` : "";
         return `record:${fieldsKey}${restKey}` as CacheKey;
       }
@@ -296,19 +290,14 @@ export class TypeStore {
       case "record": {
         const fields = Object.entries(type.fields)
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(
-            ([name, fieldType]) =>
-              `${name}: ${this.typeToString(fieldType)}`,
-          )
+          .map(([name, fieldType]) => `${name}: ${this.typeToString(fieldType)}`)
           .join(", ");
 
         if (type.rest === null) {
           return `{${fields}}`;
         } else {
           const restStr = this.typeToString(type.rest);
-          return fields.length > 0
-            ? `{${fields} | ${restStr}}`
-            : `{${restStr}}`;
+          return fields.length > 0 ? `{${fields} | ${restStr}}` : `{${restStr}}`;
         }
       }
 
@@ -316,9 +305,7 @@ export class TypeStore {
         return `${this.typeToString(type.innerType)} | null`;
 
       case "applied": {
-        const argStrs = type.arguments
-          .map((t) => this.typeToString(t))
-          .join(", ");
+        const argStrs = type.arguments.map((t) => this.typeToString(t)).join(", ");
         const ctor = this.ctors.get(type.constructorId);
         return `${ctor.name}<${argStrs}>`;
       }
@@ -328,10 +315,7 @@ export class TypeStore {
 
       case "function": {
         const params = type.parameters
-          .map(
-            (name, i) =>
-              `${name}: ${this.typeToString(type.parameterTypes[i])}`,
-          )
+          .map((name, i) => `${name}: ${this.typeToString(type.parameterTypes[i])}`)
           .join(", ");
         return `(${params}) => ${this.typeToString(type.returnType)}`;
       }
@@ -374,7 +358,7 @@ export class TypeStore {
     // Validate arity
     if (args.length !== ctor.parameters.length) {
       throw new Error(
-        `Type constructor '${ctor.name}' expects ${ctor.parameters.length} argument(s), got ${args.length}`,
+        `Type constructor '${ctor.name}' expects ${ctor.parameters.length} argument(s), got ${args.length}`
       );
     }
 
@@ -396,7 +380,7 @@ export class TypeStore {
   fn(
     parameters: readonly string[],
     parameterTypes: readonly Type[],
-    returnType: Type,
+    returnType: Type
   ): FunctionType {
     return this.ensure<FunctionType>({
       kind: "function",
@@ -445,7 +429,7 @@ export class TypeStore {
     schemeId: TypeSchemeId,
     subs: readonly Type[],
     type: Type,
-    resolve?: (t: Type) => Type,
+    resolve?: (t: Type) => Type
   ): Type {
     if (resolve && type.kind === "typevar") {
       const resolved = resolve(type);
@@ -477,9 +461,7 @@ export class TypeStore {
           if (resolved !== fieldType) changed = true;
           fields[name] = resolved;
         }
-        const rest = type.rest
-          ? this.substituteParams(schemeId, subs, type.rest, resolve)
-          : null;
+        const rest = type.rest ? this.substituteParams(schemeId, subs, type.rest, resolve) : null;
         if (rest !== type.rest) changed = true;
         return changed ? this.record(fields, rest) : type;
       }
@@ -501,16 +483,9 @@ export class TypeStore {
           if (resolved !== param) changed = true;
           resolvedParams.push(resolved);
         }
-        const resolvedReturn = this.substituteParams(
-          schemeId,
-          subs,
-          type.returnType,
-          resolve,
-        );
+        const resolvedReturn = this.substituteParams(schemeId, subs, type.returnType, resolve);
         if (resolvedReturn !== type.returnType) changed = true;
-        return changed
-          ? this.fn(type.parameters, resolvedParams, resolvedReturn)
-          : type;
+        return changed ? this.fn(type.parameters, resolvedParams, resolvedReturn) : type;
       }
     }
   }

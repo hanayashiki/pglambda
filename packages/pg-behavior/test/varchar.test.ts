@@ -34,27 +34,18 @@ describe("varchar and char length behavior", () => {
   });
 
   test("assign short value to varchar(3)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO str_test(short_col) VALUES ('ab'::varchar(8))",
-    );
+    const r = await tryExec(db, "INSERT INTO str_test(short_col) VALUES ('ab'::varchar(8))");
     console.info("INSERT 'ab'::varchar(8) into varchar(3):", r);
     expect(r.ok).toBe(true);
   });
 
   test("assign too-long value to varchar(3)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO str_test(short_col) VALUES ('abcdefgh'::varchar(8))",
-    );
+    const r = await tryExec(db, "INSERT INTO str_test(short_col) VALUES ('abcdefgh'::varchar(8))");
     console.info("INSERT 'abcdefgh'::varchar(8) into varchar(3):", r);
   });
 
   test("assign too-long literal to varchar(3)", async () => {
-    const r = await tryExec(
-      db,
-      "INSERT INTO str_test(short_col) VALUES ('abcd')",
-    );
+    const r = await tryExec(db, "INSERT INTO str_test(short_col) VALUES ('abcd')");
     console.info("INSERT 'abcd' into varchar(3):", r);
   });
 
@@ -86,7 +77,7 @@ describe("varchar and char length behavior", () => {
       typ: string;
     }>(
       `SELECT char_col, length(char_col) AS len, pg_typeof(char_col)::text AS typ
-       FROM str_test WHERE char_col IS NOT NULL LIMIT 1`,
+       FROM str_test WHERE char_col IS NOT NULL LIMIT 1`
     );
     console.info("char(5) stored value:", JSON.stringify(result.rows[0].char_col));
     console.info("char(5) length():", result.rows[0].len);
@@ -95,9 +86,7 @@ describe("varchar and char length behavior", () => {
 
   test("char(5) = text comparison", async () => {
     // Does 'ab   ' (padded) = 'ab' (unpadded)?
-    const result = await db.query<{ eq: boolean }>(
-      "SELECT 'ab'::char(5) = 'ab'::text AS eq",
-    );
+    const result = await db.query<{ eq: boolean }>("SELECT 'ab'::char(5) = 'ab'::text AS eq");
     console.info("char(5) 'ab' = text 'ab':", result.rows[0].eq);
   });
 
@@ -115,21 +104,15 @@ describe("varchar and char length behavior", () => {
 
     // Are text and varchar the same underlying type?
     const sameType = await db.query<{ eq: boolean }>(
-      "SELECT 'text'::regtype = 'varchar'::regtype AS eq",
+      "SELECT 'text'::regtype = 'varchar'::regtype AS eq"
     );
     console.info("text::regtype = varchar::regtype:", sameType.rows[0].eq);
 
     // Can you assign text to varchar column and vice versa?
-    const r1 = await tryExec(
-      db,
-      "INSERT INTO str_test(text_col) VALUES ('hello'::varchar(5))",
-    );
+    const r1 = await tryExec(db, "INSERT INTO str_test(text_col) VALUES ('hello'::varchar(5))");
     console.info("varchar(5) → text column:", r1);
 
-    const r2 = await tryExec(
-      db,
-      "INSERT INTO str_test(unbound_varchar) VALUES ('hello'::text)",
-    );
+    const r2 = await tryExec(db, "INSERT INTO str_test(unbound_varchar) VALUES ('hello'::text)");
     console.info("text → varchar column:", r2);
 
     // What about in a UNION — does PG unify them?
@@ -141,11 +124,10 @@ describe("varchar and char length behavior", () => {
     console.info("UNION of text and varchar:", unionResult.rows[0].t);
 
     // Function that takes text — can you pass varchar?
-    await db.exec("CREATE FUNCTION test_text_fn(x text) RETURNS text AS $$ SELECT x $$ LANGUAGE SQL");
-    const fnResult = await tryExec(
-      db,
-      "SELECT test_text_fn('hello'::varchar(10))",
+    await db.exec(
+      "CREATE FUNCTION test_text_fn(x text) RETURNS text AS $$ SELECT x $$ LANGUAGE SQL"
     );
+    const fnResult = await tryExec(db, "SELECT test_text_fn('hello'::varchar(10))");
     console.info("text function accepts varchar arg:", fnResult);
 
     // pg_typeof on column references
@@ -172,9 +154,7 @@ describe("varchar and char length behavior", () => {
       } else {
         // For varchar/char: atttypmod = max_length + VARHDRSZ(4)
         const maxLen = row.atttypmod - 4;
-        console.info(
-          `${row.attname}: atttypmod=${row.atttypmod} → maxLen=${maxLen}`,
-        );
+        console.info(`${row.attname}: atttypmod=${row.atttypmod} → maxLen=${maxLen}`);
       }
     }
     expect(result.rows.length).toBe(5);

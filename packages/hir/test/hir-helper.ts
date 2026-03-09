@@ -10,16 +10,10 @@ export function lowerAndPrint(source: string, filename = "test.pgl"): string {
   const astStore = new AstStore();
   const uri = `file:///${filename}` as FileUri;
 
-  const parseResult = parseContent(
-    { content: source, uri, success: true },
-    { astStore },
-  );
+  const parseResult = parseContent({ content: source, uri, success: true }, { astStore });
 
   if (!parseResult.success) {
-    return (
-      parseResult.errors.map((e) => `parse error: ${e.message}`).join("\n") +
-      "\n"
-    );
+    return parseResult.diagnostics.map((e) => `parse error: ${e.message}`).join("\n") + "\n";
   }
 
   const { module } = lowerToHir(parseResult.parseTree!, uri);

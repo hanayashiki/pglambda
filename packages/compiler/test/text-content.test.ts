@@ -38,8 +38,7 @@ describe("loadTextContent", () => {
   });
 
   it("handles file with UTF-8 content", async () => {
-    const utf8Content =
-      "query 测试 { select * from users where name = '日本語' }";
+    const utf8Content = "query 测试 { select * from users where name = '日本語' }";
     const { db, query } = setupQuery({
       "/unicode.pgl": utf8Content,
     });

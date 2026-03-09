@@ -47,9 +47,7 @@ export function hirChildren(node: HirNode): HirNode[] {
     case "fromClause":
       return node.data.refs;
     case "tableRef":
-      return node.data.alias
-        ? [node.data.name, node.data.alias]
-        : [node.data.name];
+      return node.data.alias ? [node.data.name, node.data.alias] : [node.data.name];
 
     // --- Expressions ---
     case "literal":
@@ -80,8 +78,7 @@ export function hirChildren(node: HirNode): HirNode[] {
       return [node.data.name, ...node.data.columns];
     case "columnDef": {
       const children: HirNode[] = [node.data.name, node.data.typeName];
-      if (node.data.constraints.defaultExpr)
-        children.push(node.data.constraints.defaultExpr);
+      if (node.data.constraints.defaultExpr) children.push(node.data.constraints.defaultExpr);
       return children;
     }
     case "typeName":
@@ -93,10 +90,7 @@ export function hirChildren(node: HirNode): HirNode[] {
  * Walk a HIR tree depth-first, calling `visit` on each node.
  * If `visit` returns `false`, children are skipped.
  */
-export function walkHir(
-  node: HirNode,
-  visit: (node: HirNode) => void | false,
-): void {
+export function walkHir(node: HirNode, visit: (node: HirNode) => void | false): void {
   if (visit(node) === false) return;
   for (const child of hirChildren(node)) {
     walkHir(child, visit);

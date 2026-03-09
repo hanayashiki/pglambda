@@ -25,8 +25,7 @@ export function simpleTypeToPrimitive(st: SimpleTypeName): PrimitiveName | null 
     case "character":
       return "text";
     case "datetime":
-      if (st.base === "timestamp")
-        return st.timezone === "with" ? "timestamptz" : "timestamp";
+      if (st.base === "timestamp") return st.timezone === "with" ? "timestamptz" : "timestamp";
       return st.timezone === "with" ? "timetz" : "time";
     case "interval":
       return "interval";

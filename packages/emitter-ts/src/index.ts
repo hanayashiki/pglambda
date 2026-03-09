@@ -33,11 +33,7 @@ export class TsEmitter implements Emitter {
       const queryDef = def;
       // Look up the function type from exported types
       // We need the definition ID — find it via the query name resolution
-      const fnType = findQueryFnType(
-        queryDef,
-        hirStore,
-        checkResult.exportedTypes,
-      );
+      const fnType = findQueryFnType(queryDef, hirStore, checkResult.exportedTypes);
       if (!fnType) continue;
       const tsName = snakeToCamel(queryDef.data.name.data.text);
       nameEntries.push({
@@ -81,8 +77,7 @@ export class TsEmitter implements Emitter {
     // Assemble: imports first, then body
     const body = join(concat(hardline, hardline), parts);
     const imports = tracker.emitImports();
-    const file =
-      imports.tag === "nil" ? body : concat(imports, hardline, hardline, body);
+    const file = imports.tag === "nil" ? body : concat(imports, hardline, hardline, body);
 
     return { ok: true, result: { code: render(file) } };
   }
@@ -91,18 +86,14 @@ export class TsEmitter implements Emitter {
 function findQueryFnType(
   queryDef: QueryDef,
   hirStore: HirStore,
-  exportedTypes: ReadonlyMap<DefinitionId, Type>,
+  exportedTypes: ReadonlyMap<DefinitionId, Type>
 ): FunctionType | undefined {
   // The definition ID for the query should match the QueryDef's name node resolution
   // or we can iterate exportedTypes looking for a matching definition
   for (const [defId, type] of exportedTypes) {
     if (type.kind !== "function") continue;
     const def = hirStore.getDefinition(defId);
-    if (
-      def &&
-      def.tag === "query" &&
-      def.name === queryDef.data.name.data.text
-    ) {
+    if (def && def.tag === "query" && def.name === queryDef.data.name.data.text) {
       return type;
     }
   }

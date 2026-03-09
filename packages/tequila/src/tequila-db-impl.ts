@@ -1,11 +1,7 @@
 import type { AnyKeySchema, KeyType, QueryFunction, ValueType } from "./key.js";
 import type { TequilaNode } from "./node.js";
 import type { TequilaDB } from "./tequila-db.js";
-import type {
-  CachedValue,
-  DependencyRecord,
-  ExecutionContext,
-} from "./types.js";
+import type { CachedValue, DependencyRecord, ExecutionContext } from "./types.js";
 
 /**
  * Context-aware DB wrapper that carries execution context for async-safe dependency tracking
@@ -13,27 +9,18 @@ import type {
 class TequilaDBWithContext implements TequilaDB {
   constructor(
     private impl: TequilaDBImpl,
-    private context: ExecutionContext,
+    private context: ExecutionContext
   ) {}
 
-  async get<S extends AnyKeySchema>(
-    schema: S,
-    key: KeyType<S>,
-  ): Promise<ValueType<S>> {
+  async get<S extends AnyKeySchema>(schema: S, key: KeyType<S>): Promise<ValueType<S>> {
     return this.impl.getWithContext(schema, key, this.context);
   }
 
-  defineInput<S extends AnyKeySchema>(
-    schema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S> {
+  defineInput<S extends AnyKeySchema>(schema: S, fn: QueryFunction<S>): QueryFunction<S> {
     return this.impl.defineInput(schema, fn);
   }
 
-  defineTracked<S extends AnyKeySchema>(
-    schema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S> {
+  defineTracked<S extends AnyKeySchema>(schema: S, fn: QueryFunction<S>): QueryFunction<S> {
     return this.impl.defineTracked(schema, fn);
   }
 
@@ -54,10 +41,8 @@ export class TequilaDBImpl implements TequilaDB {
   private cache: Map<AnyKeySchema, Map<any, CachedValue<any>>> = new Map();
 
   // Reverse dependencies: For each (schema, key), track which other (schema, key) pairs depend on it
-  private reverseDeps: Map<
-    AnyKeySchema,
-    Map<any, Set<{ schema: AnyKeySchema; key: any }>>
-  > = new Map();
+  private reverseDeps: Map<AnyKeySchema, Map<any, Set<{ schema: AnyKeySchema; key: any }>>> =
+    new Map();
 
   // In-flight computations: Deduplicate concurrent gets for the same key
   private inFlight: Map<AnyKeySchema, Map<any, Promise<any>>> = new Map();
@@ -65,10 +50,7 @@ export class TequilaDBImpl implements TequilaDB {
   // Track schema names used in this DB instance to ensure uniqueness
   private schemaNames: Set<string> = new Set();
 
-  async get<S extends AnyKeySchema>(
-    schema: S,
-    key: KeyType<S>,
-  ): Promise<ValueType<S>> {
+  async get<S extends AnyKeySchema>(schema: S, key: KeyType<S>): Promise<ValueType<S>> {
     return this.getWithContext(schema, key, undefined);
   }
 
@@ -76,7 +58,7 @@ export class TequilaDBImpl implements TequilaDB {
   async getWithContext<S extends AnyKeySchema>(
     schema: S,
     key: KeyType<S>,
-    parentContext: ExecutionContext | undefined,
+    parentContext: ExecutionContext | undefined
   ): Promise<ValueType<S>> {
     // Step 1: Check cache and verify dependencies
     const schemaCache = this.cache.get(schema);
@@ -97,11 +79,7 @@ export class TequilaDBImpl implements TequilaDB {
         let allUnchanged = true;
         for (const dep of cached.dependencies) {
           // Don't pass parentContext when verifying - just check the value
-          const currentValue = await this.getWithContext(
-            dep.schema,
-            dep.key,
-            undefined,
-          );
+          const currentValue = await this.getWithContext(dep.schema, dep.key, undefined);
           if (currentValue !== dep.value) {
             allUnchanged = false;
             break;
@@ -131,9 +109,7 @@ export class TequilaDBImpl implements TequilaDB {
     let currentCtx = parentContext;
     while (currentCtx) {
       if (currentCtx.schema === schema && currentCtx.key === key) {
-        throw new Error(
-          `Dependency cycle detected involving schema ${schema.name} and key ${key}`,
-        );
+        throw new Error(`Dependency cycle detected involving schema ${schema.name} and key ${key}`);
       }
       currentCtx = currentCtx.parent;
     }
@@ -169,7 +145,7 @@ export class TequilaDBImpl implements TequilaDB {
   private async compute<S extends AnyKeySchema>(
     schema: S,
     key: KeyType<S>,
-    parentContext: ExecutionContext | undefined,
+    parentContext: ExecutionContext | undefined
   ): Promise<ValueType<S>> {
     // Step 1: Compute value
     const node = this.nodes.get(schema);
@@ -231,15 +207,10 @@ export class TequilaDBImpl implements TequilaDB {
     return value;
   }
 
-  defineInput<S extends AnyKeySchema>(
-    keySchema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S> {
+  defineInput<S extends AnyKeySchema>(keySchema: S, fn: QueryFunction<S>): QueryFunction<S> {
     // Check for duplicate schema names in this DB instance
     if (this.schemaNames.has(keySchema.name)) {
-      throw new Error(
-        `Schema with name '${keySchema.name}' has already been defined in this DB`,
-      );
+      throw new Error(`Schema with name '${keySchema.name}' has already been defined in this DB`);
     }
     this.schemaNames.add(keySchema.name);
 
@@ -254,15 +225,10 @@ export class TequilaDBImpl implements TequilaDB {
     return (db: TequilaDB, key: KeyType<S>) => db.get(keySchema, key);
   }
 
-  defineTracked<S extends AnyKeySchema>(
-    keySchema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S> {
+  defineTracked<S extends AnyKeySchema>(keySchema: S, fn: QueryFunction<S>): QueryFunction<S> {
     // Check for duplicate schema names in this DB instance
     if (this.schemaNames.has(keySchema.name)) {
-      throw new Error(
-        `Schema with name '${keySchema.name}' has already been defined in this DB`,
-      );
+      throw new Error(`Schema with name '${keySchema.name}' has already been defined in this DB`);
     }
     this.schemaNames.add(keySchema.name);
 

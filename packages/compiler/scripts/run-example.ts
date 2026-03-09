@@ -6,5 +6,5 @@ await main(
       ast: true,
     },
   },
-  "./example",
+  "./example"
 );

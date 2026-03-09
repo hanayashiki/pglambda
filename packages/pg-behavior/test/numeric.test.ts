@@ -44,10 +44,7 @@ describe("numeric precision and scale", () => {
   });
 
   test("numeric(p,s) op unparameterized numeric", async () => {
-    const t = await pgTypeOf(
-      db,
-      "(SELECT a + c FROM num_test LIMIT 1)",
-    );
+    const t = await pgTypeOf(db, "(SELECT a + c FROM num_test LIMIT 1)");
     console.info("pg_typeof(numeric(2,1) + numeric) =", t);
   });
 
@@ -67,7 +64,7 @@ describe("numeric precision and scale", () => {
         const precision = ((typmod - 4) >> 16) & 0xffff;
         const scale = (typmod - 4) & 0xffff;
         console.info(
-          `${row.attname}: atttypmod=${typmod} → precision=${precision}, scale=${scale}`,
+          `${row.attname}: atttypmod=${typmod} → precision=${precision}, scale=${scale}`
         );
       }
     }
@@ -92,7 +89,7 @@ describe("numeric precision and scale", () => {
     console.info("INSERT 1.55 into numeric(2,1):", r);
     if (r.ok) {
       const result = await db.query<{ a: string }>(
-        "SELECT a FROM num_test ORDER BY ctid DESC LIMIT 1",
+        "SELECT a FROM num_test ORDER BY ctid DESC LIMIT 1"
       );
       console.info("Stored value:", result.rows[0].a);
     }

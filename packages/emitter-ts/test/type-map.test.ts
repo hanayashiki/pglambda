@@ -43,9 +43,7 @@ describe("primitives", () => {
   });
 
   test("timestamptz → Date", () => {
-    expect(emit(store.primitive("timestamptz"))).toMatchInlineSnapshot(
-      `"Date"`,
-    );
+    expect(emit(store.primitive("timestamptz"))).toMatchInlineSnapshot(`"Date"`);
   });
 
   test("date → Date", () => {
@@ -71,21 +69,17 @@ describe("primitives", () => {
 
 describe("compound types", () => {
   test("nullable", () => {
-    expect(emit(store.nullable(store.primitive("text")))).toMatchInlineSnapshot(
-      `"string | null"`,
-    );
+    expect(emit(store.nullable(store.primitive("text")))).toMatchInlineSnapshot(`"string | null"`);
   });
 
   test("array", () => {
-    expect(emit(store.array(store.primitive("integer")))).toMatchInlineSnapshot(
-      `"number[]"`,
-    );
+    expect(emit(store.array(store.primitive("integer")))).toMatchInlineSnapshot(`"number[]"`);
   });
 
   test("nullable array", () => {
-    expect(
-      emit(store.nullable(store.array(store.primitive("text")))),
-    ).toMatchInlineSnapshot(`"string[] | null"`);
+    expect(emit(store.nullable(store.array(store.primitive("text"))))).toMatchInlineSnapshot(
+      `"string[] | null"`
+    );
   });
 });
 
@@ -103,9 +97,7 @@ describe("record types", () => {
       id: store.primitive("integer"),
       email: store.nullable(store.primitive("text")),
     });
-    expect(emit(rec)).toMatchInlineSnapshot(
-      `"{ email: string | null; id: number }"`,
-    );
+    expect(emit(rec)).toMatchInlineSnapshot(`"{ email: string | null; id: number }"`);
   });
 
   test("empty record", () => {

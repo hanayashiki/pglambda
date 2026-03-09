@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/parser",
-  "type": "module",
   "version": "2.2.8",
   "description": "parser package",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "imports": {
@@ -16,8 +17,6 @@
     "test": "vitest run",
     "lint": "eslint"
   },
-  "license": "MIT",
-  "public": true,
   "dependencies": {
     "@pglambda/antlr": "workspace:*",
     "@pglambda/utils": "workspace:*",
@@ -28,5 +27,6 @@
     "pgsql-parser": "^17.9.11",
     "tsx": "^4.21.0",
     "vitest": "^4.0.18"
-  }
+  },
+  "public": true
 }

@@ -28,10 +28,7 @@ export type UnificationResult = {
   errors: readonly UnificationError[];
 };
 
-export type UnificationErrorKind =
-  | "kind_mismatch"
-  | "occurs_check"
-  | "field_mismatch";
+export type UnificationErrorKind = "kind_mismatch" | "occurs_check" | "field_mismatch";
 
 export type UnificationError = {
   errorKind: UnificationErrorKind;
@@ -98,9 +95,7 @@ export class Unification {
           if (resolved !== arg) changed = true;
           resolvedArgs.push(resolved);
         }
-        return changed
-          ? this.typeStore.apply(type.constructorId, resolvedArgs)
-          : type;
+        return changed ? this.typeStore.apply(type.constructorId, resolvedArgs) : type;
       }
       case "function": {
         let changed = false;
@@ -112,9 +107,7 @@ export class Unification {
         }
         const resolvedReturn = this.deepResolve(type.returnType);
         if (resolvedReturn !== type.returnType) changed = true;
-        return changed
-          ? this.typeStore.fn(type.parameters, resolvedParams, resolvedReturn)
-          : type;
+        return changed ? this.typeStore.fn(type.parameters, resolvedParams, resolvedReturn) : type;
       }
       case "param":
         return type;
@@ -135,12 +128,8 @@ export class Unification {
       case "nullable":
         return this.occursIn(typeVarId, type.innerType);
       case "record": {
-        const fieldOccurs = Object.values(type.fields).some((f) =>
-          this.occursIn(typeVarId, f),
-        );
-        const restOccurs = type.rest
-          ? this.occursIn(typeVarId, type.rest)
-          : false;
+        const fieldOccurs = Object.values(type.fields).some((f) => this.occursIn(typeVarId, f));
+        const restOccurs = type.rest ? this.occursIn(typeVarId, type.rest) : false;
         return fieldOccurs || restOccurs;
       }
       case "applied":
@@ -340,20 +329,14 @@ export class Unification {
             for (const field of onlyInT2) {
               extraForT1[field] = t2r.fields[field];
             }
-            const recordForT1Rest = this.typeStore.record(
-              extraForT1,
-              freshRest,
-            );
+            const recordForT1Rest = this.typeStore.record(extraForT1, freshRest);
 
             // Build record for t2.rest: contains t1's extra fields + fresh rest
             const extraForT2: Record<string, Type> = {};
             for (const field of onlyInT1) {
               extraForT2[field] = t1.fields[field];
             }
-            const recordForT2Rest = this.typeStore.record(
-              extraForT2,
-              freshRest,
-            );
+            const recordForT2Rest = this.typeStore.record(extraForT2, freshRest);
 
             // Unify both rest variables (both must be non-null in this branch)
             this.unify(t1.rest!, recordForT1Rest);

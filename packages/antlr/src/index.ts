@@ -10,4 +10,6 @@ export { default as PGLParserListener } from "./PGLParserListener";
 export * from "./PGLParserVisitor";
 export { default as PGLParserVisitor } from "./PGLParserVisitor";
 
-export * from "antlr4";
+export * from "@pglambda/antlr-next";
+
+export type { PGLRuleName } from "./rule-names.js";

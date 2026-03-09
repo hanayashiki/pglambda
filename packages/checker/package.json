@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/checker",
-  "type": "module",
   "version": "0.0.1",
   "description": "Type checker for pglambda",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
@@ -12,17 +13,16 @@
     "check": "tsc",
     "test": "vitest run"
   },
-  "license": "MIT",
-  "public": true,
   "dependencies": {
     "@pglambda/antlr": "workspace:*",
     "@pglambda/hir": "workspace:*",
+    "@pglambda/parser": "workspace:*",
     "@pglambda/types": "workspace:*",
-    "@pglambda/utils": "workspace:*",
-    "@pglambda/parser": "workspace:*"
+    "@pglambda/utils": "workspace:*"
   },
   "devDependencies": {
     "@pglambda/parser": "workspace:*",
     "vitest": "^4.0.18"
-  }
+  },
+  "public": true
 }

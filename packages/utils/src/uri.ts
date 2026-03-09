@@ -34,9 +34,7 @@ export function pathToUri(path: string): FileUri {
   const normalizedPath = path.replace(/\\/g, "/");
 
   // Handle Windows paths: C:/path -> /C:/path for URL
-  const urlPath = /^[A-Za-z]:/.test(normalizedPath)
-    ? "/" + normalizedPath
-    : normalizedPath;
+  const urlPath = /^[A-Za-z]:/.test(normalizedPath) ? "/" + normalizedPath : normalizedPath;
 
   // Ensure absolute path starts with /
   const absolutePath = urlPath.startsWith("/") ? urlPath : "/" + urlPath;

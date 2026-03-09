@@ -12,13 +12,13 @@ export const CompilerOptions = z.object({
   exclude: z
     .array(z.string())
     .describe(
-      "Glob patterns (minimatch) for files to exclude in compilation. Only included files that do not match any of the exclude patterns will be compiled.",
+      "Glob patterns (minimatch) for files to exclude in compilation. Only included files that do not match any of the exclude patterns will be compiled."
     )
     .default(["**/node_modules/**", "**/.git/**", "**/.hg/**", "dist/**"]),
 
-  outputOptions: OutputOptions.describe(
-    "Options for controlling compiler output",
-  ).default(OutputOptions.decode({})),
+  outputOptions: OutputOptions.describe("Options for controlling compiler output").default(
+    OutputOptions.decode({})
+  ),
 });
 export type CompilerOptions = z.infer<typeof CompilerOptions>;
 
@@ -27,6 +27,4 @@ export type CompilerOptionsIn = z.input<typeof CompilerOptions>;
 /**
  * Default compiler options with all defaults applied
  */
-export const defaultCompilerOptions: CompilerOptions = CompilerOptions.decode(
-  {},
-);
+export const defaultCompilerOptions: CompilerOptions = CompilerOptions.decode({});

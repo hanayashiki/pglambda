@@ -12,10 +12,7 @@ type Def<Tag extends string, Data> = {
 };
 
 export type TypeParamDefinition = Def<"typeParam", void>;
-export type QueryParamDefinition = Def<
-  "queryParam",
-  { annotationHash: ContentHash | null }
->;
+export type QueryParamDefinition = Def<"queryParam", { annotationHash: ContentHash | null }>;
 export type QueryDefinition = Def<
   "query",
   {
@@ -26,10 +23,7 @@ export type QueryDefinition = Def<
   }
 >;
 
-export type Definition =
-  | TypeParamDefinition
-  | QueryParamDefinition
-  | QueryDefinition;
+export type Definition = TypeParamDefinition | QueryParamDefinition | QueryDefinition;
 
 export type ScopeId = ContentHash;
 

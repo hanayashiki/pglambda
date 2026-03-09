@@ -41,10 +41,7 @@ export class NodeVFS implements VFS {
     }
   }
 
-  async writeFile(
-    filePath: string,
-    content: string
-  ): Promise<Result<void, VFSError>> {
+  async writeFile(filePath: string, content: string): Promise<Result<void, VFSError>> {
     if (!this.isInsideWorkspace(filePath)) {
       return Result.err({ type: "outsideWorkspace", path: filePath });
     }
@@ -57,10 +54,7 @@ export class NodeVFS implements VFS {
     }
   }
 
-  async glob(
-    pattern: string | string[],
-    options: GlobOptions
-  ): Promise<string[]> {
+  async glob(pattern: string | string[], options: GlobOptions): Promise<string[]> {
     const results: string[] = [];
 
     for await (const entry of fs.glob(pattern, {
@@ -84,10 +78,7 @@ export class NodeVFS implements VFS {
     return results;
   }
 
-  private async hasSymlinkAncestor(
-    filePath: string,
-    cwd: string
-  ): Promise<boolean> {
+  private async hasSymlinkAncestor(filePath: string, cwd: string): Promise<boolean> {
     let current = path.dirname(filePath);
     const normalizedCwd = path.resolve(cwd);
 

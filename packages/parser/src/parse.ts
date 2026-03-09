@@ -38,7 +38,7 @@ export type ParseContentContext = {
  */
 export function parseContent(
   { content, uri }: TextContent,
-  context: ParseContentContext,
+  context: ParseContentContext
 ): ParseResult {
   try {
     const inputStream = CharStreams.fromString(content);
@@ -56,7 +56,7 @@ export function parseContent(
     parser.addParseListener(new ContentHashListener(context));
 
     const parseTree = parser.prog();
-    const errors = errorListener.getErrors();
+    const diagnostics = errorListener.getDiagnostics();
 
     // Collect query markers from QUERY_MARKER channel tokens
     tokenStream.fill();
@@ -74,17 +74,21 @@ export function parseContent(
       }
     }
 
-    return { uri, parseTree, errors, markers, success: errors.length === 0 };
+    return { uri, parseTree, diagnostics, markers, success: diagnostics.length === 0 };
   } catch (error) {
     return {
       uri,
       parseTree: null,
-      errors: [
+      diagnostics: [
         {
+          span: {
+            file: uri,
+            start: { line: 1, column: 0 },
+            end: { line: 1, column: 1 },
+          },
           severity: "error" as const,
+          code: "syntax/unknown",
           message: `Parse failed: ${error instanceof Error ? error.message : String(error)}`,
-          location: { file: uri, line: 1, column: 0 },
-          recovered: false,
         },
       ],
       markers: [],

@@ -6,9 +6,7 @@ describe("TequilaDB", () => {
   it("should cache input values", async () => {
     const db = new TequilaDBImpl();
     const schema = defineKeySchema<string, string>("file");
-    const mockRead = vi.fn((_db, key: string) =>
-      Promise.resolve(`content-${key}`),
-    );
+    const mockRead = vi.fn((_db, key: string) => Promise.resolve(`content-${key}`));
 
     const getInput = db.defineInput(schema, mockRead);
 
@@ -25,9 +23,7 @@ describe("TequilaDB", () => {
     const fileSchema = defineKeySchema<string, string>("file2");
     const astSchema = defineKeySchema<string, string>("ast");
 
-    const mockRead = vi.fn((_db, key: string) =>
-      Promise.resolve(`content-${key}`),
-    );
+    const mockRead = vi.fn((_db, key: string) => Promise.resolve(`content-${key}`));
     const mockParse = vi.fn(async (db, key: string) => {
       const content = await getInput(db, key);
       return `parsed(${content})`;
@@ -51,9 +47,7 @@ describe("TequilaDB", () => {
     const middleSchema = defineKeySchema<string, string>("middle");
     const topSchema = defineKeySchema<string, string>("top");
 
-    const mockInput = vi.fn((_db, key: string) =>
-      Promise.resolve(`input-${key}`),
-    );
+    const mockInput = vi.fn((_db, key: string) => Promise.resolve(`input-${key}`));
     const mockMiddle = vi.fn(async (db, key: string) => {
       const input = await getInput(db, key);
       return `middle(${input})`;
@@ -166,9 +160,7 @@ describe("TequilaDB", () => {
   it("should handle multiple independent keys", async () => {
     const db = new TequilaDBImpl();
     const schema = defineKeySchema<string, string>("multi");
-    const mockRead = vi.fn((_db, key: string) =>
-      Promise.resolve(`value-${key}`),
-    );
+    const mockRead = vi.fn((_db, key: string) => Promise.resolve(`value-${key}`));
 
     const getInput = db.defineInput(schema, mockRead);
 
@@ -193,7 +185,7 @@ describe("TequilaDB", () => {
       async (db, key: string) => {
         const b = await getB(db, key);
         return `A(${b})`;
-      },
+      }
     );
 
     const getB: (db: any, key: string) => Promise<string> = db.defineTracked(
@@ -201,7 +193,7 @@ describe("TequilaDB", () => {
       async (db, key: string) => {
         const a = await getA(db, key);
         return `B(${a})`;
-      },
+      }
     );
 
     await expect(getA(db, "k1")).rejects.toThrow(/cycle/i);

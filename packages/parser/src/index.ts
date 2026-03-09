@@ -6,3 +6,5 @@ export * from "./parse.js";
 export * from "./format-tree.js";
 export * from "./query-markers.js";
 export * from "./ast-lookup.js";
+export { displayRuleName } from "./rule-display-names.js";
+export { getExpectedNonTerminal } from "./expected-nonterminal.js";

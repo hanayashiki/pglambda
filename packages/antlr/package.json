@@ -1,8 +1,12 @@
 {
   "name": "@pglambda/antlr",
-  "type": "module",
   "version": "2.2.8",
   "description": "the generated antlr syntax",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -14,22 +18,18 @@
       "types": "./src/antlr4.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "check": "tsc",
     "build": "pnpm gen && tsup",
-    "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript -visitor src/PGLParser.g4",
+    "gen": "antlr4 -Dlanguage=TypeScript src/PGLLexer.g4 && antlr4 -Dlanguage=TypeScript -visitor src/PGLParser.g4 && tsx scripts/postprocess.ts",
     "lint": "eslint"
   },
-  "license": "MIT",
-  "public": true,
   "devDependencies": {
-    "antlr4": "^4.13.2",
+    "@pglambda/antlr-next": "workspace:*",
     "pgsql-parser": "^17.9.11",
+    "tsup": "^8.0.0",
     "tsx": "^4.21.0",
-    "vitest": "^4.0.18",
-    "tsup": "^8.0.0"
-  }
+    "vitest": "^4.0.18"
+  },
+  "public": true
 }

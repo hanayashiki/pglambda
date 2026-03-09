@@ -6,25 +6,17 @@ import {
   type ErrorNode,
 } from "@pglambda/antlr";
 
-function positionInSpan(
-  ctx: ParserRuleContext,
-  line: number,
-  column: number,
-): boolean {
+function positionInSpan(ctx: ParserRuleContext, line: number, column: number): boolean {
   const startToken = ctx.start;
   const stopToken = ctx.stop ?? startToken;
   if (!startToken) return false;
 
-  if (
-    line < startToken.line ||
-    (line === startToken.line && column < startToken.column)
-  )
+  if (line < startToken.line || (line === startToken.line && column < startToken.column))
     return false;
 
   if (
     line > stopToken.line ||
-    (line === stopToken.line &&
-      column > stopToken.column + stopToken.text.length - 1)
+    (line === stopToken.line && column > stopToken.column + stopToken.text.length - 1)
   )
     return false;
 
@@ -34,7 +26,7 @@ function positionInSpan(
 class NodeAtPositionVisitor extends PGLParserVisitor<ParserRuleContext | null> {
   constructor(
     private line: number,
-    private column: number,
+    private column: number
   ) {
     super();
   }
@@ -72,7 +64,7 @@ class NodeAtPositionVisitor extends PGLParserVisitor<ParserRuleContext | null> {
 export function resolveNodeAtPosition(
   tree: ParserRuleContext,
   line: number,
-  column: number,
+  column: number
 ): ParserRuleContext | null {
   return new NodeAtPositionVisitor(line, column).visit(tree);
 }

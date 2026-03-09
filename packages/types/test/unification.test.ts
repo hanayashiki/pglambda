@@ -1,11 +1,7 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { TypeStore } from "../src/type-store.ts";
 import { Unification } from "../src/unification.ts";
-import type {
-  TypeConstructorId,
-  TypeSchemeId,
-  AppliedType,
-} from "../src/type.ts";
+import type { TypeConstructorId, TypeSchemeId, AppliedType } from "../src/type.ts";
 
 describe("Unification", () => {
   let store: TypeStore;

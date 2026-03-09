@@ -61,7 +61,10 @@ export type QueryBody =
 
 // --- SELECT ---
 
-export type SelectStmt = Hir<"select", { targets: SelectTarget[]; from: FromClause | null; where: Expr | null }>;
+export type SelectStmt = Hir<
+  "select",
+  { targets: SelectTarget[]; from: FromClause | null; where: Expr | null }
+>;
 
 export type SelectTarget =
   | Hir<"targetExpr", { expr: Expr; alias: Name }>

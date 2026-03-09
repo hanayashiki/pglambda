@@ -22,10 +22,7 @@ export class MemoryVFS implements VFS {
     return Result.ok(undefined);
   }
 
-  async glob(
-    pattern: string | string[],
-    options: GlobOptions
-  ): Promise<string[]> {
+  async glob(pattern: string | string[], options: GlobOptions): Promise<string[]> {
     const patterns = Array.isArray(pattern) ? pattern : [pattern];
     const results: string[] = [];
 

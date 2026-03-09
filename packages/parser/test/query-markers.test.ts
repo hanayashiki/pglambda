@@ -9,10 +9,7 @@ const ctx: ParseContentContext = {
 };
 
 function parse(source: string) {
-  return parseContent(
-    { content: source, uri: "file:///test.pgl" as FileUri, success: true },
-    ctx,
-  );
+  return parseContent({ content: source, uri: "file:///test.pgl" as FileUri, success: true }, ctx);
 }
 
 describe("query markers", () => {
@@ -22,9 +19,7 @@ describe("query markers", () => {
   });
 
   test("regular comments produce no markers", () => {
-    const result = parse(
-      `-- this is a comment\nquery foo() {\n    select 1\n}`,
-    );
+    const result = parse(`-- this is a comment\nquery foo() {\n    select 1\n}`);
     expect(result.markers).toEqual([]);
   });
 
@@ -39,9 +34,7 @@ describe("query markers", () => {
     expect(result.success).toBe(true);
     expect(result.markers).toHaveLength(1);
     expect(result.markers[0].label).toBe("a");
-    expect(result.markers[0].node?.ruleIndex).toBe(
-      PGLParser.RULE_simple_select,
-    );
+    expect(result.markers[0].node?.ruleIndex).toBe(PGLParser.RULE_simple_select);
   });
 
   test("resolves marker to literal", () => {

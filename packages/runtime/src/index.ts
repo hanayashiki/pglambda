@@ -33,10 +33,7 @@ export function param(value: unknown): Param {
   return new Param(value);
 }
 
-export function sql(
-  strings: TemplateStringsArray,
-  ...values: SqlValue[]
-): SqlFragment {
+export function sql(strings: TemplateStringsArray, ...values: SqlValue[]): SqlFragment {
   const parts: (string | Param)[] = [];
   for (let i = 0; i < strings.length; i++) {
     if (strings[i]) parts.push(strings[i]);
@@ -69,28 +66,20 @@ function quoteIdent(name: string): string {
   return `"${name.replace(/"/g, '""')}"`;
 }
 
-export function insert(
-  table: string,
-  row: Record<string, unknown>,
-): SqlFragment {
+export function insert(table: string, row: Record<string, unknown>): SqlFragment {
   const keys = Object.keys(row);
   const cols = keys.map(quoteIdent).join(", ");
   const vals = join(
     keys.map((k) => sql`${param(row[k])}`),
-    ", ",
+    ", "
   );
   return sql`INSERT INTO ${raw(table)} (${raw(cols)}) VALUES (${vals})`;
 }
 
-export function update(
-  table: string,
-  patch: Record<string, unknown>,
-): SqlFragment {
+export function update(table: string, patch: Record<string, unknown>): SqlFragment {
   const sets = join(
-    Object.keys(patch).map(
-      (k) => sql`${raw(quoteIdent(k))} = ${param(patch[k])}`,
-    ),
-    ", ",
+    Object.keys(patch).map((k) => sql`${raw(quoteIdent(k))} = ${param(patch[k])}`),
+    ", "
   );
   return sql`UPDATE ${raw(table)} SET ${sets}`;
 }

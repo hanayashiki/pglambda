@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/emitter-ts",
-  "type": "module",
   "version": "0.0.1",
   "description": "TypeScript code emitter for pglambda",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
@@ -12,16 +13,15 @@
     "check": "tsc",
     "test": "vitest run"
   },
-  "license": "MIT",
   "dependencies": {
+    "@pglambda/checker": "workspace:*",
     "@pglambda/emitter": "workspace:*",
-    "@pglambda/types": "workspace:*",
     "@pglambda/hir": "workspace:*",
-    "@pglambda/checker": "workspace:*"
+    "@pglambda/types": "workspace:*"
   },
   "devDependencies": {
-    "@pglambda/runtime": "workspace:*",
     "@pglambda/parser": "workspace:*",
+    "@pglambda/runtime": "workspace:*",
     "@pglambda/utils": "workspace:*",
     "vitest": "^4.0.18"
   }

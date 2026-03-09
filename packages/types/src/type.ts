@@ -25,10 +25,7 @@ export interface TypeConstructor {
   readonly parameters: string[];
 }
 
-export type TypeConstructorCreate = Pick<
-  TypeConstructor,
-  "name" | "parameters"
->;
+export type TypeConstructorCreate = Pick<TypeConstructor, "name" | "parameters">;
 
 export type TypeSchemeId = number & {
   readonly __brand: "TypeSchemeId";

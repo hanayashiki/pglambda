@@ -26,9 +26,7 @@ describe("Doc combinators", () => {
   });
 
   test("concat joins docs", () => {
-    expect(
-      render(concat(text("a"), text("b"), text("c"))),
-    ).toMatchInlineSnapshot(`"abc"`);
+    expect(render(concat(text("a"), text("b"), text("c")))).toMatchInlineSnapshot(`"abc"`);
   });
 
   test("concat flattens nested concats", () => {
@@ -94,12 +92,7 @@ describe("group + line", () => {
 describe("nest", () => {
   test("nest indents after line break", () => {
     const doc = group(
-      concat(
-        text("{"),
-        nest(2, concat(line, text("a"), line, text("b"))),
-        line,
-        text("}"),
-      ),
+      concat(text("{"), nest(2, concat(line, text("a"), line, text("b"))), line, text("}"))
     );
     expect(render(doc, 5)).toMatchInlineSnapshot(`
       "{
@@ -110,25 +103,21 @@ describe("nest", () => {
   });
 
   test("nest does not affect flat mode", () => {
-    const doc = group(
-      concat(text("{"), nest(2, concat(line, text("a"))), line, text("}")),
-    );
+    const doc = group(concat(text("{"), nest(2, concat(line, text("a"))), line, text("}")));
     expect(render(doc, 80)).toMatchInlineSnapshot(`"{ a }"`);
   });
 });
 
 describe("realistic: TS record type", () => {
   function recordDoc(fields: string[][]) {
-    const entries = fields.map(([name, type]) =>
-      concat(text(name), text(": "), text(type)),
-    );
+    const entries = fields.map(([name, type]) => concat(text(name), text(": "), text(type)));
     return group(
       concat(
         text("{"),
         nest(2, concat(line, join(concat(text(";"), line), entries))),
         line,
-        text("}"),
-      ),
+        text("}")
+      )
     );
   }
 
@@ -137,9 +126,7 @@ describe("realistic: TS record type", () => {
       ["id", "number"],
       ["name", "string"],
     ]);
-    expect(render(doc, 80)).toMatchInlineSnapshot(
-      `"{ id: number; name: string }"`,
-    );
+    expect(render(doc, 80)).toMatchInlineSnapshot(`"{ id: number; name: string }"`);
   });
 
   test("long record breaks across lines", () => {
@@ -164,12 +151,8 @@ describe("realistic: TS record type", () => {
 
 describe("realistic: SQL template", () => {
   test("short query stays on one line", () => {
-    const doc = group(
-      concat(text("SELECT "), text("id, name"), text(" FROM "), text("users")),
-    );
-    expect(render(doc, 80)).toMatchInlineSnapshot(
-      `"SELECT id, name FROM users"`,
-    );
+    const doc = group(concat(text("SELECT "), text("id, name"), text(" FROM "), text("users")));
+    expect(render(doc, 80)).toMatchInlineSnapshot(`"SELECT id, name FROM users"`);
   });
 
   test("long query breaks at clauses", () => {
@@ -186,8 +169,8 @@ describe("realistic: SQL template", () => {
         line,
         text("FROM users"),
         line,
-        text("WHERE id = $1"),
-      ),
+        text("WHERE id = $1")
+      )
     );
     expect(render(doc, 30)).toMatchInlineSnapshot(`
       "SELECT id,

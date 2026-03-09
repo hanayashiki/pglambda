@@ -1,4 +1,14 @@
-import type { HirStore, DefinitionId, ScopeId, Definition, QueryDefinition, TypeParamDefinition, QueryParamDefinition, TableDefinition, TableColumnDef } from "./store.js";
+import type {
+  HirStore,
+  DefinitionId,
+  ScopeId,
+  Definition,
+  QueryDefinition,
+  TypeParamDefinition,
+  QueryParamDefinition,
+  TableDefinition,
+  TableColumnDef,
+} from "./store.js";
 import type { Module, Def, QueryDef, DatabaseDef, HirId } from "./types.js";
 
 /**
@@ -78,8 +88,8 @@ function defineQueryDef(q: QueryDef, store: HirStore, scopeStack: ScopeId[]): vo
 
 function defineDatabaseDef(db: DatabaseDef, store: HirStore, scopeStack: ScopeId[]): void {
   for (const stmt of db.data.statements) {
-    const tableName = stmt.data.name.data.parts.map(p => p.data.text).join(".");
-    const columns: TableColumnDef[] = stmt.data.columns.map(col => ({
+    const tableName = stmt.data.name.data.parts.map((p) => p.data.text).join(".");
+    const columns: TableColumnDef[] = stmt.data.columns.map((col) => ({
       name: col.data.name.data.text,
       simpleType: col.data.typeName.data.simpleType,
       notNull: col.data.constraints.notNull || col.data.constraints.primaryKey,
@@ -114,4 +124,3 @@ function addToScope(store: HirStore, scopeStack: ScopeId[], def: Definition): vo
   const ns = def.tag === "typeParam" ? scope.typeDefinitions : scope.valueDefinitions;
   ns.set(def.name, def.id);
 }
-

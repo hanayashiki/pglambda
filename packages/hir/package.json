@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/hir",
-  "type": "module",
   "version": "0.0.1",
   "description": "High-level Intermediate Representation for pglambda",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
@@ -12,14 +13,13 @@
     "check": "tsc",
     "test": "vitest run"
   },
-  "license": "MIT",
-  "public": true,
   "dependencies": {
     "@pglambda/antlr": "workspace:*",
-    "@pglambda/utils": "workspace:*",
-    "@pglambda/parser": "workspace:*"
+    "@pglambda/parser": "workspace:*",
+    "@pglambda/utils": "workspace:*"
   },
   "devDependencies": {
     "vitest": "^4.0.18"
-  }
+  },
+  "public": true
 }

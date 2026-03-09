@@ -1,11 +1,6 @@
 import type { ParserRuleContext } from "@pglambda/antlr";
 import type { ContentHash } from "@pglambda/antlr/antlr4";
-import type {
-  Definition,
-  DefinitionId,
-  Scope,
-  ScopeId,
-} from "./definitions.js";
+import type { Definition, DefinitionId, Scope, ScopeId } from "./definitions.js";
 
 /**
  * Persistently store and retrieve AST nodes by content hash, to enable AST reuse across passes.

@@ -5,10 +5,7 @@ import { AstStore, formatParseTree } from "@pglambda/parser";
 import { createTequilaDB } from "@pglambda/tequila";
 import { pathToUri } from "./utils/uri.js";
 import type { HostContext } from "./host/index.js";
-import {
-  type CompilerOptionsIn,
-  defaultCompilerOptions,
-} from "./options/index.js";
+import { type CompilerOptionsIn, defaultCompilerOptions } from "./options/index.js";
 import { loadTextContent } from "./queries/inputs/text-content.js";
 import { parseAST, parseASTSchema } from "./queries/ast/index.js";
 
@@ -53,7 +50,7 @@ export const main = async (optionsIn: CompilerOptionsIn, workspace: string) => {
       const uri = pathToUri(filePath);
       const result = await db.get(parseASTSchema, uri);
       return { filePath, result };
-    }),
+    })
   );
 
   // report errors
@@ -61,9 +58,9 @@ export const main = async (optionsIn: CompilerOptionsIn, workspace: string) => {
   for (const { filePath, result } of results) {
     if (!result.success) {
       hasErrors = true;
-      for (const err of result.errors) {
+      for (const d of result.diagnostics) {
         console.error(
-          `${filePath}:${err.location.line}:${err.location.column}: ${err.severity}: ${err.message}`,
+          `${filePath}:${d.span.start.line}:${d.span.start.column}: ${d.severity}: ${d.message}`
         );
       }
     }
@@ -85,9 +82,7 @@ export const main = async (optionsIn: CompilerOptionsIn, workspace: string) => {
 
         const writeResult = await vfs.writeFile(outputPath, formatted);
         if (writeResult.isErr()) {
-          console.error(
-            `Failed to write AST for ${filePath}: ${writeResult.error.type}`,
-          );
+          console.error(`Failed to write AST for ${filePath}: ${writeResult.error.type}`);
         }
       }
     }

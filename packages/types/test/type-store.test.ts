@@ -429,7 +429,10 @@ describe("TypeStore", () => {
     });
 
     test("applied types have correct properties", () => {
-      const rec = store.record({ id: store.primitive("integer"), name: store.primitive("text") });
+      const rec = store.record({
+        id: store.primitive("integer"),
+        name: store.primitive("text"),
+      });
       const applied = store.apply(setOfCtorId, [rec]);
       expect(applied.kind).toBe("applied");
       expect(store.typeToString(applied)).toBe("SetOf<{id: integer, name: text}>");
@@ -495,9 +498,7 @@ describe("TypeStore", () => {
       if (instantiated.kind === "function") {
         expect(instantiated.parameterTypes[0].kind).toBe("typevar");
         expect(instantiated.parameterTypes[1].kind).toBe("typevar");
-        expect(instantiated.parameterTypes[0]).not.toBe(
-          instantiated.parameterTypes[1],
-        );
+        expect(instantiated.parameterTypes[0]).not.toBe(instantiated.parameterTypes[1]);
         expect(instantiated.returnType).toBe(instantiated.parameterTypes[0]);
       }
     });

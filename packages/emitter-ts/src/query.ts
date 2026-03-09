@@ -42,7 +42,7 @@ export function emitQueryDecl(
   fnType: FunctionType,
   hirStore: HirStore,
   store: TypeStore,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
   const fnName = snakeToCamel(def.data.name.data.text);
   const isFullQuery = isSetOf(fnType.returnType, store);
@@ -58,9 +58,7 @@ export function emitQueryDecl(
   // Parameters
   const params = fnType.parameters.map((name, i) => {
     const paramType = fnType.parameterTypes[i];
-    const tsType = isRowParam(paramType)
-      ? text("string")
-      : emitType(paramType, store);
+    const tsType = isRowParam(paramType) ? text("string") : emitType(paramType, store);
     return concat(text(name), text(": "), tsType);
   });
 
@@ -86,8 +84,8 @@ export function emitQueryDecl(
             text("("),
             nest(2, concat(softline, join(concat(text(","), line), params))),
             softline,
-            text(")"),
-          ),
+            text(")")
+          )
         )
       : text("()");
 
@@ -100,6 +98,6 @@ export function emitQueryDecl(
     text(" {"),
     nest(2, concat(hardline, text("return "), body, text(";"))),
     hardline,
-    text("}"),
+    text("}")
   );
 }

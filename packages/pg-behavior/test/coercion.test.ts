@@ -27,32 +27,15 @@ describe("implicit coercion rules", () => {
   });
 
   test("numeric type assignment coercion matrix", async () => {
-    const sourceTypes = [
-      "int2",
-      "int4",
-      "int8",
-      "float4",
-      "float8",
-      "numeric",
-    ] as const;
-    const columns = [
-      "c_int2",
-      "c_int4",
-      "c_int8",
-      "c_float4",
-      "c_float8",
-      "c_numeric",
-    ] as const;
+    const sourceTypes = ["int2", "int4", "int8", "float4", "float8", "numeric"] as const;
+    const columns = ["c_int2", "c_int4", "c_int8", "c_float4", "c_float8", "c_numeric"] as const;
 
     const matrix: Record<string, boolean> = {};
 
     for (const srcType of sourceTypes) {
       for (const col of columns) {
         const key = `${srcType} → ${col}`;
-        const r = await tryExec(
-          db,
-          `INSERT INTO coerce_test(${col}) VALUES (1::${srcType})`,
-        );
+        const r = await tryExec(db, `INSERT INTO coerce_test(${col}) VALUES (1::${srcType})`);
         matrix[key] = r.ok;
       }
     }
@@ -117,22 +100,13 @@ describe("implicit coercion rules", () => {
   });
 
   test("cross-type string/numeric assignment", async () => {
-    const r1 = await tryExec(
-      db,
-      "INSERT INTO coerce_test(c_text) VALUES (123)",
-    );
+    const r1 = await tryExec(db, "INSERT INTO coerce_test(c_text) VALUES (123)");
     console.info("INSERT 123 into text:", r1);
 
-    const r2 = await tryExec(
-      db,
-      "INSERT INTO coerce_test(c_int4) VALUES ('123')",
-    );
+    const r2 = await tryExec(db, "INSERT INTO coerce_test(c_int4) VALUES ('123')");
     console.info("INSERT '123' into int4:", r2);
 
-    const r3 = await tryExec(
-      db,
-      "INSERT INTO coerce_test(c_int4) VALUES ('abc')",
-    );
+    const r3 = await tryExec(db, "INSERT INTO coerce_test(c_int4) VALUES ('abc')");
     console.info("INSERT 'abc' into int4:", r3);
   });
 });

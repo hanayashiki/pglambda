@@ -8,30 +8,18 @@ import { CheckContext } from "../src/index.js";
  * Parse a .pgl source with database blocks, type-check, and return a snapshot
  * string listing each table's resolved row type.
  */
-export function checkDdlAndSnapshot(
-  source: string,
-  filename = "test.pgl",
-): string {
+export function checkDdlAndSnapshot(source: string, filename = "test.pgl"): string {
   const astStore = new AstStore();
   const store = new TypeStore();
   const uri = `file:///${filename}` as FileUri;
 
-  const parseResult = parseContent(
-    { content: source, uri, success: true },
-    { astStore },
-  );
+  const parseResult = parseContent({ content: source, uri, success: true }, { astStore });
 
   if (!parseResult.success) {
-    return (
-      parseResult.errors.map((e) => `parse error: ${e.message}`).join("\n") +
-      "\n"
-    );
+    return parseResult.diagnostics.map((e) => `parse error: ${e.message}`).join("\n") + "\n";
   }
 
-  const { module, store: hirStore } = lowerAndResolve(
-    parseResult.parseTree!,
-    uri,
-  );
+  const { module, store: hirStore } = lowerAndResolve(parseResult.parseTree!, uri);
 
   const ctx = new CheckContext(module, hirStore, store);
   const result = ctx.check();

@@ -1,0 +1,18 @@
+{
+  "name": "@pglambda/antlr-next",
+  "version": "0.0.1",
+  "description": "Typed ANTLR4 runtime fork for pglambda",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "main": "./src/antlr4/index.node.js",
+  "types": "./src/antlr4/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/antlr4/index.d.ts",
+      "default": "./src/antlr4/index.node.js"
+    }
+  },
+  "scripts": {
+    "check": "tsc"
+  }
+}

@@ -5,11 +5,7 @@ import { fileURLToPath } from "node:url";
 import { lowerAndPrint } from "./hir-helper.js";
 
 describe("HIR Snapshot Tests", () => {
-  const inputDir = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "fixtures",
-    "hir",
-  );
+  const inputDir = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "hir");
   const fixtures = readdirSync(inputDir)
     .filter((f) => f.endsWith(".pgl"))
     .sort();
@@ -20,9 +16,7 @@ describe("HIR Snapshot Tests", () => {
 
     const snapshot = lowerAndPrint(input, filename);
 
-    await expect(snapshot).toMatchFileSnapshot(
-      `fixtures/hir/${filename}.snap`,
-    );
+    await expect(snapshot).toMatchFileSnapshot(`fixtures/hir/${filename}.snap`);
   });
 
   test("has fixture files", () => {

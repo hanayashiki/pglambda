@@ -14,14 +14,7 @@ describe("operator return types", () => {
   });
 
   test("full arithmetic return type matrix", async () => {
-    const types = [
-      "int2",
-      "int4",
-      "int8",
-      "float4",
-      "float8",
-      "numeric",
-    ] as const;
+    const types = ["int2", "int4", "int8", "float4", "float8", "numeric"] as const;
     const ops = ["+", "-", "*", "/"] as const;
     const matrix: Record<string, string> = {};
 
@@ -69,8 +62,22 @@ describe("operator return types", () => {
     for (const a of types) {
       for (const b of types) {
         const key = `${a} = ${b}`;
-        const castA = a === "varchar" ? "'x'::varchar" : a === "text" ? "'x'::text" : a === "bool" ? "true::bool" : `1::${a}`;
-        const castB = b === "varchar" ? "'x'::varchar" : b === "text" ? "'x'::text" : b === "bool" ? "true::bool" : `1::${b}`;
+        const castA =
+          a === "varchar"
+            ? "'x'::varchar"
+            : a === "text"
+              ? "'x'::text"
+              : a === "bool"
+                ? "true::bool"
+                : `1::${a}`;
+        const castB =
+          b === "varchar"
+            ? "'x'::varchar"
+            : b === "text"
+              ? "'x'::text"
+              : b === "bool"
+                ? "true::bool"
+                : `1::${b}`;
         const r = await tryQuery(db, `SELECT ${castA} = ${castB}`);
         matrix[key] = r.ok;
       }
@@ -79,9 +86,7 @@ describe("operator return types", () => {
     console.info("\n=== Comparison (=) Acceptance Matrix ===");
     console.info("  " + "".padEnd(10) + types.map((t) => t.padEnd(10)).join(""));
     for (const a of types) {
-      const row = types.map((b) =>
-        (matrix[`${a} = ${b}`] ? "✓" : "✗").padEnd(10),
-      );
+      const row = types.map((b) => (matrix[`${a} = ${b}`] ? "✓" : "✗").padEnd(10));
       console.info(`  ${a.padEnd(10)}${row.join("")}`);
     }
 
@@ -126,19 +131,12 @@ describe("operator return types", () => {
 
     const r1 = await db.query<{ v: unknown }>("SELECT 7::int4 / 2::int4 AS v");
     results["7::int4 / 2::int4 value"] = r1.rows[0].v;
-    results["7::int4 / 2::int4 type"] = await pgTypeOf(
-      db,
-      "7::int4 / 2::int4",
-    );
+    results["7::int4 / 2::int4 type"] = await pgTypeOf(db, "7::int4 / 2::int4");
 
-    const r2 = await db.query<{ v: unknown }>(
-      "SELECT 7::float8 / 2::float8 AS v",
-    );
+    const r2 = await db.query<{ v: unknown }>("SELECT 7::float8 / 2::float8 AS v");
     results["7::float8 / 2::float8 value"] = r2.rows[0].v;
 
-    const r3 = await db.query<{ v: unknown }>(
-      "SELECT 7::numeric / 2::numeric AS v",
-    );
+    const r3 = await db.query<{ v: unknown }>("SELECT 7::numeric / 2::numeric AS v");
     results["7::numeric / 2::numeric value"] = r3.rows[0].v;
 
     console.info("\n=== Division Behavior ===");

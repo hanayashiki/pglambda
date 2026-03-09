@@ -16,9 +16,7 @@ describe("Checker (HIR) Snapshot Tests", () => {
 
     const snapshot = checkAndExtractMarkers(input, filename);
 
-    await expect(snapshot).toMatchFileSnapshot(
-      `input/checker/${filename}.snap`,
-    );
+    await expect(snapshot).toMatchFileSnapshot(`input/checker/${filename}.snap`);
   });
 
   test("has fixture files", () => {
@@ -37,36 +35,26 @@ describe("Checker imports/exports", () => {
 
   test("exports multiple query defs", () => {
     const { result, store } = checkModule(
-      `query f() { select 1 as a }\nquery g(x: text) { select $x as b }`,
+      `query f() { select 1 as a }\nquery g(x: text) { select $x as b }`
     );
 
     expect(result.exportedTypes.size).toBe(2);
-    const types = [...result.exportedTypes.values()].map((t) =>
-      store.typeToString(t),
-    );
+    const types = [...result.exportedTypes.values()].map((t) => store.typeToString(t));
     expect(types).toContain("() => SetOf<{a: integer}>");
     expect(types).toContain("(x: text) => SetOf<{b: text}>");
   });
 
   test("exports generic type schemes", () => {
-    const { result, store } = checkModule(
-      `query identity<T>(x: T) { $x }`,
-    );
+    const { result, store } = checkModule(`query identity<T>(x: T) { \${x} }`);
 
     expect(result.exportedTypes.size).toBe(1);
     expect(result.exportedTypeSchemes.length).toBe(1);
-    expect(store.typeSchemeToString(result.exportedTypeSchemes[0])).toBe(
-      "for<T> (x: T) => T",
-    );
+    expect(store.typeSchemeToString(result.exportedTypeSchemes[0])).toBe("for<T> (x: T) => T");
   });
 
   test("imported types are not re-exported", () => {
     const modA = checkModule(`query f() { select 1 as col }`);
-    const modB = checkModule(
-      `query g() { select 2 as col }`,
-      "b.pgl",
-      modA.result.exportedTypes,
-    );
+    const modB = checkModule(`query g() { select 2 as col }`, "b.pgl", modA.result.exportedTypes);
 
     // Module B should only export its own def (g), not f
     expect(modB.result.exportedTypes.size).toBe(1);

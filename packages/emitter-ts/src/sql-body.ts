@@ -9,16 +9,7 @@ import type {
   QualifiedName,
   HirStore,
 } from "@pglambda/hir";
-import {
-  type Doc,
-  text,
-  concat,
-  group,
-  nest,
-  join,
-  line,
-  softline,
-} from "@pglambda/utils/doc";
+import { type Doc, text, concat, group, nest, join, line, softline } from "@pglambda/utils/doc";
 import type { ImportTracker } from "./imports.js";
 import { snakeToCamel } from "./names.js";
 
@@ -34,25 +25,15 @@ export function emitSqlBody(
   body: QueryBody,
   hirStore: HirStore,
   rowParams: ReadonlySet<string>,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
   tracker.useValue("sql");
 
   switch (body.tag) {
     case "selectBody": {
-      const sqlContent = emitSelect(
-        body.data.stmt,
-        hirStore,
-        rowParams,
-        tracker,
-      );
+      const sqlContent = emitSelect(body.data.stmt, hirStore, rowParams, tracker);
       return group(
-        concat(
-          text("sql`"),
-          nest(2, concat(softline, sqlContent)),
-          softline,
-          text("`.build()"),
-        ),
+        concat(text("sql`"), nest(2, concat(softline, sqlContent)), softline, text("`.build()"))
       );
     }
 
@@ -60,7 +41,7 @@ export function emitSqlBody(
       return concat(
         text("sql`"),
         emitExpr(body.data.expr, hirStore, rowParams, tracker),
-        text("`"),
+        text("`")
       );
 
     case "paramRefBody": {
@@ -80,22 +61,15 @@ function emitSelect(
   stmt: SelectStmt,
   hirStore: HirStore,
   rowParams: ReadonlySet<string>,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
-  const targetDocs = stmt.data.targets.map((t) =>
-    emitTarget(t, hirStore, rowParams, tracker),
-  );
+  const targetDocs = stmt.data.targets.map((t) => emitTarget(t, hirStore, rowParams, tracker));
   const selectClause = concat(text("SELECT "), join(text(", "), targetDocs));
 
   const clauses: Doc[] = [selectClause];
   if (stmt.data.from) clauses.push(emitFrom(stmt.data.from));
   if (stmt.data.where)
-    clauses.push(
-      concat(
-        text("WHERE "),
-        emitExpr(stmt.data.where, hirStore, rowParams, tracker),
-      ),
-    );
+    clauses.push(concat(text("WHERE "), emitExpr(stmt.data.where, hirStore, rowParams, tracker)));
 
   return join(line, clauses);
 }
@@ -104,7 +78,7 @@ function emitTarget(
   target: SelectTarget,
   hirStore: HirStore,
   rowParams: ReadonlySet<string>,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
   switch (target.tag) {
     case "targetStar":
@@ -145,7 +119,7 @@ function emitExpr(
   expr: Expr,
   hirStore: HirStore,
   rowParams: ReadonlySet<string>,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
   switch (expr.tag) {
     case "literal":
@@ -163,12 +137,7 @@ function emitExpr(
             .slice(1)
             .map((p) => p.data.text)
             .join(".");
-          return concat(
-            text("${raw("),
-            text(tablePart),
-            text(")}"),
-            text("." + col),
-          );
+          return concat(text("${raw("), text(tablePart), text(")}"), text("." + col));
         }
       }
       // Regular column ref: literal SQL
@@ -182,19 +151,9 @@ function emitExpr(
     }
 
     case "pglCall": {
-      const fnName = snakeToCamel(
-        expr.data.name.data.parts.map((p) => p.data.text).join("_"),
-      );
-      const args = expr.data.args.map((a) =>
-        emitCallArg(a, hirStore, rowParams, tracker),
-      );
-      return concat(
-        text("${"),
-        text(fnName),
-        text("("),
-        join(text(", "), args),
-        text(")}"),
-      );
+      const fnName = snakeToCamel(expr.data.name.data.parts.map((p) => p.data.text).join("_"));
+      const args = expr.data.args.map((a) => emitCallArg(a, hirStore, rowParams, tracker));
+      return concat(text("${"), text(fnName), text("("), join(text(", "), args), text(")}"));
     }
 
     case "pglRef":
@@ -204,27 +163,17 @@ function emitExpr(
       return concat(
         emitExpr(expr.data.left, hirStore, rowParams, tracker),
         text(` ${expr.data.op} `),
-        emitExpr(expr.data.right, hirStore, rowParams, tracker),
+        emitExpr(expr.data.right, hirStore, rowParams, tracker)
       );
 
     case "unaryOp":
       if (expr.data.op === "NOT") {
-        return concat(
-          text("NOT "),
-          emitExpr(expr.data.operand, hirStore, rowParams, tracker),
-        );
+        return concat(text("NOT "), emitExpr(expr.data.operand, hirStore, rowParams, tracker));
       }
-      return concat(
-        text(expr.data.op),
-        emitExpr(expr.data.operand, hirStore, rowParams, tracker),
-      );
+      return concat(text(expr.data.op), emitExpr(expr.data.operand, hirStore, rowParams, tracker));
 
     case "paren":
-      return concat(
-        text("("),
-        emitExpr(expr.data.inner, hirStore, rowParams, tracker),
-        text(")"),
-      );
+      return concat(text("("), emitExpr(expr.data.inner, hirStore, rowParams, tracker), text(")"));
   }
 }
 
@@ -233,7 +182,7 @@ function emitCallArg(
   arg: Expr,
   hirStore: HirStore,
   rowParams: ReadonlySet<string>,
-  tracker: ImportTracker,
+  tracker: ImportTracker
 ): Doc {
   switch (arg.tag) {
     case "paramRef":

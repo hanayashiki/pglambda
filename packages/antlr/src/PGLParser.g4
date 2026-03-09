@@ -195,8 +195,7 @@ query_parameter: colid (COLON type_expression)?;
 
 query_body:
 	simple_select						# simple_select_body
-	| DOLLAR_LCURLY pgl_expr R_CURLY	# pgl_expr_body
-	| columnref_or_pgl_dollar_ident_ref	# pgl_dollar_ident_ref_body;
+	| DOLLAR_LCURLY pgl_expr R_CURLY	# pgl_expr_body;
 
 simple_select: KW_SELECT target_list from_clause? where_clause?;
 

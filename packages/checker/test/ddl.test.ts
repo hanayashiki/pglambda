@@ -16,9 +16,7 @@ describe("DDL table type resolution", () => {
 
     const snapshot = checkDdlAndSnapshot(input, filename);
 
-    await expect(snapshot).toMatchFileSnapshot(
-      `input/ddl/${filename}.snap`,
-    );
+    await expect(snapshot).toMatchFileSnapshot(`input/ddl/${filename}.snap`);
   });
 
   test("has fixture files", () => {

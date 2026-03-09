@@ -3,11 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { FileUri } from "@pglambda/utils";
-import {
-  formatParseTree,
-  parseContent,
-  type ParseContentContext,
-} from "../src/index.js";
+import { formatParseTree, parseContent, type ParseContentContext } from "../src/index.js";
 import { AstStore } from "#ast-store.js";
 
 // ESM equivalent of __dirname
@@ -31,14 +27,16 @@ describe("ANTLR Parser Snapshot Tests", () => {
         uri: `file:///${filename}` as FileUri,
         success: true,
       },
-      ctx,
+      ctx
     );
 
     // Format parse tree with proper indentation using listener
     const formattedTree = formatParseTree(result.parseTree!);
 
     // Snapshot the parse tree to individual file
-    await expect(formattedTree).toMatchFileSnapshot(`fixtures/parser/__snapshots__/${filename}.snap`);
+    await expect(formattedTree).toMatchFileSnapshot(
+      `fixtures/parser/__snapshots__/${filename}.snap`
+    );
   });
 
   // Ensure we have at least one test
@@ -55,7 +53,7 @@ describe("Content Hash", () => {
         uri: "file:///test.pgl" as FileUri,
         success: true,
       },
-      { astStore: new AstStore() },
+      { astStore: new AstStore() }
     );
 
     const hashes = new Set<string>();

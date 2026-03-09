@@ -1,11 +1,5 @@
-import type {
-  TypeConstructor,
-  TypeConstructorId,
-} from "./type.js";
-import {
-  type AnyBuiltInTypeConstructorDef,
-  BuiltinTypeConstructors,
-} from "./builtins.js";
+import type { TypeConstructor, TypeConstructorId } from "./type.js";
+import { type AnyBuiltInTypeConstructorDef, BuiltinTypeConstructors } from "./builtins.js";
 
 export class TypeConstructorStore {
   private nextId = 0;
@@ -22,9 +16,7 @@ export class TypeConstructorStore {
     return this.nextId++ as TypeConstructorId;
   }
 
-  private registerBuiltin(
-    def: AnyBuiltInTypeConstructorDef,
-  ): TypeConstructorId {
+  private registerBuiltin(def: AnyBuiltInTypeConstructorDef): TypeConstructorId {
     const id = this.freshCtorId();
     const ctor: TypeConstructor = {
       id,

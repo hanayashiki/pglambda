@@ -17,20 +17,14 @@ export function emitTs(source: string, filename = "test.pgl"): string {
   const uri = `file:///${filename}` as FileUri;
 
   // 1. Parse
-  const parseResult = parseContent(
-    { content: source, uri, success: true },
-    { astStore },
-  );
+  const parseResult = parseContent({ content: source, uri, success: true }, { astStore });
 
   if (!parseResult.success) {
-    return parseResult.errors.map((e) => `parse error: ${e.message}`).join("\n") + "\n";
+    return parseResult.diagnostics.map((e) => `parse error: ${e.message}`).join("\n") + "\n";
   }
 
   // 2. Lower to HIR + define + resolve
-  const { module, store: hirStore } = lowerAndResolve(
-    parseResult.parseTree!,
-    uri,
-  );
+  const { module, store: hirStore } = lowerAndResolve(parseResult.parseTree!, uri);
 
   // 3. Type-check
   const ctx = new CheckContext(module, hirStore, typeStore);

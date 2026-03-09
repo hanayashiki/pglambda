@@ -1,4 +1,6 @@
 set -e
+
+pnpm format --check
 pnpm lint
 pnpm check
 pnpm -r build

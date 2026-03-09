@@ -2,54 +2,89 @@ import {
   ErrorListener,
   type Recognizer,
   type RecognitionException,
+  Token,
+  Parser,
+  NoViableAltException,
+  InputMismatchException,
+  LexerNoViableAltException,
 } from "@pglambda/antlr";
-import type { FileUri } from "@pglambda/utils";
-import type { SyntaxError } from "./types.js";
+import type { FileUri, Diagnostic } from "@pglambda/utils";
+import { getExpectedNonTerminal } from "./expected-nonterminal.js";
+
+function classifyCode(e: RecognitionException | undefined, antlrMessage: string): string {
+  if (e instanceof NoViableAltException) return "syntax/no-viable-alt";
+  if (e instanceof InputMismatchException) return "syntax/mismatch";
+  if (e instanceof LexerNoViableAltException) return "syntax/lexer";
+  if (e === null || e === undefined) {
+    if (antlrMessage.startsWith("extraneous")) return "syntax/extraneous";
+    if (antlrMessage.startsWith("missing")) return "syntax/missing";
+  }
+  return "syntax/unknown";
+}
 
 /**
- * Custom ANTLR error listener that collects all syntax errors
- * instead of throwing on the first error.
+ * Custom ANTLR error listener that collects all syntax errors as Diagnostics
+ * with range-based spans and human-readable messages.
  */
 export class CollectingErrorListener<TSymbol> extends ErrorListener<TSymbol> {
-  private errors: SyntaxError[] = [];
+  private diagnostics: Diagnostic[] = [];
 
   constructor(private readonly uri: FileUri) {
     super();
   }
 
   syntaxError(
-    _recognizer: Recognizer<TSymbol>,
+    recognizer: Recognizer<TSymbol>,
     offendingSymbol: TSymbol,
     line: number,
     column: number,
-    message: string,
-    e: RecognitionException | undefined,
+    antlrMessage: string,
+    e: RecognitionException | undefined
   ): void {
-    let symbolText: string | undefined;
-    if (
-      offendingSymbol &&
-      typeof offendingSymbol === "object" &&
-      "text" in offendingSymbol
-    ) {
-      symbolText = String(offendingSymbol.text);
+    const code = classifyCode(e, antlrMessage);
+
+    // Build message: use expected nonterminal when available
+    let message: string;
+    if (recognizer instanceof Parser) {
+      const expected = getExpectedNonTerminal(recognizer);
+      const symbolText = offendingSymbol instanceof Token ? offendingSymbol.text : undefined;
+      if (expected && symbolText) {
+        message = `expected ${expected}, got '${symbolText}'`;
+      } else if (expected) {
+        message = `expected ${expected}`;
+      } else {
+        message = antlrMessage;
+      }
+    } else {
+      message = antlrMessage;
     }
 
-    const recovered = e === null || e === undefined;
+    // Build span from offending token when available
+    let endLine = line;
+    let endColumn = column + 1;
+    if (offendingSymbol instanceof Token) {
+      const text = offendingSymbol.text;
+      endLine = line;
+      endColumn = column + (text?.length ?? 1);
+    }
 
-    this.errors.push({
+    this.diagnostics.push({
+      span: {
+        file: this.uri,
+        start: { line, column },
+        end: { line: endLine, column: endColumn },
+      },
       severity: "error",
+      code,
       message,
-      location: { file: this.uri, line, column },
-      offendingSymbol: symbolText,
-      recovered,
     });
   }
 
-  getErrors(): readonly SyntaxError[] {
-    return this.errors;
+  getDiagnostics(): readonly Diagnostic[] {
+    return this.diagnostics;
   }
 
   hasErrors(): boolean {
-    return this.errors.length > 0;
+    return this.diagnostics.length > 0;
   }
 }

@@ -33,11 +33,11 @@ DSL constructs. This document tracks every known difference.
 
 ## indirection_el
 
-| Feature | PGL | PostgreSQL |
-|---------|-----|------------|
-| `DOT (attr_name \| STAR)` | yes | yes |
-| `[a_expr]` array subscript | **missing** | yes |
-| `[lo:hi]` slice syntax | **missing** | yes |
+| Feature                    | PGL         | PostgreSQL |
+| -------------------------- | ----------- | ---------- |
+| `DOT (attr_name \| STAR)`  | yes         | yes        |
+| `[a_expr]` array subscript | **missing** | yes        |
+| `[lo:hi]` slice syntax     | **missing** | yes        |
 
 PGL comment (lines 143-149) notes this omission is intentional.
 
@@ -47,27 +47,27 @@ PGL comment (lines 143-149) notes this omission is intentional.
 
 ### Skipped levels (entirely absent from PGL)
 
-| PostgreSQL Rule | Purpose | PGL Status |
-|-----------------|---------|------------|
-| `a_expr_qual` | Postfix custom operators (semantic predicate) | skipped |
-| `a_expr_lessless` | Bitwise shift `<<` / `>>` | skipped |
-| `a_expr_qual_op` | Infix custom operators | skipped |
-| `a_expr_unary_qualop` | Prefix custom operators | skipped |
-| `a_expr_caret` | Exponentiation `^` | skipped |
-| `a_expr_at_time_zone` | `AT TIME ZONE` | skipped |
-| `a_expr_collate` | `COLLATE` | skipped |
-| `a_expr_typecast` | `::` type cast | **todo** |
+| PostgreSQL Rule       | Purpose                                       | PGL Status |
+| --------------------- | --------------------------------------------- | ---------- |
+| `a_expr_qual`         | Postfix custom operators (semantic predicate) | skipped    |
+| `a_expr_lessless`     | Bitwise shift `<<` / `>>`                     | skipped    |
+| `a_expr_qual_op`      | Infix custom operators                        | skipped    |
+| `a_expr_unary_qualop` | Prefix custom operators                       | skipped    |
+| `a_expr_caret`        | Exponentiation `^`                            | skipped    |
+| `a_expr_at_time_zone` | `AT TIME ZONE`                                | skipped    |
+| `a_expr_collate`      | `COLLATE`                                     | skipped    |
+| `a_expr_typecast`     | `::` type cast                                | **todo**   |
 
 ### Partial levels (present but incomplete)
 
-| Rule | Missing from PGL |
-|------|-----------------|
-| `a_expr_between` | `BETWEEN SYMMETRIC` |
-| `a_expr_in` | Subquery form `IN (SELECT ...)`; PGL allows empty `IN ()` |
-| `a_expr_isnull` | PGL uses `IS [NOT] NULL`; PG uses `ISNULL`/`NOTNULL` tokens |
-| `a_expr_is_not` | `IS [NOT] UNKNOWN`, `IS [NOT] DISTINCT FROM`, `IS [NOT] OF (types)`, `IS [NOT] DOCUMENT`, `IS [NOT] NORMALIZED` |
-| `a_expr_compare` | Subquery comparisons `op ANY/ALL/SOME (subquery)` |
-| `a_expr_like` | `ILIKE`, `SIMILAR TO`, `ESCAPE` clause |
+| Rule             | Missing from PGL                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| `a_expr_between` | `BETWEEN SYMMETRIC`                                                                                             |
+| `a_expr_in`      | Subquery form `IN (SELECT ...)`; PGL allows empty `IN ()`                                                       |
+| `a_expr_isnull`  | PGL uses `IS [NOT] NULL`; PG uses `ISNULL`/`NOTNULL` tokens                                                     |
+| `a_expr_is_not`  | `IS [NOT] UNKNOWN`, `IS [NOT] DISTINCT FROM`, `IS [NOT] OF (types)`, `IS [NOT] DOCUMENT`, `IS [NOT] NORMALIZED` |
+| `a_expr_compare` | Subquery comparisons `op ANY/ALL/SOME (subquery)`                                                               |
+| `a_expr_like`    | `ILIKE`, `SIMILAR TO`, `ESCAPE` clause                                                                          |
 
 ---
 
@@ -156,6 +156,7 @@ PGL uses `KW_AS colLabel | colid`; PostgreSQL also supports `bareColLabel` witho
 PGL has only built-in operators: `=`, `<>`, `<`, `>`, `<=`, `>=`, `+`, `-`, `*`, `/`, `%`.
 
 Missing:
+
 - Custom `OPERATOR(...)` syntax
 - `any_operator`, `qual_op`, `all_op`, `subquery_Op` rules
 - The `Operator` token class for user-defined operators
@@ -165,6 +166,7 @@ Missing:
 ## Subqueries
 
 No subquery support at all:
+
 - No `select_with_parens`
 - No `EXISTS`
 - No `ANY` / `ALL` / `SOME`
@@ -191,20 +193,20 @@ Only SELECT is supported. Missing:
 
 ### createstmt
 
-| Feature | PGL | PostgreSQL |
-|---------|-----|------------|
-| `IF NOT EXISTS` | yes | yes |
-| `opttemp` (`TEMPORARY` / `TEMP` / `UNLOGGED` / `LOCAL` / `GLOBAL`) | yes | yes |
-| `optinherit` (`INHERITS (...)`) | yes | yes |
-| `optpartitionspec` (`PARTITION BY ...`) | yes (simplified `part_elem`) | yes |
-| `table_access_method_clause` (`USING name`) | yes | yes |
-| `optwith` (`WITH (...) / WITHOUT OIDS`) | yes (simplified `reloption_elem`) | yes |
-| `oncommitoption` (`ON COMMIT ...`) | yes | yes |
-| `opttablespace` (`TABLESPACE name`) | yes | yes |
-| Empty element list `()` | yes | yes |
-| `OF type` (typed table) | **no** | yes |
-| `PARTITION OF` (partition table) | **no** | yes |
-| `LIKE source_table` (`tablelikeclause`) | **no** | yes |
+| Feature                                                            | PGL                               | PostgreSQL |
+| ------------------------------------------------------------------ | --------------------------------- | ---------- |
+| `IF NOT EXISTS`                                                    | yes                               | yes        |
+| `opttemp` (`TEMPORARY` / `TEMP` / `UNLOGGED` / `LOCAL` / `GLOBAL`) | yes                               | yes        |
+| `optinherit` (`INHERITS (...)`)                                    | yes                               | yes        |
+| `optpartitionspec` (`PARTITION BY ...`)                            | yes (simplified `part_elem`)      | yes        |
+| `table_access_method_clause` (`USING name`)                        | yes                               | yes        |
+| `optwith` (`WITH (...) / WITHOUT OIDS`)                            | yes (simplified `reloption_elem`) | yes        |
+| `oncommitoption` (`ON COMMIT ...`)                                 | yes                               | yes        |
+| `opttablespace` (`TABLESPACE name`)                                | yes                               | yes        |
+| Empty element list `()`                                            | yes                               | yes        |
+| `OF type` (typed table)                                            | **no**                            | yes        |
+| `PARTITION OF` (partition table)                                   | **no**                            | yes        |
+| `LIKE source_table` (`tablelikeclause`)                            | **no**                            | yes        |
 
 #### Simplifications vs PostgreSQL
 
@@ -245,16 +247,16 @@ PGL omits `create_generic_options` (OPTIONS for foreign tables).
 
 ## Type System
 
-| Feature | PGL | PostgreSQL |
-|---------|-----|------------|
-| `BIT` / `BIT VARYING` | **no** | yes |
-| `JSON` type | **no** | yes |
-| `NCHAR` / `NATIONAL CHARACTER` | **no** | yes |
-| `DEC` (alias for DECIMAL) | **no** | yes |
-| `ARRAY[n]` syntax | **no** | yes |
-| Interval qualifiers (YEAR, MONTH, DAY...) | **no** | yes |
-| Schema-qualified types (`schema.type`) | **no** | yes |
-| Type modifiers as expressions | **no** (integer literals only) | yes |
+| Feature                                   | PGL                            | PostgreSQL |
+| ----------------------------------------- | ------------------------------ | ---------- |
+| `BIT` / `BIT VARYING`                     | **no**                         | yes        |
+| `JSON` type                               | **no**                         | yes        |
+| `NCHAR` / `NATIONAL CHARACTER`            | **no**                         | yes        |
+| `DEC` (alias for DECIMAL)                 | **no**                         | yes        |
+| `ARRAY[n]` syntax                         | **no**                         | yes        |
+| Interval qualifiers (YEAR, MONTH, DAY...) | **no**                         | yes        |
+| Schema-qualified types (`schema.type`)    | **no**                         | yes        |
+| Type modifiers as expressions             | **no** (integer literals only) | yes        |
 
 ### typename
 
@@ -286,6 +288,7 @@ PostgreSQL has `NCHAR` / `NATIONAL CHARACTER` / `NATIONAL CHAR`; PGL does not.
 PGL: `INTEGER_LITERAL | NUMERIC_LITERAL | STRING_LITERAL | TRUE | FALSE | NULL`.
 
 Missing:
+
 - `B'...'` (binary string constant)
 - `X'...'` (hexadecimal string constant)
 - Typed string literals (`date '2024-01-01'`)
@@ -336,14 +339,14 @@ These entire feature areas have no representation in PGL:
 
 ## Keyword Counts
 
-| Category | PGL | PostgreSQL |
-|----------|-----|------------|
-| unreserved_keyword | 33 | 330+ |
-| col_name_keyword | 17 | 48 |
-| type_func_name_keyword | 3 | 16 |
-| reserved_keyword | 20 | 62 |
-| bare_label_keyword | **absent** | 400+ |
-| **Total** | ~73 | ~500+ |
+| Category               | PGL        | PostgreSQL |
+| ---------------------- | ---------- | ---------- |
+| unreserved_keyword     | 33         | 330+       |
+| col_name_keyword       | 17         | 48         |
+| type_func_name_keyword | 3          | 16         |
+| reserved_keyword       | 20         | 62         |
+| bare_label_keyword     | **absent** | 400+       |
+| **Total**              | ~73        | ~500+      |
 
 ---
 
@@ -351,23 +354,23 @@ These entire feature areas have no representation in PGL:
 
 These rules exist only in PGL and have no PostgreSQL counterpart:
 
-| Rule | Purpose |
-|------|---------|
-| `prog` | Top-level: `def* EOF` |
-| `def` | `query_def \| type_def \| database_def` |
-| `query_def` | Named query with typed parameters |
-| `type_parameter_list` | Generic type params `<T, U>` |
-| `query_parameter_list` | Parameter list with trailing comma support |
-| `query_parameter` | `colid (: type_expression)?` |
-| `query_body` | SELECT or `${pgl_expr}` or bare dollar-ident |
-| `pgl_expr` | `pgl_query_call \| pgl_ident_ref \| aexprconst` |
-| `pgl_query_call` | Function call with optional type arguments |
-| `type_argument_list` | `::<type1, type2>` syntax |
-| `columnref_or_pgl_dollar_ident_ref` | Combined column ref / dollar-ident |
-| `type_def` | Stub (not yet implemented) |
-| `type_expression` / `type_ref` | PGL type expression system |
-| `database_def` | `database { ddl_statement* }` block |
-| `ddl_statement` | `createstmt ;` |
+| Rule                                | Purpose                                         |
+| ----------------------------------- | ----------------------------------------------- |
+| `prog`                              | Top-level: `def* EOF`                           |
+| `def`                               | `query_def \| type_def \| database_def`         |
+| `query_def`                         | Named query with typed parameters               |
+| `type_parameter_list`               | Generic type params `<T, U>`                    |
+| `query_parameter_list`              | Parameter list with trailing comma support      |
+| `query_parameter`                   | `colid (: type_expression)?`                    |
+| `query_body`                        | SELECT or `${pgl_expr}` or bare dollar-ident    |
+| `pgl_expr`                          | `pgl_query_call \| pgl_ident_ref \| aexprconst` |
+| `pgl_query_call`                    | Function call with optional type arguments      |
+| `type_argument_list`                | `::<type1, type2>` syntax                       |
+| `columnref_or_pgl_dollar_ident_ref` | Combined column ref / dollar-ident              |
+| `type_def`                          | Stub (not yet implemented)                      |
+| `type_expression` / `type_ref`      | PGL type expression system                      |
+| `database_def`                      | `database { ddl_statement* }` block             |
+| `ddl_statement`                     | `createstmt ;`                                  |
 
 ### PGL-specific tokens
 
@@ -380,19 +383,19 @@ These rules exist only in PGL and have no PostgreSQL counterpart:
 
 ## Token Naming Conventions
 
-| Concept | PGL Token | PostgreSQL Token |
-|---------|-----------|------------------|
-| Opening paren | `L_PAREN` | `OPEN_PAREN` |
-| Closing paren | `R_PAREN` | `CLOSE_PAREN` |
-| Opening bracket | `L_BRACKET` | `OPEN_BRACKET` |
-| Closing bracket | `R_BRACKET` | `CLOSE_BRACKET` |
-| Equal | `EQ` | `EQUAL` |
-| Not equal | `NEQ` | `NOT_EQUALS` |
-| Less-or-equal | `LTE` | `LESS_EQUALS` |
-| Greater-or-equal | `GTE` | `GREATER_EQUALS` |
-| Identifier | `IDENTIFIER` | `Identifier` |
-| Quoted identifier | `QUOTED_IDENTIFIER` | `QuotedIdentifier` |
-| Integer | `INTEGER_LITERAL` | `Integral` (via `iconst`) |
-| Decimal | `NUMERIC_LITERAL` | `Numeric` (via `fconst`) |
-| String | `STRING_LITERAL` | `StringConstant` (via `sconst`) |
-| Keywords | `KW_SELECT`, `KW_FROM`, ... | `SELECT`, `FROM`, ... |
+| Concept           | PGL Token                   | PostgreSQL Token                |
+| ----------------- | --------------------------- | ------------------------------- |
+| Opening paren     | `L_PAREN`                   | `OPEN_PAREN`                    |
+| Closing paren     | `R_PAREN`                   | `CLOSE_PAREN`                   |
+| Opening bracket   | `L_BRACKET`                 | `OPEN_BRACKET`                  |
+| Closing bracket   | `R_BRACKET`                 | `CLOSE_BRACKET`                 |
+| Equal             | `EQ`                        | `EQUAL`                         |
+| Not equal         | `NEQ`                       | `NOT_EQUALS`                    |
+| Less-or-equal     | `LTE`                       | `LESS_EQUALS`                   |
+| Greater-or-equal  | `GTE`                       | `GREATER_EQUALS`                |
+| Identifier        | `IDENTIFIER`                | `Identifier`                    |
+| Quoted identifier | `QUOTED_IDENTIFIER`         | `QuotedIdentifier`              |
+| Integer           | `INTEGER_LITERAL`           | `Integral` (via `iconst`)       |
+| Decimal           | `NUMERIC_LITERAL`           | `Numeric` (via `fconst`)        |
+| String            | `STRING_LITERAL`            | `StringConstant` (via `sconst`) |
+| Keywords          | `KW_SELECT`, `KW_FROM`, ... | `SELECT`, `FROM`, ...           |

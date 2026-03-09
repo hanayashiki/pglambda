@@ -1,20 +1,11 @@
 import type { AnyKeySchema, KeyType, QueryFunction, ValueType } from "./key";
 
 export interface TequilaDB {
-  get<S extends AnyKeySchema>(
-    keySchema: S,
-    key: KeyType<S>,
-  ): Promise<ValueType<S>>;
+  get<S extends AnyKeySchema>(keySchema: S, key: KeyType<S>): Promise<ValueType<S>>;
 
-  defineInput<S extends AnyKeySchema>(
-    keySchema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S>;
+  defineInput<S extends AnyKeySchema>(keySchema: S, fn: QueryFunction<S>): QueryFunction<S>;
 
-  defineTracked<S extends AnyKeySchema>(
-    keySchema: S,
-    fn: QueryFunction<S>,
-  ): QueryFunction<S>;
+  defineTracked<S extends AnyKeySchema>(keySchema: S, fn: QueryFunction<S>): QueryFunction<S>;
 
   /**
    * Mark a specific input as unverified.

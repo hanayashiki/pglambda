@@ -31,7 +31,7 @@ describe("parseAST", () => {
       const result = await db.get(parseASTSchema, uri);
 
       expect(result.success).toBe(true);
-      expect(result.errors).toHaveLength(0);
+      expect(result.diagnostics).toHaveLength(0);
       expect(result.parseTree).toBeInstanceOf(ProgContext);
     });
   });

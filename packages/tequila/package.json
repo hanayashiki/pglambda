@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/tequila",
-  "type": "module",
   "version": "0.0.1",
   "description": "Cache layer for pglambda",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
@@ -12,9 +13,8 @@
     "check": "tsc",
     "test": "vitest run"
   },
-  "license": "MIT",
-  "public": true,
   "devDependencies": {
     "vitest": "^4.0.18"
-  }
+  },
+  "public": true
 }

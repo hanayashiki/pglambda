@@ -413,7 +413,7 @@ describe("Row Polymorphism Unification", () => {
       // Deep resolve preserves row structure: {id: integer | {name: text, active: boolean | {created_at: int}}}
       const fullyResolved = u.deepResolve(open);
       expect(store.typeToString(fullyResolved)).toBe(
-        "{id: integer | {active: boolean, name: text | {created_at: integer}}}",
+        "{id: integer | {active: boolean, name: text | {created_at: integer}}}"
       );
 
       // Verify individual bindings

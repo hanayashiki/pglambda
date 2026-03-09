@@ -1,8 +1,9 @@
 {
   "name": "@pglambda/compiler",
-  "type": "module",
   "version": "0.0.1",
   "description": "Main compiler for pglambda",
+  "license": "MIT",
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
@@ -12,18 +13,17 @@
     "check": "tsc",
     "test": "vitest run"
   },
-  "license": "MIT",
-  "public": true,
+  "dependencies": {
+    "@pglambda/antlr": "workspace:*",
+    "@pglambda/parser": "workspace:*",
+    "@pglambda/tequila": "workspace:*",
+    "@pglambda/types": "workspace:*",
+    "@pglambda/utils": "workspace:*",
+    "@pglambda/vfs": "workspace:*",
+    "zod": "catalog:"
+  },
   "devDependencies": {
     "vitest": "^4.0.18"
   },
-  "dependencies": {
-    "zod": "catalog:",
-    "@pglambda/tequila": "workspace:*",
-    "@pglambda/vfs": "workspace:*",
-    "@pglambda/antlr": "workspace:*",
-    "@pglambda/types": "workspace:*",
-    "@pglambda/utils": "workspace:*",
-    "@pglambda/parser": "workspace:*"
-  }
+  "public": true
 }

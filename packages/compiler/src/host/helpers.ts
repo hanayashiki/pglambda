@@ -1,10 +1,4 @@
-import type {
-  AnyKeySchema,
-  KeyType,
-  QueryFunction,
-  TequilaDB,
-  ValueType,
-} from "@pglambda/tequila";
+import type { AnyKeySchema, KeyType, QueryFunction, TequilaDB, ValueType } from "@pglambda/tequila";
 import type { HostContext } from "./compiler-host.js";
 
 export type HostedQuery<S extends AnyKeySchema> = {
@@ -22,14 +16,12 @@ export type HostedQuery<S extends AnyKeySchema> = {
  */
 export const hostedQuery = <S extends AnyKeySchema>(
   schema: S,
-  fn: (
-    db: TequilaDB,
-    key: KeyType<S>,
-    ctx: HostContext,
-  ) => Promise<ValueType<S>>,
+  fn: (db: TequilaDB, key: KeyType<S>, ctx: HostContext) => Promise<ValueType<S>>
 ): HostedQuery<S> => {
-  const bind = (ctx: HostContext): QueryFunction<S> =>
-    async (db: TequilaDB, key: KeyType<S>) => fn(db, key, ctx);
+  const bind =
+    (ctx: HostContext): QueryFunction<S> =>
+    async (db: TequilaDB, key: KeyType<S>) =>
+      fn(db, key, ctx);
 
   const factory = ((ctx: HostContext) => [schema, bind(ctx)]) as HostedQuery<S>;
   factory.schema = schema;

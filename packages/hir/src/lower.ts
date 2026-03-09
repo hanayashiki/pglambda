@@ -5,7 +5,6 @@ import {
   PGLParser,
   Simple_select_bodyContext,
   Pgl_expr_bodyContext,
-  Pgl_dollar_ident_ref_bodyContext,
   Target_labelContext,
   Target_starContext,
   type ProgContext,
@@ -120,7 +119,7 @@ function spanFrom(ctx: ParserRuleContext, file: FileUri): Span {
 class HirVisitor extends PGLParserVisitor<HirNode | null> {
   constructor(
     private readonly store: HirStore,
-    private readonly file: FileUri,
+    private readonly file: FileUri
   ) {
     super();
   }
@@ -228,9 +227,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   private lowerQueryParameter(ctx: Query_parameterContext): QueryParam {
     const name = this.lowerColid(ctx.colid());
     const typeExprCtx = ctx.type_expression();
-    const typeAnnotation = typeExprCtx
-      ? this.lowerTypeExpression(typeExprCtx)
-      : null;
+    const typeAnnotation = typeExprCtx ? this.lowerTypeExpression(typeExprCtx) : null;
     return {
       id: this.id(),
       tag: "queryParam",
@@ -256,18 +253,6 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
         data: { expr: this.lowerPglExpr(ctx.pgl_expr()) },
       };
     }
-    if (ctx instanceof Pgl_dollar_ident_ref_bodyContext) {
-      return {
-        id: this.id(),
-        tag: "paramRefBody",
-        span: this.span(ctx),
-        data: {
-          name: this.lowerColumnrefAsName(
-            ctx.columnref_or_pgl_dollar_ident_ref(),
-          ),
-        },
-      };
-    }
     throw new Error("Unknown query_body alternative");
   }
 
@@ -291,7 +276,10 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerFromClause(ctx: From_clauseContext): FromClause {
-    const refs = ctx.from_list().table_ref_list().map((r) => this.lowerTableRef(r));
+    const refs = ctx
+      .from_list()
+      .table_ref_list()
+      .map((r) => this.lowerTableRef(r));
     return {
       id: this.id(),
       tag: "fromClause",
@@ -358,12 +346,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerAExprOr(ctx: A_expr_orContext): Expr {
-    return this.lowerLeftAssoc(
-      ctx.a_expr_and_list(),
-      (c) => this.lowerAExprAnd(c),
-      "OR",
-      ctx,
-    );
+    return this.lowerLeftAssoc(ctx.a_expr_and_list(), (c) => this.lowerAExprAnd(c), "OR", ctx);
   }
 
   private lowerAExprAnd(ctx: A_expr_andContext): Expr {
@@ -371,7 +354,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
       ctx.a_expr_between_list(),
       (c) => this.lowerAExprBetween(c),
       "AND",
-      ctx,
+      ctx
     );
   }
 
@@ -460,10 +443,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     // Interleaved: child0 op child1 op child2 ...
     // Operator tokens are PLUS or MINUS between children
     let result = this.lowerAExprMul(children[0]);
-    const ops = this.extractInterleavedOps(ctx, [
-      PGLParser.PLUS,
-      PGLParser.MINUS,
-    ]);
+    const ops = this.extractInterleavedOps(ctx, [PGLParser.PLUS, PGLParser.MINUS]);
     for (let i = 1; i < children.length; i++) {
       const right = this.lowerAExprMul(children[i]);
       result = {
@@ -573,8 +553,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   // --- PGL expressions ---
 
   private lowerPglExpr(ctx: Pgl_exprContext): Expr {
-    if (ctx.pgl_query_call())
-      return this.lowerPglQueryCall(ctx.pgl_query_call());
+    if (ctx.pgl_query_call()) return this.lowerPglQueryCall(ctx.pgl_query_call());
     if (ctx.pgl_ident_ref()) return this.lowerPglIdentRef(ctx.pgl_ident_ref());
     if (ctx.aexprconst()) return this.lowerAExprConst(ctx.aexprconst());
     throw new Error("Unknown pgl_expr alternative");
@@ -593,13 +572,9 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     const name = this.lowerQualifiedName(ctx.qualified_name());
     const typeArgList = ctx.type_argument_list();
     const typeArgs: TypeExpr[] = typeArgList
-      ? typeArgList
-          .type_expression_list()
-          .map((te) => this.lowerTypeExpression(te))
+      ? typeArgList.type_expression_list().map((te) => this.lowerTypeExpression(te))
       : [];
-    const args: Expr[] = ctx
-      .pgl_expr_list()
-      .map((arg) => this.lowerPglExpr(arg));
+    const args: Expr[] = ctx.pgl_expr_list().map((arg) => this.lowerPglExpr(arg));
     return {
       id: this.id(),
       tag: "pglCall",
@@ -640,16 +615,6 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
         },
       },
     };
-  }
-
-  /** For pgl_dollar_ident_ref_body — extract the name from a columnref, stripping `$` */
-  private lowerColumnrefAsName(
-    ctx: Columnref_or_pgl_dollar_ident_refContext,
-  ): Name {
-    const colids = ctx.colid_list();
-    const raw = this.lowerColid(colids[0]);
-    const text = raw.data.text.startsWith("$") ? raw.data.text.slice(1) : raw.data.text;
-    return { ...raw, data: { text } };
   }
 
   // --- Type expressions ---
@@ -733,8 +698,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
         result.notNull = true;
       }
       if (elem instanceof Col_uniqueContext) result.unique = true;
-      if (elem instanceof Col_defaultContext)
-        result.defaultExpr = this.lowerAExpr(elem.a_expr());
+      if (elem instanceof Col_defaultContext) result.defaultExpr = this.lowerAExpr(elem.a_expr());
     }
     return result;
   }
@@ -742,9 +706,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   private lowerTypename(ctx: TypenameContext): TypeName {
     const isSetOf = !!ctx.KW_SETOF();
     const arrayBounds = ctx.opt_array_bounds();
-    const arrayDimensions = arrayBounds
-      ? arrayBounds.L_BRACKET_list().length
-      : 0;
+    const arrayDimensions = arrayBounds ? arrayBounds.L_BRACKET_list().length : 0;
     const simpleType = this.lowerSimpleTypeName(ctx.simpletypename());
     return {
       id: this.id(),
@@ -765,29 +727,19 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   private lowerNumericType(ctx: NumericContext): SimpleTypeName {
     let base: SimpleTypeName & { kind: "numeric" };
     const literals = ctx.INTEGER_LITERAL_list();
-    const precision =
-      literals.length > 0 ? parseInt(literals[0].getText()) : null;
+    const precision = literals.length > 0 ? parseInt(literals[0].getText()) : null;
     const scale = literals.length > 1 ? parseInt(literals[1].getText()) : null;
 
     if (ctx.KW_INT()) base = { kind: "numeric", base: "int", precision, scale };
-    else if (ctx.KW_INTEGER())
-      base = { kind: "numeric", base: "integer", precision, scale };
-    else if (ctx.KW_SMALLINT())
-      base = { kind: "numeric", base: "smallint", precision, scale };
-    else if (ctx.KW_BIGINT())
-      base = { kind: "numeric", base: "bigint", precision, scale };
-    else if (ctx.KW_REAL())
-      base = { kind: "numeric", base: "real", precision, scale };
-    else if (ctx.KW_FLOAT())
-      base = { kind: "numeric", base: "float", precision, scale };
-    else if (ctx.KW_DOUBLE())
-      base = { kind: "numeric", base: "double", precision, scale };
-    else if (ctx.KW_DECIMAL())
-      base = { kind: "numeric", base: "decimal", precision, scale };
-    else if (ctx.KW_NUMERIC())
-      base = { kind: "numeric", base: "numeric", precision, scale };
-    else if (ctx.KW_BOOLEAN())
-      base = { kind: "numeric", base: "boolean", precision, scale };
+    else if (ctx.KW_INTEGER()) base = { kind: "numeric", base: "integer", precision, scale };
+    else if (ctx.KW_SMALLINT()) base = { kind: "numeric", base: "smallint", precision, scale };
+    else if (ctx.KW_BIGINT()) base = { kind: "numeric", base: "bigint", precision, scale };
+    else if (ctx.KW_REAL()) base = { kind: "numeric", base: "real", precision, scale };
+    else if (ctx.KW_FLOAT()) base = { kind: "numeric", base: "float", precision, scale };
+    else if (ctx.KW_DOUBLE()) base = { kind: "numeric", base: "double", precision, scale };
+    else if (ctx.KW_DECIMAL()) base = { kind: "numeric", base: "decimal", precision, scale };
+    else if (ctx.KW_NUMERIC()) base = { kind: "numeric", base: "numeric", precision, scale };
+    else if (ctx.KW_BOOLEAN()) base = { kind: "numeric", base: "boolean", precision, scale };
     else throw new Error("Unknown numeric type");
 
     return base;
@@ -801,17 +753,11 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
   }
 
   private lowerDatetimeType(ctx: ConstdatetimeContext): SimpleTypeName {
-    const base: "timestamp" | "time" = ctx.KW_TIMESTAMP()
-      ? "timestamp"
-      : "time";
+    const base: "timestamp" | "time" = ctx.KW_TIMESTAMP() ? "timestamp" : "time";
     const lit = ctx.INTEGER_LITERAL();
     const precision = lit ? parseInt(lit.getText()) : null;
     const tz = ctx.timezone_();
-    const timezone: "with" | "without" | null = tz
-      ? tz.KW_WITH()
-        ? "with"
-        : "without"
-      : null;
+    const timezone: "with" | "without" | null = tz ? (tz.KW_WITH() ? "with" : "without") : null;
     return { kind: "datetime", base, precision, timezone };
   }
 
@@ -819,9 +765,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     const name = ctx.type_function_name().getText().toLowerCase();
     const wellKnown = WELL_KNOWN_CATALOG_TYPES[name];
     if (wellKnown) return wellKnown;
-    const params = ctx
-      .INTEGER_LITERAL_list()
-      .map((lit) => parseInt(lit.getText()));
+    const params = ctx.INTEGER_LITERAL_list().map((lit) => parseInt(lit.getText()));
     return { kind: "named", name, params };
   }
 
@@ -835,7 +779,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
     children: T[],
     lower: (c: T) => Expr,
     op: BinOp,
-    parentCtx: ParserRuleContext,
+    parentCtx: ParserRuleContext
   ): Expr {
     if (children.length === 1) return lower(children[0]);
     let result = lower(children[0]);
@@ -855,10 +799,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
    * child op child op child ...
    * Returns the operator BinOp strings in order.
    */
-  private extractInterleavedOps(
-    ctx: ParserRuleContext,
-    tokenTypes: number[],
-  ): BinOp[] {
+  private extractInterleavedOps(ctx: ParserRuleContext, tokenTypes: number[]): BinOp[] {
     const ops: BinOp[] = [];
     const childCount = ctx.getChildCount();
     for (let i = 0; i < childCount; i++) {
@@ -922,10 +863,7 @@ class HirVisitor extends PGLParserVisitor<HirNode | null> {
  * Lower a CST parse tree into HIR.
  * Does NOT perform name resolution — that is a separate pass.
  */
-export function lowerToHir(
-  prog: ProgContext,
-  file: FileUri,
-): { module: Module; store: HirStore } {
+export function lowerToHir(prog: ProgContext, file: FileUri): { module: Module; store: HirStore } {
   const store = new HirStore();
   const visitor = new HirVisitor(store, file);
   const module = visitor.visit(prog) as Module;
@@ -938,7 +876,7 @@ export function lowerToHir(
  */
 export function lowerAndResolve(
   prog: ProgContext,
-  file: FileUri,
+  file: FileUri
 ): { module: Module; store: HirStore } {
   const { module, store } = lowerToHir(prog, file);
   define(module, store);

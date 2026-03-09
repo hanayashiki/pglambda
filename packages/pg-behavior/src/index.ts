@@ -5,9 +5,7 @@ import { PGlite } from "@electric-sql/pglite";
  * Example: pgTypeOf(db, "1 + 2") => "integer"
  */
 export async function pgTypeOf(db: PGlite, expr: string): Promise<string> {
-  const result = await db.query<{ t: string }>(
-    `SELECT pg_typeof(${expr})::text AS t`,
-  );
+  const result = await db.query<{ t: string }>(`SELECT pg_typeof(${expr})::text AS t`);
   return result.rows[0].t;
 }
 
@@ -16,7 +14,7 @@ export async function pgTypeOf(db: PGlite, expr: string): Promise<string> {
  */
 export async function tryExec(
   db: PGlite,
-  sql: string,
+  sql: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await db.exec(sql);
@@ -31,10 +29,8 @@ export async function tryExec(
  */
 export async function tryQuery(
   db: PGlite,
-  sql: string,
-): Promise<
-  { ok: true; rows: Record<string, unknown>[] } | { ok: false; error: string }
-> {
+  sql: string
+): Promise<{ ok: true; rows: Record<string, unknown>[] } | { ok: false; error: string }> {
   try {
     const result = await db.query(sql);
     return { ok: true, rows: result.rows as Record<string, unknown>[] };
